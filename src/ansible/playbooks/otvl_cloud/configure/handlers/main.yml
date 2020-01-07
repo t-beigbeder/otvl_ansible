@@ -1,0 +1,16 @@
+---
+# handlers file for otvl_cloud/configure
+
+
+- name: Enable the otvl_network_configurator timer
+  systemd:
+    name: /etc/systemd/system/otvl_network_configurator.timer
+    enabled: yes
+  notify: Restart the otvl_network_configurator timer
+
+- name: Restart the otvl_network_configurator timer
+  systemd:
+    name: otvl_network_configurator.timer
+    state: restarted
+
+###

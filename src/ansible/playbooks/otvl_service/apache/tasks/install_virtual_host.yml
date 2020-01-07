@@ -1,0 +1,42 @@
+---
+# install_virtual_host tasks file for otvl_service/apache
+
+- name: display the virtual_host information
+  debug:
+    msg: "virtual_host is {{ current_virtual_host.key }}: {{ current_virtual_host.value }}"
+
+- name: Install the virtual host configuration file {{ current_virtual_host.key }}
+  template:
+    src: "apache/conf/apache_virtual_host.conf"
+    dest: "/etc/apache2/sites-available/{{ current_virtual_host.key }}_virtual_host.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart the apache service
+
+- name: Create virtual host subdir configuration {{ current_virtual_host.key }}
+  file:
+    path: "/etc/apache2/otvl_conf/{{ current_virtual_host.key }}"
+    state: directory
+    mode: 0755
+
+- name: Loop over virtual host subdir configurations {{ current_virtual_host.key }}
+  template:
+    src: "{{ current_vh_inc }}"
+    dest: "/etc/apache2/otvl_conf/{{ current_virtual_host.key }}/{{ current_vh_inc | basename }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart the apache service
+  with_fileglob:
+    - "../templates/apache/{{ current_virtual_host.key }}/*"
+  loop_control:
+    loop_var: current_vh_inc
+
+- name: Enable apache virtual host {{ current_virtual_host.key }}
+  command: "a2ensite {{ current_virtual_host.key }}_virtual_host"
+  args:
+    creates: /etc/apache2/sites-enabled/{{ current_virtual_host.key }}_virtual_host.conf
+  notify: Restart the apache service
+
+###

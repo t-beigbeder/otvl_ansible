@@ -1,0 +1,65 @@
+---
+# main tasks file for otvl_service/git_service
+- name: debug
+  debug:
+    var: combined_otvl
+  when: combined_otvl.debug
+
+- name: Install git for ansible on the git server
+  command: apt-get install -y --no-install-recommends git
+  args:
+    creates: /usr/bin/git
+    warn: false
+
+- name: Create git project root
+  file:
+    path: "{{ combined_otvl.apache.www }}/{{ combined_otvl.git_service.project_root }}"
+    state: directory
+    owner: "{{ combined_otvl.git_service.user }}"
+    group: "{{ combined_otvl.git_service.group }}"
+    mode: 0750
+
+- name: Create git related artifacts directory
+  file:
+    path: "{{ combined_otvl.apache.www }}/{{ combined_otvl.git_service.project_artifacts_root }}"
+    state: directory
+    mode: 0750
+
+- name: Create git backup directory
+  file:
+    path: "{{ combined_otvl.config_paths.backup }}/git"
+    state: directory
+    mode: 0750
+
+- name: Install git install and util scripts
+  template:
+    src: "sbin/{{ item }}"
+    dest: "{{ combined_otvl.config_paths.sbin }}/{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - git_backup_util.sh
+    - git_info_util.sh
+    - git_init_bare_install.sh
+    - git_init_bare_util.sh
+    - git_restore_install.sh
+    - git_restore_util.sh
+    - otvl_git_lib.sh
+
+- name: Enable apache packages required by git
+  command: "a2enmod {{ item }}"
+  args:
+    creates: "/etc/apache2/mods-enabled/{{ item }}.load"
+  with_items: "{{ combined_otvl.git_service.apache_modules }}"
+
+- name: Configure apache virtual host otvl_backend_vh for git 01_git_service
+  template:
+    src: apache/otvl_backend_vh/01_git_service.inc
+    dest: /etc/apache2/otvl_conf/otvl_backend_vh/01_git_service.inc
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart the apache service
+
+###

@@ -1,0 +1,8 @@
+networks:
+{% for key, value in combined_infra.networks.items() %}
+  - key: {{ key }}
+    name: {{ value.name }}
+    cidr: {{ value.cidr | default("") }}
+    prefix: {{ value.prefix | default("") }}
+    host_ip: {{ server_infra.ips[key] | default("") }}
+{% endfor %}

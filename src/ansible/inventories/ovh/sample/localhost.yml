@@ -1,0 +1,14 @@
+all:
+  vars:
+
+  children:
+    localhost_group:
+      children:
+        iaas_init:
+          hosts:
+            localhost:
+        iaas_network_setup:
+          hosts:
+            localhost:
+
+###

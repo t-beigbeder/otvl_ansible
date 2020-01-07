@@ -1,0 +1,13 @@
+---
+# main tasks file for otvl_bastion/controlled
+- name: combine default with actual otvl config data
+  set_fact:
+    combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+
+- name: Authorize ssh admin public key
+  authorized_key:
+    user: "{{ combined_otvl.config_vars.admin_user }}"
+    state: present
+    key: "{{ lookup('file', 'ssh/admin_key.pub') }}"
+
+###

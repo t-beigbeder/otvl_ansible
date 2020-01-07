@@ -1,0 +1,41 @@
+---
+# default otvl variable for otvl_ansible playbooks and roles
+
+default_otvl:
+  debug: false
+  config_paths:
+    sbin: /otvl/sbin
+    data: /otvl/data
+    backup: /otvl/backup
+    delivery: /otvl/delivery
+    pkg: /otvl/pkg
+  config_vars:
+    admin_user: otvl_admin_user
+    admin_key: otvl_admin_key
+  apache:
+    www: /otvl/www
+    dis_sites:
+    - 000-default
+    test_notify_restart: false
+    test_htpasswd_create: false
+    test_htpasswd_path: apache/htpasswd
+    test_htpasswd_users:
+    virtual_hosts:
+
+  git_service:
+    project_root: git
+    project_artifacts_root: artifacts
+    user: www-data
+    group: www-data
+    max_backup: 35
+    apache_modules:
+    - cgid
+    - alias
+    - env
+    apache_location: git
+    # redefine to authenticate read access too, useful with tool such as egit
+    apache_location_rw: git
+    apache_artifacts_location: artifacts
+    apache_artifacts_folders: []
+
+###

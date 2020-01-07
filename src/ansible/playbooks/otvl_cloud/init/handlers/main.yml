@@ -1,0 +1,8 @@
+---
+# handlers file for otvl_cloud/init
+
+- name: wait_for_otvl_iaas_ip
+  include_tasks: wait_for_server_reboot.yml
+  loop: "{{ otvl_iaas_ip | dict2items }}"
+
+###

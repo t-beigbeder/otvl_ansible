@@ -1,0 +1,7 @@
+- hosts: localhost
+  gather_facts: False
+
+  tasks:
+  - debug: msg="the value of admin_key is {{lookup('file', 'admin_key') }}"
+  - debug: msg="the value of admin_key_wc is {{lookup('file', 'admin_key_wc') }}"
+  - debug: msg="{{ test02.key }}"

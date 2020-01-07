@@ -1,0 +1,21 @@
+plugin: openstack
+only_clouds:
+  - ovh
+groups:
+  test03_group: true
+  bastion_controlled_group:
+    children:
+      bastion_group:
+        children:
+          sub_bastion_group:
+          meta-logical_name_bastion:
+  bastion_group2:
+    children:
+      zarbi_group:
+  bation_group3: "openstack.metadata.logical_name == 'bastion'"
+
+keyed_groups:
+  # add hosts to tag_Name_value groups for each aws_ec2 host's tags.Name variable
+  - key: properties
+    prefix: properties
+    separator: ""

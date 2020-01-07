@@ -1,0 +1,5 @@
+- name: "Destroy the {{ item.key }} server {{ item.value.name }}"
+  os_server:
+    cloud: "{{ cloud_name }}"
+    state: absent
+    name: "{{ item.value.name }}"

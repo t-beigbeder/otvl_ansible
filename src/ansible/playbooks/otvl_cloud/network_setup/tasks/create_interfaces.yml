@@ -1,0 +1,10 @@
+---
+# included tasks file for otvl_cloud/network_setup
+
+- name: Loop over interfaces {{ var_server.value.name }} for {{ var_server.key }}
+  include_tasks: create_interface.yml
+  loop: "{{ var_server.value.ips|dict2items }}"
+  loop_control:
+    loop_var: var_ip
+
+###

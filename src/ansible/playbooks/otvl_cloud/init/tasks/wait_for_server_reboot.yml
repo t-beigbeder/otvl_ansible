@@ -1,0 +1,13 @@
+---
+# included tasks file for otvl_cloud/init
+
+- name: "wait_for_server_reboot"
+  wait_for_connection:
+    delay: 45
+    timeout: 320
+
+- name: "wait_for_server_reboot_add_delay"
+  wait_for:
+    timeout: 15
+
+###

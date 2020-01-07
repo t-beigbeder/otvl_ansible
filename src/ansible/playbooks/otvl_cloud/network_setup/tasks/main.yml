@@ -1,0 +1,14 @@
+---
+# main tasks file for otvl_cloud/network_setup
+
+- name: combine default with actual infra data
+  set_fact:
+    combined_infra: "{{ default_infra | combine(infra, recursive=True) }}"
+
+- name: Loop over servers
+  include_tasks: create_interfaces.yml
+  loop: "{{ combined_infra.servers|dict2items }}"
+  loop_control:
+    loop_var: var_server
+
+###

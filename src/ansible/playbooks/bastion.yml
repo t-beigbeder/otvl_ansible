@@ -1,0 +1,22 @@
+- hosts: "*"
+  gather_facts: False
+  tasks:
+  - name: Load default variables
+    include_vars:
+      dir: vars/defaults
+
+- hosts: bastion_group
+  gather_facts: False
+  become: yes
+  roles:
+  - otvl_bastion/bastion
+  tags:
+  - otvl_bastion
+
+- hosts: bastion_controlled_group
+  gather_facts: False
+  become: yes
+  roles:
+  - otvl_bastion/controlled
+  tags:
+  - otvl_bastion

@@ -1,0 +1,16 @@
+networks:
+  - key: external
+    name: Ext-Net
+    cidr: 192.168.122.0/24
+    prefix: 192.168.122.
+    host_ip:
+  - key: admin
+    name: sample-admin-net
+    cidr: 172.23.0.32/24
+    prefix: 172.23.0.
+    host_ip: 172.23.0.2
+  - key: appli
+    name: sample-appli-net
+    cidr: 172.24.0.32/24
+    prefix: 172.24.0
+    host_ip: 172.24.0.2

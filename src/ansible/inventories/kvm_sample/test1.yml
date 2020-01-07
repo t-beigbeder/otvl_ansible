@@ -1,0 +1,92 @@
+---
+all:
+  hosts:
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_user: guest
+    infra:
+      servers:
+        bastion:
+          name: ksbas
+          ips:
+            admin: 172.23.0.2
+            appli: 172.24.0.2
+        dxnettst1:
+          name: dxnettst1
+          ips:
+            admin: 172.23.0.33
+            appli: 172.24.0.33
+      networks:
+        external:
+          name: Ext-Net
+          cidr: 192.168.122.0/24
+          prefix: 192.168.122.
+        admin:
+          name: sample-admin-net
+        appli:
+          name: sample-appli-net
+      otvl_network_configurator:
+        test_notify_enable: false
+      dns:
+        resolv_conf_content: |
+          # created by otvl_network_configurator
+          nameserver 192.168.122.1
+
+    otvl:
+      config_paths:
+        sbin: /srv/sbin
+        data: /srv/data
+        backup: /srv/backup
+        delivery: /srv/delivery
+        pkg: /srv/pkg
+      config_vars:
+        admin_user: guest
+        admin_key: sample_admin_key
+      apache:
+        www: /srv/www
+        test_notify_restart: false
+        test_htpasswd_create: true
+        test_htpasswd_users:
+          testuser1: password1
+          testuser2: password2
+        virtual_hosts:
+          ksgits:
+            otvl_vh:
+              server_name: ksgits
+              ip: ansible_all_ipv4_addresses[0]
+              port: 9090
+              aliases:
+                - name: public
+                  directory: /srv/www/public
+                - name: private
+                  directory: /srv/www/priv
+            otvl_backend_vh:
+              server_name: ksgits
+              ip: ansible_all_ipv4_addresses[0]
+              port: 80
+
+  children:
+    iaas_configure:
+      hosts:
+        ksbas:
+        dxnettst1:
+      vars:
+        ansible_user: guest
+        ansible_ssh_private_key_file: ~/.ssh/id_rsa
+        ansible_ssh_extra_args: -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+    bastion_controlled_group:
+      hosts:
+        dxnettst1:
+      vars:
+      children:
+        bastion_group:
+          hosts:
+            ksbas:
+          vars:
+    docker_build_group:
+      hosts:
+      vars:
+    git_service_group:
+      hosts:
+      vars:
+###

@@ -1,0 +1,18 @@
+- name: combine default with actual infra data
+  set_fact:
+    combined_infra: "{{ default_infra | combine(infra, recursive=True) }}"
+
+- name: Loop over servers
+  include_tasks: destroy_interfaces.yml
+  loop: "{{ combined_infra.servers|dict2items }}"
+  loop_control:
+    loop_var: var_server
+
+- name: Loop over servers
+  include_tasks: destroy_server.yml
+  loop: "{{ combined_infra.servers|dict2items }}"
+
+- name: Loop over internal networks
+  include_tasks: destroy_network.yml
+  loop: "{{ combined_infra.networks|dict2items }}"
+  when: item.key != "external"

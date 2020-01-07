@@ -1,0 +1,10 @@
+[Unit]
+Description=Runs otvl_network_configurator
+Wants=otvl_network_configurator.timer
+
+[Service]
+ExecStart=/srv/venv/otvl_cloud_init/bin/python /srv/otvl/iaas/python/otvl_network_configurator.py
+WorkingDirectory=/srv/otvl/iaas/python
+
+[Install]
+WantedBy=multi-user.target
