@@ -1,0 +1,57 @@
+cloud_name: cloudwatt
+
+ansible_user: cloud
+ansible_ssh_private_key_file: ~/.ssh/id_rsa_4k
+ansible_ssh_extra_args: -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+ansible_python_interpreter: /srv/venv/otvl_cloud_init/bin/python
+
+infra:
+  image_name: Debian Buster
+  key_name: d9office4k
+  servers:
+    bastion:
+      flavor: s1.cw.small-1
+      name: sample-bastion
+      ips:
+        admin: 172.23.0.2
+        appli: 172.24.0.2
+      groups: "iaas_configure,bastion_controlled_group,bastion_group"
+    nettst1:
+      flavor: s1.cw.small-1
+      name: sample-nettst1
+      ips:
+        admin: 172.23.0.33
+        appli: 172.24.0.33
+      groups: "iaas_configure,bastion_controlled_group"
+  networks:
+    external:
+      name: pub-net
+    admin:
+      name: sample-admin-net
+    appli:
+      name: sample-appli-net
+  security_groups:
+    require_open_egress: False
+    cloud_init_access: sample-cloud-init-access-sg
+    bastion_access: sample-bastion-access-sg
+  dns:
+    resolv_conf_content: |
+      # created by otvl_network_configurator
+      domain openstacklocal
+      search openstacklocal
+      nameserver 213.186.33.99
+  otvl_configure:
+    openstack_path: /home/guest/tools/venv/otvl_ansible/bin
+
+otvl:
+  config_paths:
+    sbin: /srv/sbin
+    data: /srv/data
+    backup: /srv/backup
+    delivery: /srv/delivery
+    pkg: /srv/pkg
+  config_vars:
+    admin_user: cloud
+    admin_key: sample_admin_key
+
+###

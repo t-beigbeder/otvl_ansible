@@ -1,0 +1,72 @@
+---
+# main tasks file for otvl_service/apache
+
+- name: debug
+  debug:
+    var: combined_otvl
+  when: combined_otvl.debug
+
+- name: Install apache2
+  command: apt-get install -y --no-install-recommends apache2
+  args:
+    creates: /usr/sbin/apache2
+    warn: false
+
+- name: Disable apache unused sites
+  command: "a2dissite {{ item }}"
+  args:
+    removes: "/etc/apache2/sites-enabled/{{ item }}.conf"
+  with_items: "{{ combined_otvl.apache.dis_sites }}"
+
+- name: Enable apache service
+  service:
+    name: apache2
+    enabled: yes
+
+- name: Test the notify handler to restart the apache service
+  debug:
+    msg: Test the notify handler to restart the apache service
+  changed_when: true
+  notify: Restart the apache service
+  when: combined_otvl.apache.test_notify_restart
+
+- name: Install the python3-passlib package
+  command: apt-get install -y --no-install-recommends python3-passlib
+  args:
+    creates: /usr/lib/python3/dist-packages/passlib/__init__.py
+    warn: false
+  when: combined_otvl.apache.test_htpasswd_create
+
+- name: Create the htpasswd directory
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/{{ combined_otvl.apache.test_htpasswd_path | dirname }}"
+    state: directory
+    mode: 0755
+  when: combined_otvl.apache.test_htpasswd_create
+
+- name: Create a htpasswd
+  htpasswd:
+    path: "{{ combined_otvl.config_paths.data }}/{{ combined_otvl.apache.test_htpasswd_path }}"
+    create: yes
+    crypt_scheme: md5_crypt
+    name: "{{ item.key }}"
+    password: "{{ item.value }}"
+    state: present
+    mode: 0644
+  with_dict: "{{ combined_otvl.apache.test_htpasswd_users }}"
+  when: combined_otvl.apache.test_htpasswd_create
+
+- name: Collect only facts returned by facter
+  setup:
+    gather_subset:
+      - '!all'
+      - '!any'
+      - facter
+
+- name: Loop over virtual hosts installation
+  include: install_virtual_host.yml
+  with_dict: "{{ combined_otvl.apache.virtual_hosts[ansible_nodename] }}"
+  loop_control:
+    loop_var: current_virtual_host
+
+###

@@ -1,0 +1,44 @@
+---
+# default infra variable for otvl_ansible playbooks and roles
+
+default_infra:
+  debug: false
+  image_name: image_name_to_be_defined
+  key_name: key_name_to_be_defined
+  servers:
+    bastion:
+      flavor: bastion_flavor_to_be_defined
+      name: otvl-bastion
+  networks:
+    external:
+      name: external_network_to_be_defined
+      dhcp: true
+
+    admin:
+      name: otvl-admin-net
+      cidr: 172.23.0.32/24
+      dhcp: false
+      prefix: 172.23.0.
+      host_suffix: "-adm"
+    appli:
+      name: otvl-appli-net
+      cidr: 172.24.0.32/24
+      dhcp: false
+      prefix: 172.24.0
+      host_suffix: "-app"
+  security_groups:
+    require_open_egress: True
+    cloud_init_access: otvl-cloud-init-access-sg
+    bastion_access: otvl-bastion-access-sg
+    admin_traffic: otvl-admin-traffic-sg
+    appli_traffic: otvl-appli-traffic-sg
+
+  dns:
+    resolv_conf_content: |
+      nameserver dns_resolv_conf_content_nameserver_is_undefined
+  otvl_network_configurator:
+    test_notify_enable: false
+  otvl_configure:
+    force_otvl_os_port_check: false
+    openstack_path: /path/to/openstack/to/be/defined
+###

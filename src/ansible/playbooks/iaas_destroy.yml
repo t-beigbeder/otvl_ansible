@@ -1,0 +1,13 @@
+- hosts: "*"
+  gather_facts: False
+  tasks:
+  - name: Load default variables
+    include_vars:
+      dir: vars/defaults
+
+- hosts: iaas_init
+  gather_facts: False
+  roles:
+  - otvl_cloud/destroy
+  tags:
+  - otvl_iaas_destroy

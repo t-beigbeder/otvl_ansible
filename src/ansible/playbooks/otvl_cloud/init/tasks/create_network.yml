@@ -1,0 +1,19 @@
+---
+# included tasks file for otvl_cloud/init
+
+- name: "Create the {{ item.key }} network {{ item.value.name }}"
+  os_network:
+    cloud: "{{ cloud_name }}"
+    state: present
+    name: "{{ item.value.name }}"
+
+- name: "Create the {{ item.key }} sub network {{ item.value.cidr }} on {{ item.value.name }}"
+  os_subnet:
+    cloud: "{{ cloud_name }}"
+    state: present
+    network_name: "{{ item.value.name }}"
+    name: "{{ item.value.name }}_sn"
+    cidr: "{{ item.value.cidr }}"
+    enable_dhcp: "{{ item.value.dhcp }}"
+
+###

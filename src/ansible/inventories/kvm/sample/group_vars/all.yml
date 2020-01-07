@@ -1,0 +1,58 @@
+---
+
+ansible_user: guest
+ansible_python_interpreter: /usr/bin/python3
+ansible_ssh_private_key_file: ~/.ssh/id_rsa
+ansible_ssh_extra_args: -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+
+infra:
+  servers:
+    bastion:
+      name: ksbas
+      ips:
+        admin: 172.23.0.2
+        appli: 172.24.0.2
+    nfs:
+      name: ksnfs
+      ips:
+        admin: 172.23.0.10
+        appli: 172.24.0.10
+    tor:
+      name: kstor
+      ips:
+        admin: 172.23.0.20
+        appli: 172.24.0.20
+    dkb:
+      name: ksdkb
+      ips:
+        admin: 172.23.0.30
+        appli: 172.24.0.30
+    dkr:
+      name: ksdkr
+      ips:
+        admin: 172.23.0.40
+        appli: 172.24.0.40
+  networks:
+    external:
+      name: Ext-Net
+    admin:
+      name: admin-net
+    appli:
+      name: appli-net
+  dns:
+    resolv_conf_content: |
+      # created by otvl_network_configurator
+      nameserver 192.168.122.1
+
+otvl:
+  config_paths:
+    sbin: /srv/sbin
+    data: /srv/data
+    backup: /srv/backup
+    delivery: /srv/delivery
+    pkg: /srv/pkg
+  config_vars:
+    admin_user: guest
+    admin_key: sample_admin_key
+
+###

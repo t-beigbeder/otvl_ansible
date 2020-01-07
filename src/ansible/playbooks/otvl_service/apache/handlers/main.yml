@@ -1,0 +1,9 @@
+---
+# handlers file for otvl_service/apache
+
+- name: Restart the apache service
+  service:
+    name: apache2
+    state: restarted
+
+###

@@ -1,0 +1,10 @@
+---
+# included tasks file for otvl_cloud/destroy
+
+- name: "Destroy the {{ var_ip.key }} interface on {{ var_server.value.name }}"
+  os_port:
+    cloud: "{{ cloud_name }}"
+    state: absent
+    name: "{{ var_server.key }}_{{ var_ip.key }}"
+
+###

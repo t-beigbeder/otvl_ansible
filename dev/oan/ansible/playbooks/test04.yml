@@ -1,0 +1,16 @@
+
+- hosts: "localhost"
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  gather_facts: False
+  tasks:
+  - name: bad command
+    command: ls no_such_file
+    ignore_errors: yes
+    register:
+      otvl_test04
+  - name: "Handle errors re-lauch command"
+    command: ls no_such_file
+    when:
+    - '(otvl_test04.msg is defined and otvl_test04.msg|regex_search("non-zero", ignorecase=True))'

@@ -1,0 +1,10 @@
+[Unit]
+Description=Run otvl_network_configurator every 2 minutes
+Requires=otvl_network_configurator.service
+
+[Timer]
+Unit=otvl_network_configurator.service
+OnCalendar=*:0/2
+
+[Install]
+WantedBy=timers.target

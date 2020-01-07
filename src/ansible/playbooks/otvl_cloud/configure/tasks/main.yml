@@ -1,0 +1,137 @@
+---
+# main tasks file for otvl_cloud/configure
+
+- name: combine default with actual infra data
+  set_fact:
+    combined_infra: "{{ default_infra | combine(infra, recursive=True) }}"
+
+- name: set logical name for server {{ inventory_hostname }}
+  set_fact:
+    otvl_logical_name: "{{ item.key }}"
+  when: 'item.value.name == inventory_hostname'
+  loop: "{{ combined_infra.servers | dict2items }}"
+
+- name: set configuration data for server {{ inventory_hostname }}
+  set_fact:
+    server_infra: "{{ combined_infra.servers[otvl_logical_name] }}"
+
+- name: Create configuration directory for {{ otvl_logical_name }} server {{ inventory_hostname }}
+  file:
+    path: /srv/otvl/iaas/config
+    state: directory
+    mode: 0755
+  ignore_errors: yes
+  register:
+    otvl_file
+
+- name: "Handle file errors re-create configuration directory for {{ otvl_logical_name }} server {{ inventory_hostname }}"
+  file:
+    path: /srv/otvl/iaas/config
+    state: directory
+    mode: 0755
+  when:
+  - '(otvl_file.msg is defined and otvl_os_server.msg|regex_search("error", ignorecase=True))'
+
+- name: Create configuration file for {{ otvl_logical_name }} server {{ inventory_hostname }}
+  template:
+    src: "config/network_config.yml"
+    dest: "/srv/otvl/iaas/config/network_config.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create data directory for {{ otvl_logical_name }} server {{ inventory_hostname }}
+  file:
+    path: /srv/otvl/iaas/data
+    state: directory
+    mode: 0755
+  ignore_errors: yes
+
+- name: Create DNS resolv.conf reference for the hosting environment
+  copy:
+    content: "{{ combined_infra.dns.resolv_conf_content }}"
+    dest: /srv/otvl/iaas/data/resolv.conf.reference
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Install virtualenv
+  command: apt-get install -y --no-install-recommends virtualenv
+  args:
+    creates: /usr/bin/virtualenv
+    warn: false
+
+- name: Install libudev1
+  command: apt-get install -y --no-install-recommends libudev1
+  args:
+    creates: /lib/x86_64-linux-gnu/libudev.so.1
+    warn: false
+
+- name: Create virtualenv /srv/venv/otvl_cloud_init
+  command: virtualenv -p python3 /srv/venv/otvl_cloud_init
+  args:
+    creates: /srv/venv/otvl_cloud_init
+    warn: false
+
+- name: Install pyudev in virtualenv /srv/venv/otvl_cloud_init
+  command: /srv/venv/otvl_cloud_init/bin/pip install pyudev
+  args:
+    creates: /srv/venv/otvl_cloud_init/lib/python3.7/site-packages/pyudev
+    warn: false
+  notify: Enable the otvl_network_configurator timer
+
+- name: Install PyYAML in virtualenv /srv/venv/otvl_cloud_init
+  command: /srv/venv/otvl_cloud_init/bin/pip install PyYAML
+  args:
+    creates: /srv/venv/otvl_cloud_init/lib/python3.7/site-packages/yaml
+    warn: false
+  notify: Enable the otvl_network_configurator timer
+
+- name: Create python directory for {{ otvl_logical_name }} server {{ inventory_hostname }}
+  file:
+    path: /srv/otvl/iaas/python
+    state: directory
+    mode: 0755
+
+- name: Create otvl_network_configurator python script
+  copy:
+    src: ../../../../python/otvl_cloud/otvl_network_configurator.py
+    dest: /srv/otvl/iaas/python/otvl_network_configurator.py
+    owner: root
+    group: root
+    mode: 0644
+  notify: Enable the otvl_network_configurator timer
+
+- name: Create otvl_network_configurator systemd service file
+  copy:
+    src: systemd/otvl_network_configurator.service
+    dest: /etc/systemd/system/otvl_network_configurator.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: Enable the otvl_network_configurator timer
+
+- name: Create otvl_network_configurator systemd timer file
+  copy:
+    src: systemd/otvl_network_configurator.timer
+    dest: /etc/systemd/system/otvl_network_configurator.timer
+    owner: root
+    group: root
+    mode: 0644
+  notify: Enable the otvl_network_configurator timer
+
+- name: Test the notify handler to enable the otvl_network_configurator timer
+  debug:
+    msg: Test the notify handler to enable the otvl_network_configurator timer
+  changed_when: true
+  notify: Enable the otvl_network_configurator timer
+  when: combined_infra.otvl_network_configurator.test_notify_enable
+
+- name: Update /etc/hosts for server {{ inventory_hostname }}
+  template:
+    src: "etc/hosts.j2"
+    dest: "/etc/hosts"
+    owner: root
+    group: root
+    mode: 0644
+###

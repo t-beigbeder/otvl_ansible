@@ -1,0 +1,58 @@
+---
+# main tasks file for otvl_service/base_service
+
+- name: Load default otvl (base) variables
+  include_vars:
+    dir: "{{ role_path }}/../../vars/defaults"
+
+- name: combine default with actual infra config data (base)
+  set_fact:
+    combined_infra: "{{ default_infra | combine(infra, recursive=True) }}"
+
+- name: combine default with actual otvl config data (base)
+  set_fact:
+    combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+
+- name: Create otvl sbin dir
+  file:
+    path: "{{ combined_otvl.config_paths.sbin }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create otvl backup dir
+  file:
+    path: "{{ combined_otvl.config_paths.backup }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create otvl delivery dir
+  file:
+    path: "{{ combined_otvl.config_paths.delivery }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create otvl package installation dir
+  file:
+    path: "{{ combined_otvl.config_paths.pkg }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Install common install and util scripts in sbin
+  copy:
+    src: "sbin/{{ item }}"
+    dest: "{{ combined_otvl.config_paths.sbin }}/{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - otvl_sbin_lib.sh
+
+###
