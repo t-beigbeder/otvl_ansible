@@ -1,0 +1,17 @@
+---
+# main tasks file for otvl_service/git_service
+- name: debug
+  debug:
+    var: combined_otvl
+  when: combined_otvl.debug
+
+- name: Install virtualenv for otvl_web_service
+  command: env
+  args:
+    creates: /usr/bin/virtualenv
+    warn: false
+  environment:
+    LC_ALL: C
+    DEBIAN_FRONTEND: noninteractive
+
+###

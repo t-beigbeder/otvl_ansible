@@ -53,7 +53,7 @@
     password: "{{ item.value }}"
     state: present
     mode: 0644
-  with_dict: "{{ combined_otvl.apache.test_htpasswd_users }}"
+  loop: "{{ combined_otvl.apache.test_htpasswd_users|dict2items}}"
   when: combined_otvl.apache.test_htpasswd_create
 
 - name: Collect only facts returned by facter
