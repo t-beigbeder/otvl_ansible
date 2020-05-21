@@ -38,5 +38,9 @@ otvl:
     pkg: /srv/pkg
   config_vars:
     admin_user: guest
+  apache:
+    virtual_hosts:
+      dxotfe:
+        "9982":
 
 ###

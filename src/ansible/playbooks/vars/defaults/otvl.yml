@@ -20,7 +20,7 @@ default_otvl:
     test_htpasswd_create: false
     test_htpasswd_path: apache/htpasswd
     test_htpasswd_users: {}
-    virtual_hosts:
+    virtual_hosts: {}
 
   git_service:
     project_root: git
