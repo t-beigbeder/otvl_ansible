@@ -6,12 +6,14 @@
   when: combined_otvl.debug
 
 - name: Install virtualenv for otvl_web_service
-  command: env
+  command: "{{ combined_otvl.config_paths.sbin }}/otvl_apt_subs.sh virtualenv"
   args:
     creates: /usr/bin/virtualenv
-    warn: false
-  environment:
-    LC_ALL: C
-    DEBIAN_FRONTEND: noninteractive
+
+- name: Loop over sites installation (otvl_service/front_end)
+  include: install_site_front_end.yml
+  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
+  loop_control:
+    loop_var: current_site
 
 ###

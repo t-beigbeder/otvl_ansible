@@ -45,13 +45,13 @@ otvl:
           template: apache/conf/ssl_sni.conf
           site_items:
           - name: site1
-            template: otvl_web_front_end.inc
+            template: apache/conf/otvl_web_front_end.inc
             vars:
               server_name: site1.dxpydk
               web_port: "9981"
               api_port: "9991"
           - name: site2
-            template: otvl_web_front_end.inc
+            template: apache/conf/otvl_web_front_end.inc
             vars:
               server_name: site2.dxpydk
               web_port: "9982"

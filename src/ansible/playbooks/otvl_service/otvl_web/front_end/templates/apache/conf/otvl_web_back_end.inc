@@ -1,26 +1,26 @@
-<VirtualHost localhost:9982>
-        ServerName site2.dxpydk
+<VirtualHost localhost:{{ current_site_item.vars.web_port }}>
+        ServerName {{ current_site_item.vars.server_name }}
         ServerAdmin webmaster@localhost
-        ErrorLog ${APACHE_LOG_DIR}/site2_static_error.log
-        CustomLog ${APACHE_LOG_DIR}/site2_static_access.log combined
-        DocumentRoot "/srv/www/site2/web"
-        <Directory /srv/www/site2/web>
+        ErrorLog ${APACHE_LOG_DIR}/{{ current_site_item.name }}_static_error.log
+        CustomLog ${APACHE_LOG_DIR}/{{ current_site_item.name }}_static_access.log combined
+        DocumentRoot "/srv/www/{{ current_site_item.name }}/web"
+        <Directory /srv/www/{{ current_site_item.name }}/web>
                 Require all granted
                 FallbackResource /index.html
         </Directory>
-        <Directory /srv/www/site2/web/assets>
+        <Directory /srv/www/{{ current_site_item.name }}/web/assets>
                 FallbackResource disabled
         </Directory>
-        <Directory /srv/www/site2/web/css>
+        <Directory /srv/www/{{ current_site_item.name }}/web/css>
                 FallbackResource disabled
         </Directory>
-        <Directory /srv/www/site2/web/fonts>
+        <Directory /srv/www/{{ current_site_item.name }}/web/fonts>
                 FallbackResource disabled
         </Directory>
-        <Directory /srv/www/site2/web/js>
+        <Directory /srv/www/{{ current_site_item.name }}/web/js>
                 FallbackResource disabled
         </Directory>
-        <Directory /srv/www/site2/web/statics>
+        <Directory /srv/www/{{ current_site_item.name }}/web/statics>
                 FallbackResource disabled
         </Directory>
         ErrorDocument 400 /statics/error/technical_error.html

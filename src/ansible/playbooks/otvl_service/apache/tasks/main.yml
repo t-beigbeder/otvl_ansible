@@ -7,10 +7,9 @@
   when: combined_otvl.debug
 
 - name: Install apache2
-  command: apt-get install -y --no-install-recommends apache2
+  command: "{{ combined_otvl.config_paths.sbin }}/otvl_apt_subs.sh apache2"
   args:
     creates: /usr/sbin/apache2
-    warn: false
 
 - name: Disable apache unused sites
   command: "a2dissite {{ item }}"
@@ -22,6 +21,12 @@
   service:
     name: apache2
     enabled: yes
+
+- name: Create the apache otvl configuration directory
+  file:
+    path: "/etc/apache2/otvl_conf"
+    state: directory
+    mode: 0755
 
 - name: Test the notify handler to restart the apache service
   debug:

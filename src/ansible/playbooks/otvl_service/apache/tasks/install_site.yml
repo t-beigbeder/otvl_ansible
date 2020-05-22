@@ -3,7 +3,7 @@
 
 - name: display the site information
   debug:
-    msg: "virtual_host is {{ current_site.key }}: {{ current_site.value }}"
+    msg: "site is {{ current_site.key }}: {{ current_site.value }}"
 
 - name: Install the site configuration file {{ current_site.value.template }}
   template:

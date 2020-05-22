@@ -63,6 +63,7 @@
     group: root
     mode: 0755
   with_items:
+    - otvl_apt_subs.sh
     - otvl_sbin_lib.sh
 
 ###

@@ -1,0 +1,17 @@
+---
+# install_site_front_end_item tasks file for otvl_service/apache
+
+- name: display the site item information
+  debug:
+    msg: "site item is {{ current_site_item }}"
+
+- name: Install the site item configuration file {{ current_site_item.template }}
+  template:
+    src: "{{ current_site_item.template }}"
+    dest: "/etc/apache2/otvl_conf/{{ current_site_item.name }}.inc"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart the apache service
+
+###
