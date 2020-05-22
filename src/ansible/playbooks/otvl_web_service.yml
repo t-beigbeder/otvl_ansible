@@ -9,6 +9,6 @@
   gather_facts: False
   become: yes
   roles:
-  - otvl_service/otvl_web_service
+  - otvl_service/otvl_web/front_end
   tags:
-  - otvl_web_service
+  - otvl_web_front_end

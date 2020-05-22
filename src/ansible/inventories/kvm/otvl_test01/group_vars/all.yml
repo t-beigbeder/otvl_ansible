@@ -39,8 +39,22 @@ otvl:
   config_vars:
     admin_user: guest
   apache:
-    virtual_hosts:
-      dxotfe:
-        "9982":
+    sites:
+      otfe:
+        ssl_sni:
+          template: apache/conf/ssl_sni.conf
+          site_items:
+          - name: site1
+            template: otvl_web_front_end.inc
+            vars:
+              server_name: site1.dxpydk
+              web_port: "9981"
+              api_port: "9991"
+          - name: site2
+            template: otvl_web_front_end.inc
+            vars:
+              server_name: site2.dxpydk
+              web_port: "9982"
+              api_port: "9992"
 
 ###

@@ -63,10 +63,10 @@
       - '!any'
       - facter
 
-- name: Loop over virtual hosts installation
-  include: install_virtual_host.yml
-  with_dict: "{{ combined_otvl.apache.virtual_hosts[ansible_nodename] }}"
+- name: Loop over sites installation
+  include: install_site.yml
+  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
   loop_control:
-    loop_var: current_virtual_host
+    loop_var: current_site
 
 ###

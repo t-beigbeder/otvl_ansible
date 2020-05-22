@@ -1,0 +1,23 @@
+---
+# install_site tasks file for otvl_service/apache
+
+- name: display the site information
+  debug:
+    msg: "virtual_host is {{ current_site.key }}: {{ current_site.value }}"
+
+- name: Install the site configuration file {{ current_site.value.template }}
+  template:
+    src: "{{ current_site.value.template }}"
+    dest: "/etc/apache2/sites-available/{{ current_site.key }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart the apache service
+
+- name: Enable apache site configuration file {{ current_site.key }}
+  command: "a2ensite {{ current_site.key }}"
+  args:
+    creates: /etc/apache2/sites-enabled/{{ current_site.key }}.conf
+  notify: Restart the apache service
+
+###

@@ -1,5 +1,5 @@
 ---
-# main tasks file for otvl_service/git_service
+# main tasks file for otvl_service/otvl_web/front_end
 - name: debug
   debug:
     var: combined_otvl

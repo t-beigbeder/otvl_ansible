@@ -13,6 +13,16 @@
   set_fact:
     combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
 
+- name: set logical name for server {{ inventory_hostname }} (base)
+  set_fact:
+    otvl_logical_name: "{{ item.key }}"
+  when: 'item.value.name == inventory_hostname'
+  loop: "{{ combined_infra.servers | dict2items }}"
+
+- name: set configuration data for server {{ inventory_hostname }} => {{ otvl_logical_name }} (base)
+  set_fact:
+    server_infra: "{{ combined_infra.servers[otvl_logical_name] }}"
+
 - name: Create otvl sbin dir
   file:
     path: "{{ combined_otvl.config_paths.sbin }}"
