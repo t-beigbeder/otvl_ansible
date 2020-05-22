@@ -17,6 +17,11 @@ infra:
       ips:
         admin: 172.23.0.30
         appli: 172.24.0.30
+    otbe:
+      name: dxotbe
+      ips:
+        admin: 172.23.0.40
+        appli: 172.24.0.40
   networks:
     external:
       name: Ext-Net
@@ -45,13 +50,19 @@ otvl:
           template: apache/conf/ssl_sni.conf
           site_items:
           - name: site1
-            template: apache/conf/otvl_web_front_end.inc
+            front_end:
+              template: apache/conf/otvl_web_front_end.inc
+            back_end:
+              template: apache/conf/otvl_web_back_end.inc
             vars:
               server_name: site1.dxpydk
               web_port: "9981"
               api_port: "9991"
           - name: site2
-            template: apache/conf/otvl_web_front_end.inc
+            front_end:
+              template: apache/conf/otvl_web_front_end.inc
+            back_end:
+              template: apache/conf/otvl_web_back_end.inc
             vars:
               server_name: site2.dxpydk
               web_port: "9982"

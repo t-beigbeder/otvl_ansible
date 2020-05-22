@@ -1,0 +1,19 @@
+---
+# main tasks file for otvl_service/otvl_web/back_end
+- name: debug
+  debug:
+    var: combined_otvl
+  when: combined_otvl.debug
+
+- name: Install virtualenv for otvl_web_service
+  command: "{{ combined_otvl.config_paths.sbin }}/otvl_apt_subs.sh virtualenv"
+  args:
+    creates: /usr/bin/virtualenv
+
+- name: Loop over sites installation (otvl_service/back_end)
+  include: install_site_back_end.yml
+  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
+  loop_control:
+    loop_var: current_site
+
+###
