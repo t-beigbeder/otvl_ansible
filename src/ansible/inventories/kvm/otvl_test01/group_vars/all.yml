@@ -85,6 +85,6 @@ otvl:
               api_port: "9992"
   otvl_web:
     static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev002.tgz"
-    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server-1.0.dev002.tgz"
+    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev002.tgz"
 
 ###
