@@ -24,7 +24,7 @@ default_infra:
       name: otvl-appli-net
       cidr: 172.24.0.32/24
       dhcp: false
-      prefix: 172.24.0
+      prefix: 172.24.0.
       host_suffix: "-app"
   security_groups:
     require_open_egress: True

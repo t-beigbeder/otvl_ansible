@@ -1,5 +1,5 @@
 ---
-# install_site_back_end_item tasks file for otvl_service/apache
+# install_site_back_end_item tasks file for otvl_service/otvl_web/front_end
 
 - name: display the site item information
   debug:
@@ -8,7 +8,7 @@
 
 - name: Install the site item configuration file {{ current_site_item.template }}
   template:
-    src: "{{ current_site_item.back_end.template }}"
+    src: "{{ current_site_item.template }}"
     dest: "/etc/apache2/otvl_conf/{{ current_site_item.name }}.inc"
     owner: root
     group: root

@@ -1,26 +1,26 @@
-<VirtualHost localhost:{{ current_site_item.vars.web_port }}>
+<VirtualHost {{ inventory_hostname }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.vars.web_port }}>
         ServerName {{ current_site_item.vars.server_name }}
         ServerAdmin webmaster@localhost
         ErrorLog ${APACHE_LOG_DIR}/{{ current_site_item.name }}_static_error.log
         CustomLog ${APACHE_LOG_DIR}/{{ current_site_item.name }}_static_access.log combined
-        DocumentRoot "/srv/www/{{ current_site_item.name }}/web"
-        <Directory /srv/www/{{ current_site_item.name }}/web>
+        DocumentRoot "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
+        <Directory {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web>
                 Require all granted
                 FallbackResource /index.html
         </Directory>
-        <Directory /srv/www/{{ current_site_item.name }}/web/assets>
+        <Directory {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/assets>
                 FallbackResource disabled
         </Directory>
-        <Directory /srv/www/{{ current_site_item.name }}/web/css>
+        <Directory {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/css>
                 FallbackResource disabled
         </Directory>
-        <Directory /srv/www/{{ current_site_item.name }}/web/fonts>
+        <Directory {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/fonts>
                 FallbackResource disabled
         </Directory>
-        <Directory /srv/www/{{ current_site_item.name }}/web/js>
+        <Directory {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/js>
                 FallbackResource disabled
         </Directory>
-        <Directory /srv/www/{{ current_site_item.name }}/web/statics>
+        <Directory {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/statics>
                 FallbackResource disabled
         </Directory>
         ErrorDocument 400 /statics/error/technical_error.html

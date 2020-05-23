@@ -1,5 +1,5 @@
 ---
-# install_site_front_end tasks file for otvl_service/apache
+# install_site_front_end tasks file for otvl_service/otvl_web/front_end
 
 - name: display the site information
   debug:

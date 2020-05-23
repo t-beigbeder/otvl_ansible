@@ -4,6 +4,7 @@
 - name: display the site information
   debug:
     msg: "site is {{ current_site.key }}: {{ current_site.value }}"
+  when: combined_otvl.debug
 
 - name: Install the site configuration file {{ current_site.value.template }}
   template:
@@ -19,5 +20,11 @@
   args:
     creates: /etc/apache2/sites-enabled/{{ current_site.key }}.conf
   notify: Restart the apache service
+
+- name: Loop over sites items (otvl_service/apache)
+  include: install_site_item.yml
+  loop: "{{ current_site.value.site_items }}"
+  loop_control:
+    loop_var: current_site_item
 
 ###

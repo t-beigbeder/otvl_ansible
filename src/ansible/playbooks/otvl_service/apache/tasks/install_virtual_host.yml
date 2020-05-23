@@ -4,6 +4,7 @@
 - name: display the virtual_host information
   debug:
     msg: "virtual_host is {{ current_virtual_host.key }}: {{ current_virtual_host.value }}"
+  when: combined_otvl.debug
 
 - name: Install the virtual host configuration file {{ current_virtual_host.key }}
   template:

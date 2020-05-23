@@ -8,8 +8,8 @@
   SSLCertificateKeyFile /etc/ssl/private/{{ current_site_item.vars.server_name }}.key
   ProxyRequests off
   ProxyPreserveHost on
-  ProxyPass /api/ http://localhost:{{ current_site_item.vars.api_port }}/api/
-  ProxyPassReverse /api/ http://localhost:{{ current_site_item.vars.api_port }}/api/
-  ProxyPass / http://localhost:{{ current_site_item.vars.web_port }}/
-  ProxyPassReverse / http://localhost:{{ current_site_item.vars.web_port }}/
+  ProxyPass /api/ http://{{ current_site_item.vars.backend_server }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.vars.api_port }}/api/
+  ProxyPassReverse /api/ http://{{ current_site_item.vars.backend_server }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.vars.api_port }}/api/
+  ProxyPass / http://{{ current_site_item.vars.backend_server }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.vars.web_port }}/
+  ProxyPassReverse / http://{{ current_site_item.vars.backend_server }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.vars.web_port }}/
 </VirtualHost>
