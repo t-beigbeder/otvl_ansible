@@ -15,7 +15,7 @@
     mode: 0644
   when: "'auto_pki_path' in current_site_item.vars"
 
-- name: Install autosigned certificate if configured
+- name: Install autosigned key if configured
   copy:
     src: "{{ current_site_item.vars.auto_pki_path }}/{{ current_site_item.vars.server_name }}.key"
     dest: "/etc/ssl/private/{{ current_site_item.vars.server_name }}.key"

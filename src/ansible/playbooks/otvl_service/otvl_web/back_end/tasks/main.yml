@@ -16,4 +16,67 @@
   loop_control:
     loop_var: current_site
 
+- name: Deliver static_site_archive_file {{ combined_otvl.otvl_web.static_site_archive_file }} if configured
+  copy:
+    src: "{{ combined_otvl.otvl_web.static_site_archive_file }}"
+    dest: "{{ combined_otvl.config_paths.delivery }}/{{ combined_otvl.otvl_web.static_site_archive_file | basename }}"
+    owner: root
+    group: root
+    mode: 0644
+  when: "'static_site_archive_file' in combined_otvl.otvl_web"
+  register: delivered_static_site_archive_file
+
+- name: Clean-up otvl_web_vuejs package directory when delivered_static_site_archive_file
+  file:
+    path: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs"
+    state: absent
+  when: delivered_static_site_archive_file.changed
+
+- name: Create otvl_web_vuejs package directory
+  file:
+    path: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs"
+    state: directory
+    mode: 0755
+
+- name: Unarchive the delivered static_site_archive_file {{ delivered_static_site_archive_file.dest }}
+  unarchive:
+    src: "{{ delivered_static_site_archive_file.dest }}"
+    dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs"
+    remote_src: yes
+    owner: root
+    group: root
+    mode: u+rwX,go+rX
+  when: "'static_site_archive_file' in combined_otvl.otvl_web"
+  register: unarchive_otvl_web_vuejs
+
+- name: Deliver virtualenv_archive_file {{ combined_otvl.otvl_web.virtualenv_archive_file }} if configured
+  copy:
+    src: "{{ combined_otvl.otvl_web.virtualenv_archive_file }}"
+    dest: "{{ combined_otvl.config_paths.delivery }}/{{ combined_otvl.otvl_web.virtualenv_archive_file | basename }}"
+    owner: root
+    group: root
+    mode: 0644
+  when: "'virtualenv_archive_file' in combined_otvl.otvl_web"
+  register: delivered_virtualenv_archive_file
+
+- name: Clean-up otvl_web_server_venv package directory when delivered_virtualenv_archive_file
+  file:
+    path: "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv"
+    state: absent
+  when: delivered_virtualenv_archive_file.changed
+
+- name: Create otvl_web_server_venv package directory
+  file:
+    path: "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv"
+    state: directory
+    mode: 0755
+
+- name: Unarchive the delivered virtualenv_archive_file {{ delivered_virtualenv_archive_file.dest }}
+  unarchive:
+    src: "{{ delivered_virtualenv_archive_file.dest }}"
+    dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv"
+    remote_src: yes
+  when: "'virtualenv_archive_file' in combined_otvl.otvl_web"
+  register: unarchive_otvl_web_server_venv
+
 ###
