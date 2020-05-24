@@ -1,0 +1,36 @@
+---
+# install_site_vuejs_back_end_item tasks file for otvl_service/otvl_web/front_end
+
+- name: install_site_vuejs_back_end_item display the site item information
+  debug:
+    msg: "site item is {{ current_site_item }}"
+  when: combined_otvl.debug
+
+- name: Create vuejs static site directory for {{ current_site_item.name }}
+  file:
+    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/"
+    state: directory
+    mode: 0755
+
+- name: Copy vuejs static site to {{ current_site_item.name }}
+  copy:
+    src: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs/"
+    remote_src: yes
+    dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/"
+    owner: root
+    group: root
+    mode: u+rwX,g+rX,o+rX
+
+- name: Configure vuejs static site {{ current_site_item.name }} for web on https://{{ current_site_item.vars.server_name }}
+  replace:
+    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
+    regexp: "=default_web_server_url"
+    replace: "=https://{{ current_site_item.vars.server_name }}"
+
+- name: Configure vuejs static site {{ current_site_item.name }} for api on https://{{ current_site_item.vars.server_name }}/api
+  replace:
+    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
+    regexp: "=default_api_server_url"
+    replace: "=https://{{ current_site_item.vars.server_name }}/api"
+
+###

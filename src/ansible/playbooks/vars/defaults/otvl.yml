@@ -14,6 +14,8 @@ default_otvl:
     admin_key: otvl_admin_key
   apache:
     www: /otvl/www
+    user: www-data
+    group: www-data
     dis_sites:
     - 000-default
     test_notify_restart: false

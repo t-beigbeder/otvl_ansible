@@ -1,0 +1,15 @@
+---
+# install_site_vuejs_back_end tasks file for otvl_service/otvl_web/front_end
+
+- name: install_site_vuejs_back_end display the site information
+  debug:
+    msg: "site is {{ current_site.key }}: {{ current_site.value }}"
+  when: combined_otvl.debug
+
+- name: Loop over sites items for vuejs (otvl_service/back_end)
+  include: install_site_vuejs_back_end_item.yml
+  loop: "{{ current_site.value.site_items }}"
+  loop_control:
+    loop_var: current_site_item
+
+###

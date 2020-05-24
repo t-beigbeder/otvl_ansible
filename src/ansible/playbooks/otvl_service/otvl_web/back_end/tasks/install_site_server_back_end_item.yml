@@ -1,0 +1,9 @@
+---
+# install_site_server_back_end_item tasks file for otvl_service/otvl_web/front_end
+
+- name: install_site_server_back_end_item display the site item information
+  debug:
+    msg: "site item is {{ current_site_item }}"
+  when: combined_otvl.debug
+
+###

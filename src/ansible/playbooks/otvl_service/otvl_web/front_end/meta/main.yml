@@ -1,2 +1,6 @@
 dependencies:
-  - otvl_service/apache
+  - role: otvl_service/apache
+    tags:
+    - otvl_service_apache
+
+###

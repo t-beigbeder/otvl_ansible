@@ -4,6 +4,7 @@
   - name: Load default variables
     include_vars:
       dir: vars/defaults
+  tags: always
 
 - hosts: otvl_web_front_end_group
   gather_facts: False

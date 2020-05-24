@@ -79,4 +79,16 @@
   when: "'virtualenv_archive_file' in combined_otvl.otvl_web"
   register: unarchive_otvl_web_server_venv
 
+- name: Loop over sites installation for vuejs (otvl_service/back_end)
+  include: install_site_vuejs_back_end.yml
+  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
+  loop_control:
+    loop_var: current_site
+
+- name: Loop over sites installation for server (otvl_service/back_end)
+  include: install_site_server_back_end.yml
+  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
+  loop_control:
+    loop_var: current_site
+
 ###
