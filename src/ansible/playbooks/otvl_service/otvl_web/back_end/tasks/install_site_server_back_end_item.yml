@@ -1,9 +1,44 @@
 ---
-# install_site_server_back_end_item tasks file for otvl_service/otvl_web/front_end
+# install_site_server_back_end_item tasks file for otvl_service/otvl_web/back_end
 
 - name: install_site_server_back_end_item display the site item information
   debug:
     msg: "site item is {{ current_site_item }}"
   when: combined_otvl.debug
+
+# /srv/data/otvl_web/siteX/[config|pages|assets] server_config.yml/site_config.yml
+
+- name: Create server config and data directories for {{ current_site_item.name }}
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}"
+    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/config"
+    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/pages"
+
+- name: Create server assets directories for {{ current_site_item.name }}
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ combined_otvl.apache.user }}"
+    group: "{{ combined_otvl.apache.group }}"
+    mode: 0755
+  with_items:
+    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets"
+    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets/images"
+    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets/documents"
+    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets/videos"
+
+- name: Install the site item server_config configuration file for {{ current_site_item.name }}
+  template:
+    src: "otvl_web_back_end/conf/server_config.yml"
+    dest: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/config/server_config.yml"
+    owner: root
+    group: root
+    mode: 0644
 
 ###

@@ -23,37 +23,19 @@
   set_fact:
     server_infra: "{{ combined_infra.servers[otvl_logical_name] }}"
 
-- name: Create otvl sbin dir
+- name: Create otvl root directories
   file:
-    path: "{{ combined_otvl.config_paths.sbin }}"
+    path: "{{ item }}"
     state: directory
     owner: root
     group: root
     mode: 0755
-
-- name: Create otvl backup dir
-  file:
-    path: "{{ combined_otvl.config_paths.backup }}"
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
-
-- name: Create otvl delivery dir
-  file:
-    path: "{{ combined_otvl.config_paths.delivery }}"
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
-
-- name: Create otvl package installation dir
-  file:
-    path: "{{ combined_otvl.config_paths.pkg }}"
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
+  with_items:
+    - "{{ combined_otvl.config_paths.sbin }}"
+    - "{{ combined_otvl.config_paths.data }}"
+    - "{{ combined_otvl.config_paths.backup }}"
+    - "{{ combined_otvl.config_paths.delivery }}"
+    - "{{ combined_otvl.config_paths.pkg }}"
 
 - name: Install common install and util scripts in sbin
   copy:

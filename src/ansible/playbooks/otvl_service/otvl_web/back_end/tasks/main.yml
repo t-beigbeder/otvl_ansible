@@ -10,6 +10,11 @@
   args:
     creates: /usr/bin/virtualenv
 
+- name: Install git for otvl_web_service
+  command: "{{ combined_otvl.config_paths.sbin }}/otvl_apt_subs.sh git"
+  args:
+    creates: /usr/bin/git
+
 - name: Loop over sites installation (otvl_service/back_end)
   include: install_site_back_end.yml
   with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"

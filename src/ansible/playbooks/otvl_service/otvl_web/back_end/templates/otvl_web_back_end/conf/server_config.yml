@@ -1,0 +1,8 @@
+version:
+  server: "1.0"
+  application: "1.0"
+
+site_config_file: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/config/site_config.yml"
+pages_directory: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/pages"
+assets_directory: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets"
+
