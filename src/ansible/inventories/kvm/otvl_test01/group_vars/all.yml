@@ -70,6 +70,7 @@ otvl:
               auto_pki_path: override/apache/auto_pki
       otbe:
         private_ports_farm:
+          apache_modules: []
           template: apache/conf/private_ports_farm.conf
           site_items:
           - name: site1

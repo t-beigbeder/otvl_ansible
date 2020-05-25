@@ -46,10 +46,10 @@
     group: "{{ combined_otvl.apache.group }}"
     mode: 0755
   with_items:
-    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets"
-    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets/images"
-    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets/documents"
-    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets/videos"
+    - "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/assets"
+    - "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/assets/images"
+    - "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/assets/documents"
+    - "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/assets/videos"
 
 - name: Install the site item server_config configuration file for {{ current_site_item.name }}
   template:
@@ -73,7 +73,7 @@
 - name: Deploy the directory containing the site {{ current_site_item.name }} assets if configured
   copy:
     src: "{{ current_site_item.assets_path }}"
-    dest: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}"
+    dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
     owner: "{{ combined_otvl.apache.user }}"
     group: "{{ combined_otvl.apache.group }}"
     mode: u+rwX,go+rX
