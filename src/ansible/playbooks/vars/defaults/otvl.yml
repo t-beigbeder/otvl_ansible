@@ -24,6 +24,11 @@ default_otvl:
     test_htpasswd_users: {}
     sites: {}
 
+  otvl_web:
+    static_site_archive_file: "/path/to/otvl_web_vuejs-1.0.x.tgz"
+    virtualenv_archive_file: "/path/to/otvl_web_server_venv-1.0.y.tgz"
+    sites: {}
+
   git_service:
     project_root: git
     project_artifacts_root: artifacts

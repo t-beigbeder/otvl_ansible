@@ -16,16 +16,20 @@
     creates: /usr/bin/git
 
 - name: Loop over sites installation (otvl_service/back_end)
-  include: install_site_back_end.yml
+  include: install_site_apache_back_end.yml
   with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
   loop_control:
     loop_var: current_site
 
-- name: Create otvl_web_vuejs package directory
+- name: Create otvl_web_vuejs, otvl_web_server_venv and otvl_web_server_git package directory
   file:
-    path: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs"
+    path: "{{ item }}"
     state: directory
     mode: 0755
+  with_items:
+  - "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs"
+  - "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv"
+  - "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_git"
 
 - name: Unarchive static_site_archive_file {{ combined_otvl.otvl_web.static_site_archive_file }} if configured
   unarchive:
@@ -43,12 +47,6 @@
     owner: root
     group: root
     mode: 0644
-
-- name: Create otvl_web_server_venv package directory
-  file:
-    path: "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv"
-    state: directory
-    mode: 0755
 
 - name: Unarchive virtualenv_archive_file {{ combined_otvl.otvl_web.virtualenv_archive_file }} if configured
   unarchive:
@@ -71,9 +69,9 @@
     loop_var: current_site
 
 - name: Loop over sites installation for server (otvl_service/back_end)
-  include: install_site_server_back_end.yml
-  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
+  include: install_site_server_back_end_item.yml
+  loop: "{{ combined_otvl.otvl_web.sites[otvl_logical_name].site_items }}"
   loop_control:
-    loop_var: current_site
+    loop_var: current_site_item
 
 ###

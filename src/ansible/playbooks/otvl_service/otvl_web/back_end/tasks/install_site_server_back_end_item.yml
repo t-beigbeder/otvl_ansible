@@ -6,7 +6,25 @@
     msg: "site item is {{ current_site_item }}"
   when: combined_otvl.debug
 
-# /srv/data/otvl_web/siteX/[config|pages|assets] server_config.yml/site_config.yml
+- name: Checkout the git project containing the site {{ current_site_item.name }} content if configured
+  git:
+    repo: "{{ current_site_item.git.repo }}"
+    dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_git/{{ current_site_item.name }}"
+    version: "{{ current_site_item.git.version }}"
+    update: true
+    recursive: no
+    force: yes
+  when: "'git' in current_site_item"
+  register: otvl_web_server_git_checkout
+
+- name: Clean-up the git project copy containing the site {{ current_site_item.name }} content if configured
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/config"
+    - "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/pages"
+  when: "'git' in current_site_item and otvl_web_server_git_checkout.changed"
 
 - name: Create server config and data directories for {{ current_site_item.name }}
   file:
@@ -36,9 +54,38 @@
 - name: Install the site item server_config configuration file for {{ current_site_item.name }}
   template:
     src: "otvl_web_back_end/conf/server_config.yml"
-    dest: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/config/server_config.yml"
+    dest: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}_server_config.yml"
     owner: root
     group: root
     mode: 0644
+
+- name: Deploy the git project containing the site {{ current_site_item.name }} content if configured
+  copy:
+    src: "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_git/{{ current_site_item.name }}/{{ current_site_item.git.content_path }}/{{ item }}"
+    remote_src: yes
+    dest: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}"
+    owner: root
+    group: root
+    mode: u+rwX,go+rX
+  with_items: ['config', 'pages']
+  when: "'git' in current_site_item"
+
+- name: Deploy the directory containing the site {{ current_site_item.name }} assets if configured
+  copy:
+    src: "{{ current_site_item.assets_path }}"
+    dest: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}"
+    owner: "{{ combined_otvl.apache.user }}"
+    group: "{{ combined_otvl.apache.group }}"
+    mode: u+rwX,go+rX
+  when: "'assets_path' in current_site_item"
+
+- name: Create otvl_web.server python tornado service file for the site {{ current_site_item.name }}
+  template:
+    src: otvl_web_back_end/systemd/tornado.service
+    dest: /etc/systemd/system/tornado_{{ current_site_item.name }}.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: Enable the otvl_web.server python tornado services
 
 ###

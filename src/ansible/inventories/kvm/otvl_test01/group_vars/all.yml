@@ -86,5 +86,20 @@ otvl:
   otvl_web:
     static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev002.tgz"
     virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev002.tgz"
+    sites:
+      otbe:
+        site_items:
+        - name: site1
+          git:
+            repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
+            version: "pri_dev_00001"
+            content_path: "server/data/test_site1"
+          assets_path: "/home/guest/git/otvl_web/server/data/test_site1/assets"
+        - name: site2
+          git:
+            repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
+            version: "pri_dev_00001"
+            content_path: "server/data/test_site2"
+          assets_path: "/home/guest/git/otvl_web/server/data/test_site2/assets"
 
 ###

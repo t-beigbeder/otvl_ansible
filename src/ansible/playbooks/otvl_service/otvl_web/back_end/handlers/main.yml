@@ -1,0 +1,21 @@
+---
+# handlers file for otvl_service/otvl_web/back_end
+
+- name: Enable the otvl_web.server python tornado services
+  systemd:
+    name: /etc/systemd/system/tornado_{{ current_site_item.name }}.service
+    enabled: yes
+  loop: "{{ combined_otvl.otvl_web.sites[otvl_logical_name].site_items }}"
+  loop_control:
+    loop_var: current_site_item
+  notify: Restart the otvl_web.server python tornado services
+
+- name: Restart the otvl_web.server python tornado services
+  systemd:
+    name: tornado_{{ current_site_item.name }}.service
+    state: restarted
+  loop: "{{ combined_otvl.otvl_web.sites[otvl_logical_name].site_items }}"
+  loop_control:
+    loop_var: current_site_item
+
+###
