@@ -6,6 +6,13 @@
     msg: "site is {{ current_site.key }}: {{ current_site.value }}"
   when: combined_otvl.debug
 
+- name: Enable apache packages required by {{ current_site.key }}
+  command: "a2enmod {{ item }}"
+  args:
+    creates: "/etc/apache2/mods-enabled/{{ item }}.load"
+  loop: "{{ current_site.value.apache_modules }}"
+  notify: Restart the apache service
+
 - name: Install the site configuration file {{ current_site.value.template }}
   template:
     src: "{{ current_site.value.template }}"

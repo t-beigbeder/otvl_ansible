@@ -49,6 +49,7 @@ otvl:
     sites:
       otfe:
         ssl_sni:
+          apache_modules: ['ssl', 'proxy', 'proxy_http']
           template: apache/conf/ssl_sni.conf
           site_items:
           - name: site1
@@ -90,12 +91,14 @@ otvl:
       otbe:
         site_items:
         - name: site1
+          api_port: "9991"
           git:
             repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
             version: "pri_dev_00001"
             content_path: "server/data/test_site1"
           assets_path: "/home/guest/git/otvl_web/server/data/test_site1/assets"
         - name: site2
+          api_port: "9992"
           git:
             repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
             version: "pri_dev_00001"
