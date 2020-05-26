@@ -48,6 +48,10 @@ otvl:
     www: /srv/www
     sites:
       otfe:
+        cert_bot_vh:
+          apache_modules: []
+          template: apache/conf/cert_bot_vh.conf
+          site_items: []
         ssl_sni:
           apache_modules: ['ssl', 'proxy', 'proxy_http']
           template: apache/conf/ssl_sni.conf

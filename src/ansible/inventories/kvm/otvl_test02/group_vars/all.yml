@@ -56,6 +56,10 @@ otvl:
     www: /srv/www
     sites:
       otfe:
+        cert_bot_vh:
+          apache_modules: []
+          template: apache/conf/cert_bot_vh.conf
+          site_items: []
         ssl_sni:
           apache_modules: ['ssl', 'proxy', 'proxy_http']
           template: apache/conf/ssl_sni.conf
@@ -67,7 +71,7 @@ otvl:
               backend_server: dxprod.otvl.org
               web_port: "9981"
               api_port: "9991"
-              auto_pki_path: override/apache/auto_pki
+              cert_bot: true
           - name: site2
             template: apache/conf/otvl_web_front_end.inc
             vars:
@@ -75,7 +79,7 @@ otvl:
               backend_server: dxprod.otvl.org
               web_port: "9982"
               api_port: "9992"
-              auto_pki_path: override/apache/auto_pki
+              cert_bot: true
       otbe:
         private_ports_farm:
           apache_modules: []

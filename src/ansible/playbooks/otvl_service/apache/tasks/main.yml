@@ -74,4 +74,25 @@
   loop_control:
     loop_var: current_site
 
+- name: Create cert_bot_vh static site directory
+  file:
+    path: "{{ combined_otvl.apache.www }}/cert_bot_vh"
+    state: directory
+    mode: 0755
+
+- name: Add debian backports in /etc/apt/sources.list.d/debian-buster-backports.list
+  copy:
+    dest: /etc/apt/sources.list.d/debian-buster-backports.list
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      deb http://deb.debian.org/debian buster-backports main
+      deb-src http://deb.debian.org/debian buster-backports main
+
+- name: Install python-certbot-apache
+  command: "{{ combined_otvl.config_paths.sbin }}/otvl_apt_subs.sh python-certbot-apache -t buster-backports"
+  args:
+    creates: /usr/bin/certbot
+
 ###
