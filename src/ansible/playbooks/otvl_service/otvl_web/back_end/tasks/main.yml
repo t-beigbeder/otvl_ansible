@@ -61,6 +61,7 @@
     owner: root
     group: root
     mode: 0644
+  notify: Restart the otvl_web.server python tornado services
 
 - name: Loop over sites installation for vuejs (otvl_service/back_end)
   include: install_site_vuejs_back_end.yml

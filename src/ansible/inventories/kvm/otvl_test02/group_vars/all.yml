@@ -99,11 +99,12 @@ otvl:
               api_port: "9992"
   otvl_web:
     static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev004.tgz"
-    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev003.tgz"
+    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev005.tgz"
     sites:
       otbe:
         site_items:
         - name: site1
+          server_name: test1.otvl.org
           api_port: "9991"
           git:
             repo: "ssh://admin@dxproxy/home/admin/dev/git/otvl_web.git"
@@ -111,6 +112,7 @@ otvl:
             content_path: "server/data/test_site1"
           assets_path: "/home/guest/git/otvl_web/server/data/test_site1/assets"
         - name: site2
+          server_name: test2.otvl.org
           api_port: "9992"
           git:
             repo: "ssh://admin@dxproxy/home/admin/dev/git/otvl_web.git"

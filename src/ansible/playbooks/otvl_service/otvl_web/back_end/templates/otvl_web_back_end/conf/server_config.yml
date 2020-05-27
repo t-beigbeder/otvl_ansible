@@ -6,3 +6,4 @@ site_config_file: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.na
 pages_directory: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/pages"
 assets_directory: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets"
 
+sitemap_root: "https://{{ current_site_item.server_name }}"
