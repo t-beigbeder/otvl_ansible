@@ -5,7 +5,11 @@ Description=Runs otvl_web/back_end API server for {{ current_site_item.name }}
 Type=simple
 Restart=always
 RestartSec=120
-ExecStart={{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv/bin/python -m otvl_web.server -c {{ current_site_item.name }}_server_config.yml -p {{ current_site_item.api_port }}
+ExecStart={{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv/bin/python \
+          -m otvl_web.server \
+          -c {{ current_site_item.name }}_server_config.yml \
+          -p {{ current_site_item.api_port }} \
+          -a {{ inventory_hostname }}{{ combined_infra.networks.appli.host_suffix }}
 WorkingDirectory={{ combined_otvl.config_paths.data }}
 User={{ combined_otvl.apache.user }}
 Group={{ combined_otvl.apache.group }}
