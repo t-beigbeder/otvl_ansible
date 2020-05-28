@@ -1,38 +1,46 @@
 ---
 
-ansible_user: guest
+ansible_user: admin
 ansible_python_interpreter: /usr/bin/python3
-ansible_ssh_private_key_file: ~/.ssh/id_rsa
+ansible_ssh_private_key_file: ~/.ssh/id_rsa_4k
 ansible_ssh_extra_args: -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
 
 infra:
   servers:
     bastion:
-      name: kslba
+      name: dxbastion.otvl.org
       ips:
-        admin: 172.23.0.2
-        appli: 172.24.0.2
+        admin: 10.0.0.6
+        appli: 10.0.1.6
     otfe:
-      name: dxotfe
+      name: dxproxy4.otvl.org
       ips:
-        admin: 172.23.0.30
-        appli: 172.24.0.30
+        admin: 10.0.0.2
+        appli: 10.0.1.2
     otbe:
-      name: dxotbe
+      name: dxprod.otvl.org
       ips:
-        admin: 172.23.0.40
-        appli: 172.24.0.40
+        admin: 10.0.0.3
+        appli: 10.0.1.3
   networks:
     external:
       name: Ext-Net
     admin:
       name: admin-net
+      cidr: 10.0.0.0/29
+      prefix: 10.0.0.
     appli:
       name: appli-net
+      cidr: 10.0.1.0/29
+      prefix: 10.0.1.
   dns:
     resolv_conf_content: |
       # created by otvl_network_configurator
-      nameserver 192.168.122.1
+      nameserver 155.133.128.66
+      nameserver 155.133.128.67
+      nameserver 2001:4b99:1:255::53:1
+      nameserver 2001:4b99:1:255::53:2
+      options timeout:1 attempts:3 rotate
 
 otvl:
   debug: false
@@ -59,27 +67,19 @@ otvl:
           - name: site1
             template: apache/conf/otvl_web_front_end.inc
             vars:
-              server_name: site1.dxotfe
-              backend_server: dxotbe
+              server_name: test1.otvl.org
+              backend_server: dxprod.otvl.org
               web_port: "9981"
               api_port: "9991"
-              auto_pki_path: override/apache/auto_pki
+              cert_bot: true
           - name: site2
             template: apache/conf/otvl_web_front_end.inc
             vars:
-              server_name: site2.dxotfe
-              backend_server: dxotbe
+              server_name: test2.otvl.org
+              backend_server: dxprod.otvl.org
               web_port: "9982"
               api_port: "9992"
-              auto_pki_path: override/apache/auto_pki
-          - name: site3
-            template: apache/conf/otvl_web_front_end.inc
-            vars:
-              server_name: site3.dxotfe
-              backend_server: dxotbe
-              web_port: "9983"
-              api_port: "9993"
-              auto_pki_path: override/apache/auto_pki
+              cert_bot: true
       otbe:
         private_ports_farm:
           apache_modules: []
@@ -88,21 +88,15 @@ otvl:
           - name: site1
             template: apache/conf/otvl_web_back_end.inc
             vars:
-              server_name: site1.dxotfe
+              server_name: test1.otvl.org
               web_port: "9981"
               api_port: "9991"
           - name: site2
             template: apache/conf/otvl_web_back_end.inc
             vars:
-              server_name: site2.dxotfe
+              server_name: test2.otvl.org
               web_port: "9982"
               api_port: "9992"
-          - name: site3
-            template: apache/conf/otvl_web_back_end.inc
-            vars:
-              server_name: site3.dxotfe
-              web_port: "9983"
-              api_port: "9993"
   otvl_web:
     static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev004.tgz"
     virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev005.tgz"
@@ -110,28 +104,20 @@ otvl:
       otbe:
         site_items:
         - name: site1
-          server_name: site1.dxotfe
+          server_name: test1.otvl.org
           api_port: "9991"
           git:
-            repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
+            repo: "ssh://admin@dxproxy/home/admin/dev/git/otvl_web.git"
             version: "pri_dev_00001"
             content_path: "server/data/test_site1"
           assets_path: "/home/guest/git/otvl_web/server/data/test_site1/assets"
         - name: site2
-          server_name: site2.dxotfe
+          server_name: test2.otvl.org
           api_port: "9992"
           git:
-            repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
+            repo: "ssh://admin@dxproxy/home/admin/dev/git/otvl_web.git"
             version: "pri_dev_00001"
             content_path: "server/data/test_site2"
           assets_path: "/home/guest/git/otvl_web/server/data/test_site2/assets"
-        - name: site3
-          server_name: site3.dxotfe
-          api_port: "9993"
-          git:
-            repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
-            version: "pri_dev_00001"
-            content_path: "server/data/test_site3"
-          assets_path: "/home/guest/git/otvl_web/server/data/test_site3/assets"
 
 ###
