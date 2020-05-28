@@ -80,6 +80,14 @@ otvl:
               web_port: "9982"
               api_port: "9992"
               cert_bot: true
+          - name: site3
+            template: apache/conf/otvl_web_front_end.inc
+            vars:
+              server_name: test3.otvl.org
+              backend_server: dxprod.otvl.org
+              web_port: "9983"
+              api_port: "9993"
+              cert_bot: true
       otbe:
         private_ports_farm:
           apache_modules: []
@@ -97,9 +105,15 @@ otvl:
               server_name: test2.otvl.org
               web_port: "9982"
               api_port: "9992"
+          - name: site3
+            template: apache/conf/otvl_web_back_end.inc
+            vars:
+              server_name: test3.otvl.org
+              web_port: "9983"
+              api_port: "9993"
   otvl_web:
-    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev004.tgz"
-    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev005.tgz"
+    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev007.tgz"
+    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev006.tgz"
     sites:
       otbe:
         site_items:
@@ -119,5 +133,13 @@ otvl:
             version: "pri_dev_00001"
             content_path: "server/data/test_site2"
           assets_path: "/home/guest/git/otvl_web/server/data/test_site2/assets"
+        - name: site3
+          server_name: test3.otvl.org
+          api_port: "9993"
+          git:
+            repo: "ssh://admin@dxproxy/home/admin/dev/git/otvl_web.git"
+            version: "pri_dev_00001"
+            content_path: "server/data/test_site3"
+          assets_path: "/home/guest/git/otvl_web/server/data/test_site3/assets"
 
 ###
