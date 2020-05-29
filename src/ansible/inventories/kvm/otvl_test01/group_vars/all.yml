@@ -91,21 +91,24 @@ otvl:
               server_name: site1.dxotfe
               web_port: "9981"
               api_port: "9991"
+              sitemap: true
           - name: site2
             template: apache/conf/otvl_web_back_end.inc
             vars:
               server_name: site2.dxotfe
               web_port: "9982"
               api_port: "9992"
+              sitemap: false
           - name: site3
             template: apache/conf/otvl_web_back_end.inc
             vars:
               server_name: site3.dxotfe
               web_port: "9983"
               api_port: "9993"
+              sitemap: true
   otvl_web:
-    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev007.tgz"
-    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev006.tgz"
+    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev008.tgz"
+    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev007.tgz"
     sites:
       otbe:
         site_items:
