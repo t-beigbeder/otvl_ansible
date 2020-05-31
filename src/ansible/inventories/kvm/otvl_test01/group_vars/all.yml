@@ -72,7 +72,7 @@ otvl:
               web_port: "9982"
               api_port: "9992"
               auto_pki_path: override/apache/auto_pki
-          - name: site3
+          - name: acceptance_otvl_org
             template: apache/conf/otvl_web_front_end.inc
             vars:
               server_name: site3.dxotfe
@@ -99,7 +99,7 @@ otvl:
               web_port: "9982"
               api_port: "9992"
               sitemap: false
-          - name: site3
+          - name: acceptance_otvl_org
             template: apache/conf/otvl_web_back_end.inc
             vars:
               server_name: site3.dxotfe
@@ -107,8 +107,8 @@ otvl:
               api_port: "9993"
               sitemap: true
   otvl_web:
-    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev008.tgz"
-    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev007.tgz"
+    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev009.tgz"
+    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev008.tgz"
     sites:
       otbe:
         site_items:
@@ -128,13 +128,14 @@ otvl:
             version: "pri_dev_00001"
             content_path: "server/data/test_site2"
           assets_path: "/home/guest/git/otvl_web/server/data/test_site2/assets"
-        - name: site3
+        - name: acceptance_otvl_org
           server_name: site3.dxotfe
           api_port: "9993"
+          site_config_name: "otvl_org"
           git:
             repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
             version: "pri_dev_00001"
-            content_path: "server/data/test_site3"
-          assets_path: "/home/guest/git/otvl_web/server/data/test_site3/assets"
+            content_path: "server/data/test_acceptance_otvl_org"
+          assets_path: "/home/guest/git/otvl_web/server/data/test_acceptance_otvl_org/assets"
 
 ###

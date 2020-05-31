@@ -2,7 +2,11 @@ version:
   server: "1.0"
   application: "1.0"
 
+{% if 'site_config_name' in current_site_item %}
+site_config_file: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/config/{{ current_site_item.site_config_name }}.yml"
+{% else %}
 site_config_file: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/config/{{ current_site_item.name }}.yml"
+{% endif %}
 pages_directory: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/pages"
 assets_directory: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets"
 
