@@ -71,7 +71,7 @@ otvl:
               backend_server: dxotbe
               web_port: "9982"
               api_port: "9992"
-              auto_pki_path: override/apache/auto_pki
+              auto_pki_ansible: true
           - name: acceptance_otvl_org
             template: apache/conf/otvl_web_front_end.inc
             vars:

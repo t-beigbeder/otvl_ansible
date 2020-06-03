@@ -24,4 +24,40 @@
     mode: 0600
   when: "'auto_pki_path' in current_site_item.vars"
 
+- name: "Generate the private key file to sign the CSR"
+  openssl_privatekey:
+    path: "/etc/ssl/private/{{ current_site_item.vars.server_name }}.pem"
+    passphrase: "private_key_password"
+    cipher: aes256
+  when: "'auto_pki_ansible' in current_site_item.vars and current_site_item.vars.auto_pki_ansible"
+
+- name: "Generate the CSR file signed with the private key"
+  openssl_csr:
+    path: "/etc/ssl/certs/{{ current_site_item.vars.server_name }}.csr"
+    privatekey_path: "/etc/ssl/private/{{ current_site_item.vars.server_name }}.pem"
+    privatekey_passphrase: "private_key_password"
+    common_name: "{{ current_site_item.vars.server_name }}"
+  when: "'auto_pki_ansible' in current_site_item.vars and current_site_item.vars.auto_pki_ansible"
+
+- name: "Sign the CSR file as a CA to turn it into a certificate"
+  openssl_certificate:
+    path: "/etc/ssl/certs/{{ current_site_item.vars.server_name }}.crt"
+    privatekey_path: "/etc/ssl/private/{{ current_site_item.vars.server_name }}.pem"
+    privatekey_passphrase: "private_key_password"
+    csr_path: "/etc/ssl/certs/{{ current_site_item.vars.server_name }}.csr"
+    provider: selfsigned
+  when: "'auto_pki_ansible' in current_site_item.vars and current_site_item.vars.auto_pki_ansible"
+
+- name: "Convert the signed certificate into a PKCS12 file with the attached private key"
+  openssl_pkcs12:
+    action: export
+    path: "/etc/ssl/private/{{ current_site_item.vars.server_name }}.pfx"
+    name: "{{ current_site_item.vars.server_name }}"
+    privatekey_path: "/etc/ssl/private/{{ current_site_item.vars.server_name }}.pem"
+    privatekey_passphrase: "private_key_password"
+    passphrase: password
+    certificate_path: "/etc/ssl/certs/{{ current_site_item.vars.server_name }}.crt"
+    state: present
+  when: "'auto_pki_ansible' in current_site_item.vars and current_site_item.vars.auto_pki_ansible"
+
 ###
