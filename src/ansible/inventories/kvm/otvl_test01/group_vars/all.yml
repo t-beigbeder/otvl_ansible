@@ -107,8 +107,8 @@ otvl:
               api_port: "9993"
               sitemap: true
   otvl_web:
-    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev010.tgz"
-    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev009.tgz"
+    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev011.tgz"
+    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev012.tgz"
     sites:
       otbe:
         site_items:

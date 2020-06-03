@@ -37,6 +37,11 @@
     owner: root
     group: root
     mode: u+rwX,go+rX
+  register: otvl_web_vuejs_copied
+
+- name: Restore vuejs static site {{ current_site_item.name }} original index.html file
+  command: "mv {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html.ori {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
+  when: otvl_web_vuejs_copied.changed
 
 - name: Configure vuejs static site {{ current_site_item.name }} for web on https://{{ current_site_item.vars.server_name }}
   replace:
