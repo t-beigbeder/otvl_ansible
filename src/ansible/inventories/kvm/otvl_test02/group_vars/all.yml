@@ -87,6 +87,7 @@ otvl:
               backend_server: dxprod.otvl.org
               web_port: "9983"
               api_port: "9993"
+              auto_pki_ansible: true
               cert_bot: true
       otbe:
         private_ports_farm:
@@ -115,8 +116,8 @@ otvl:
               api_port: "9993"
               sitemap: false
   otvl_web:
-    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev008.tgz"
-    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev007.tgz"
+    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev011.tgz"
+    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev012.tgz"
     sites:
       otbe:
         site_items:
@@ -139,10 +140,11 @@ otvl:
         - name: site3
           server_name: test3.otvl.org
           api_port: "9993"
+          site_config_name: "otvl_org"
           git:
             repo: "ssh://admin@dxproxy/home/admin/dev/git/otvl_web.git"
             version: "pri_dev_00001"
-            content_path: "server/data/test_site3"
-          assets_path: "/home/guest/git/otvl_web/server/data/test_site3/assets"
+            content_path: "server/data/test_acceptance_otvl_org"
+          assets_path: "/home/guest/git/otvl_web/server/data/test_acceptance_otvl_org/assets"
 
 ###
