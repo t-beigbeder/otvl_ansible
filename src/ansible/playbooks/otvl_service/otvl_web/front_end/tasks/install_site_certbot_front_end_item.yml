@@ -7,10 +7,10 @@
   when: combined_otvl.debug
 
 - name: Run certbot for apache for site {{ current_site_item.name }}
-  command: "certbot run -n --apache --register-unsafely-without-email --agree-tos -d {{ current_site_item.vars.server_name }}"
+  command: "certbot run -n --apache {{ current_site_item.vars.certbot_options }} --register-unsafely-without-email --agree-tos -d {{ current_site_item.vars.server_name }}"
   args:
     creates: "/etc/letsencrypt/archive/{{ current_site_item.vars.server_name }}"
-  when: "'cert_bot' in current_site_item.vars and current_site_item.vars.cert_bot"
+  when: "'certbot' in current_site_item.vars and current_site_item.vars.certbot"
 
 - name: Run again apache installation (otvl_service/front_end) for site {{ current_site_item.name }}
   include_tasks: install_site_apache_front_end_item.yml

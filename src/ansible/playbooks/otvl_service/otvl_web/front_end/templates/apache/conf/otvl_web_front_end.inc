@@ -16,7 +16,7 @@
   SSLCertificateFile    /etc/ssl/certs/{{ current_site_item.vars.server_name }}.crt
   SSLCertificateKeyFile /etc/ssl/private/{{ current_site_item.vars.server_name }}.key
 {% endif %}
-{% if (('cert_bot' in current_site_item.vars and current_site_item.vars.cert_bot) and letsencrypt_archive_dir.stat.exists) %}
+{% if (('certbot' in current_site_item.vars and current_site_item.vars.certbot) and letsencrypt_archive_dir.stat.exists) %}
   SSLCertificateFile /etc/letsencrypt/live/{{ current_site_item.vars.server_name }}/fullchain.pem
   SSLCertificateKeyFile /etc/letsencrypt/live/{{ current_site_item.vars.server_name }}/privkey.pem
   Include /etc/letsencrypt/options-ssl-apache.conf

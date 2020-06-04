@@ -72,7 +72,8 @@ otvl:
               web_port: "9981"
               api_port: "9991"
               auto_pki_ansible: true
-              cert_bot: true
+              certbot: true
+              certbot_options: "--staging"
           - name: site2
             template: apache/conf/otvl_web_front_end.inc
             vars:
@@ -81,7 +82,8 @@ otvl:
               web_port: "9982"
               api_port: "9992"
               auto_pki_ansible: true
-              cert_bot: true
+              certbot: true
+              certbot_options: ""
           - name: site3
             template: apache/conf/otvl_web_front_end.inc
             vars:
@@ -90,7 +92,8 @@ otvl:
               web_port: "9983"
               api_port: "9993"
               auto_pki_ansible: true
-              cert_bot: true
+              certbot: true
+              certbot_options: ""
       otbe:
         private_ports_farm:
           apache_modules: []
