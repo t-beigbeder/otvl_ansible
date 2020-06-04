@@ -12,14 +12,13 @@
   ProxyPassReverse /sitemap.xml http://{{ current_site_item.vars.backend_server }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.vars.api_port }}/api/sitemap.xml
   ProxyPass / http://{{ current_site_item.vars.backend_server }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.vars.web_port }}/
   ProxyPassReverse / http://{{ current_site_item.vars.backend_server }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.vars.web_port }}/
-{% if 'cert_bot' in current_site_item.vars and current_site_item.vars.cert_bot %}
-  SSLCertificateFile /etc/letsencrypt/live/{{ current_site_item.vars.server_name }}/fullchain.pem
-  SSLCertificateKeyFile /etc/letsencrypt/live/{{ current_site_item.vars.server_name }}/privkey.pem
-Include /etc/letsencrypt/options-ssl-apache.conf
-{% else %}
-{% if ('auto_pki_path' in current_site_item.vars) or ('auto_pki_ansible' in current_site_item.vars and current_site_item.vars.auto_pki_ansible) %}
+{% if ((('auto_pki_path' in current_site_item.vars) or ('auto_pki_ansible' in current_site_item.vars and current_site_item.vars.auto_pki_ansible)) and (not letsencrypt_archive_dir.stat.exists)) %}
   SSLCertificateFile    /etc/ssl/certs/{{ current_site_item.vars.server_name }}.crt
   SSLCertificateKeyFile /etc/ssl/private/{{ current_site_item.vars.server_name }}.key
 {% endif %}
+{% if (('cert_bot' in current_site_item.vars and current_site_item.vars.cert_bot) and letsencrypt_archive_dir.stat.exists) %}
+  SSLCertificateFile /etc/letsencrypt/live/{{ current_site_item.vars.server_name }}/fullchain.pem
+  SSLCertificateKeyFile /etc/letsencrypt/live/{{ current_site_item.vars.server_name }}/privkey.pem
+  Include /etc/letsencrypt/options-ssl-apache.conf
 {% endif %}
 </VirtualHost>
