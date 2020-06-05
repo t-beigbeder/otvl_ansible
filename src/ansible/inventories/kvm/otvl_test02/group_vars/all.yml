@@ -61,7 +61,7 @@ otvl:
           template: apache/conf/cert_bot_vh.conf
           site_items: []
         ssl_sni:
-          apache_modules: ['ssl', 'proxy', 'proxy_http']
+          apache_modules: ['ssl', 'rewrite', 'proxy', 'proxy_http']
           template: apache/conf/ssl_sni.conf
           site_items:
           - name: site1
@@ -121,8 +121,8 @@ otvl:
               api_port: "9993"
               sitemap: false
   otvl_web:
-    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev011.tgz"
-    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev013.tgz"
+    virtualenv_archive_file: "/srv/export_dir/guest/otvl_web_server_venv-1.0.dev013.tgz"
+    static_site_archive_file: "/srv/export_dir/guest/otvl_web_vuejs-1.0.dev014.tgz"
     sites:
       otbe:
         site_items:
