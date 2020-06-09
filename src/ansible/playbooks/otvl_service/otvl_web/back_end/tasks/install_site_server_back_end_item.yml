@@ -79,6 +79,16 @@
     mode: u+rwX,go+rX
   when: "'assets_path' in current_site_item"
 
+- name: Deploy the remote directory containing the site {{ current_site_item.name }} assets if configured
+  copy:
+    src: "{{ current_site_item.remote_assets_path }}"
+    remote_src: yes
+    dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
+    owner: "{{ combined_otvl.apache.user }}"
+    group: "{{ combined_otvl.apache.group }}"
+    mode: u+rwX,go+rX
+  when: "'remote_assets_path' in current_site_item"
+
 - name: Create otvl_web.server python tornado service file for the site {{ current_site_item.name }}
   template:
     src: otvl_web_back_end/systemd/tornado.service
