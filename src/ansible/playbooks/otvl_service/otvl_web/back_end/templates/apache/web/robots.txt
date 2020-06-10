@@ -1,0 +1,8 @@
+{% if 'sitemap' in current_site_item.vars and current_site_item.vars.sitemap %}
+Sitemap: https://{{ current_site_item.vars.server_name }}/sitemap.xml
+User-agent: *
+Disallow:
+{% else %}
+User-agent: *
+Disallow: /
+{% endif %}

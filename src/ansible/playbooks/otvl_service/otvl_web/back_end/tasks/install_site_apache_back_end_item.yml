@@ -1,0 +1,18 @@
+---
+# install_site_apache_back_end tasks file for otvl_service/otvl_web/back_end
+
+- name: display the site item information
+  debug:
+    msg: "site item is {{ current_site_item }}"
+  when: combined_otvl.debug
+
+- name: Install the site item apache configuration file {{ current_site_item.template }}
+  template:
+    src: "{{ current_site_item.template }}"
+    dest: "/etc/apache2/otvl_conf/{{ current_site_item.name }}.inc"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart the apache service
+
+###

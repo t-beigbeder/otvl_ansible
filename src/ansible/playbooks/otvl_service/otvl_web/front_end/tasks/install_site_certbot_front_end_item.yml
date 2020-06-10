@@ -1,0 +1,22 @@
+---
+# install_site_certbot_front_end_item tasks file for otvl_service/otvl_web/front_end
+
+- name: display the site item information
+  debug:
+    msg: "site item is {{ current_site_item }}"
+  when: combined_otvl.debug
+
+- name: Run certbot for apache for site {{ current_site_item.name }}
+  command: >
+    certbot run -n --apache
+    {{ current_site_item.vars.certbot_options | default('') }}
+    --register-unsafely-without-email --agree-tos
+    -d {{ current_site_item.vars.server_name }}
+  args:
+    creates: "/etc/letsencrypt/archive/{{ current_site_item.vars.server_name }}"
+  when: "'certbot' in current_site_item.vars and current_site_item.vars.certbot"
+
+- name: Run again apache installation (otvl_service/front_end) for site {{ current_site_item.name }}
+  include_tasks: install_site_apache_front_end_item.yml
+
+###

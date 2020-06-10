@@ -13,37 +13,29 @@
   set_fact:
     combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
 
-- name: Create otvl sbin dir
-  file:
-    path: "{{ combined_otvl.config_paths.sbin }}"
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
+- name: set logical name for server {{ inventory_hostname }} (base)
+  set_fact:
+    otvl_logical_name: "{{ item.key }}"
+  when: 'item.value.name == inventory_hostname'
+  loop: "{{ combined_infra.servers | dict2items }}"
 
-- name: Create otvl backup dir
-  file:
-    path: "{{ combined_otvl.config_paths.backup }}"
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
+- name: set configuration data for server {{ inventory_hostname }} => {{ otvl_logical_name }} (base)
+  set_fact:
+    server_infra: "{{ combined_infra.servers[otvl_logical_name] }}"
 
-- name: Create otvl delivery dir
+- name: Create otvl root directories
   file:
-    path: "{{ combined_otvl.config_paths.delivery }}"
+    path: "{{ item }}"
     state: directory
     owner: root
     group: root
     mode: 0755
-
-- name: Create otvl package installation dir
-  file:
-    path: "{{ combined_otvl.config_paths.pkg }}"
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
+  with_items:
+    - "{{ combined_otvl.config_paths.sbin }}"
+    - "{{ combined_otvl.config_paths.data }}"
+    - "{{ combined_otvl.config_paths.backup }}"
+    - "{{ combined_otvl.config_paths.delivery }}"
+    - "{{ combined_otvl.config_paths.pkg }}"
 
 - name: Install common install and util scripts in sbin
   copy:
@@ -53,6 +45,7 @@
     group: root
     mode: 0755
   with_items:
+    - otvl_apt_subs.sh
     - otvl_sbin_lib.sh
 
 ###

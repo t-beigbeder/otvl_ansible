@@ -1,0 +1,47 @@
+---
+# install_site_item tasks file for otvl_service/apache
+
+- name: display the site item information (otvl_service/apache)
+  debug:
+    msg: "site item is {{ current_site_item }}"
+  when: combined_otvl.debug
+
+- name: Install autosigned certificate if configured for {{ current_site_item.vars.server_name }}
+  copy:
+    src: "{{ current_site_item.vars.auto_pki_path }}/{{ current_site_item.vars.server_name }}.crt"
+    dest: "/etc/ssl/certs/{{ current_site_item.vars.server_name }}.crt"
+    owner: root
+    group: root
+    mode: 0644
+  when: "'auto_pki_path' in current_site_item.vars"
+
+- name: Install autosigned key if configured for {{ current_site_item.vars.server_name }}
+  copy:
+    src: "{{ current_site_item.vars.auto_pki_path }}/{{ current_site_item.vars.server_name }}.key"
+    dest: "/etc/ssl/private/{{ current_site_item.vars.server_name }}.key"
+    owner: root
+    group: root
+    mode: 0600
+  when: "'auto_pki_path' in current_site_item.vars"
+
+- name: "Generate the private key file to sign the CSR for {{ current_site_item.vars.server_name }}"
+  openssl_privatekey:
+    path: "/etc/ssl/private/{{ current_site_item.vars.server_name }}.key"
+  when: "'auto_pki_ansible' in current_site_item.vars and current_site_item.vars.auto_pki_ansible"
+
+- name: "Generate the CSR file signed with the private key for {{ current_site_item.vars.server_name }}"
+  openssl_csr:
+    path: "/etc/ssl/certs/{{ current_site_item.vars.server_name }}.csr"
+    privatekey_path: "/etc/ssl/private/{{ current_site_item.vars.server_name }}.key"
+    common_name: "{{ current_site_item.vars.server_name }}"
+  when: "'auto_pki_ansible' in current_site_item.vars and current_site_item.vars.auto_pki_ansible"
+
+- name: "Sign the CSR file as a CA to turn it into a certificate for {{ current_site_item.vars.server_name }}"
+  openssl_certificate:
+    path: "/etc/ssl/certs/{{ current_site_item.vars.server_name }}.crt"
+    privatekey_path: "/etc/ssl/private/{{ current_site_item.vars.server_name }}.key"
+    csr_path: "/etc/ssl/certs/{{ current_site_item.vars.server_name }}.csr"
+    provider: selfsigned
+  when: "'auto_pki_ansible' in current_site_item.vars and current_site_item.vars.auto_pki_ansible"
+
+###

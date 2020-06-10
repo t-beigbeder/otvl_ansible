@@ -1,0 +1,25 @@
+- hosts: "*"
+  gather_facts: False
+  tasks:
+  - name: Load default variables
+    include_vars:
+      dir: vars/defaults
+  tags: always
+
+- hosts: otvl_web_front_end_group
+  gather_facts: False
+  become: yes
+  roles:
+  - otvl_service/otvl_web/front_end
+  tags:
+  - otvl_web_front_end
+
+- hosts: otvl_web_back_end_group
+  gather_facts: False
+  become: yes
+  roles:
+  - otvl_service/otvl_web/back_end
+  tags:
+  - otvl_web_back_end
+
+###

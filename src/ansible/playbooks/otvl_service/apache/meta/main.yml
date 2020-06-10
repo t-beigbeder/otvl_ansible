@@ -1,2 +1,6 @@
 dependencies:
-  - otvl_service/base_service
+  - role: otvl_service/base_service
+    tags:
+    - otvl_service_base
+
+###

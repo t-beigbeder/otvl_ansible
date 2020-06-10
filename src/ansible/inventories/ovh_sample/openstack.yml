@@ -1,5 +1,0 @@
-plugin: openstack
-only_clouds:
-  - ovh
-groups:
-  iaas_configure: true

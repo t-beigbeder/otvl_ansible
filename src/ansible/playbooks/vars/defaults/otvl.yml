@@ -14,13 +14,20 @@ default_otvl:
     admin_key: otvl_admin_key
   apache:
     www: /otvl/www
+    user: www-data
+    group: www-data
     dis_sites:
     - 000-default
     test_notify_restart: false
     test_htpasswd_create: false
     test_htpasswd_path: apache/htpasswd
-    test_htpasswd_users:
-    virtual_hosts:
+    test_htpasswd_users: {}
+    sites: {}
+
+  otvl_web:
+    static_site_archive_file: "/path/to/otvl_web_vuejs-1.0.x.tgz"
+    virtualenv_archive_file: "/path/to/otvl_web_server_venv-1.0.y.tgz"
+    sites: {}
 
   git_service:
     project_root: git

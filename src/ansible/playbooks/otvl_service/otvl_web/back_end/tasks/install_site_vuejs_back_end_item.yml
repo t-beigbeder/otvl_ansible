@@ -1,0 +1,66 @@
+---
+# install_site_vuejs_back_end_item tasks file for otvl_service/otvl_web/back_end
+
+- name: install_site_vuejs_back_end_item display the site item information
+  debug:
+    msg: "site item is {{ current_site_item }}"
+  when: combined_otvl.debug
+
+- name: Create vuejs static site directory for {{ current_site_item.name }}
+  file:
+    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}"
+    state: directory
+    mode: 0755
+
+- name: Copy vuejs static site flag for {{ current_site_item.name }}
+  copy:
+    src: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs_flag.txt"
+    remote_src: yes
+    dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/otvl_web_vuejs_flag.txt"
+    owner: root
+    group: root
+    mode: 0644
+  register: otvl_web_vuejs_flag
+
+- name: Clean-up vuejs static site web directory for {{ current_site_item.name }}
+  file:
+    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
+    state: absent
+  when: otvl_web_vuejs_flag.changed
+
+- name: Copy vuejs static site for {{ current_site_item.name }}
+  copy:
+    src: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs/"
+    remote_src: yes
+    dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
+    force: no
+    owner: root
+    group: root
+    mode: u+rwX,go+rX
+  register: otvl_web_vuejs_copied
+
+- name: Restore vuejs static site {{ current_site_item.name }} original index.html file
+  command: "mv {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html.ori {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
+  when: otvl_web_vuejs_copied.changed
+
+- name: Configure vuejs static site {{ current_site_item.name }} for web on https://{{ current_site_item.vars.server_name }}
+  replace:
+    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
+    regexp: "=default_web_server_url"
+    replace: "=https://{{ current_site_item.vars.server_name }}"
+
+- name: Configure vuejs static site {{ current_site_item.name }} for api on https://{{ current_site_item.vars.server_name }}/api
+  replace:
+    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
+    regexp: "=default_api_server_url"
+    replace: "=https://{{ current_site_item.vars.server_name }}/api"
+
+- name: Configure vuejs static site {{ current_site_item.name }} for robots.txt
+  template:
+    src: "apache/web/robots.txt"
+    dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/robots.txt"
+    owner: root
+    group: root
+    mode: 0644
+
+###

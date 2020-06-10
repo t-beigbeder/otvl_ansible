@@ -7,10 +7,9 @@
   when: combined_otvl.debug
 
 - name: Install apache2
-  command: apt-get install -y --no-install-recommends apache2
+  command: "{{ combined_otvl.config_paths.sbin }}/otvl_apt_subs.sh apache2"
   args:
     creates: /usr/sbin/apache2
-    warn: false
 
 - name: Disable apache unused sites
   command: "a2dissite {{ item }}"
@@ -22,6 +21,12 @@
   service:
     name: apache2
     enabled: yes
+
+- name: Create the apache otvl configuration directory
+  file:
+    path: "/etc/apache2/otvl_conf"
+    state: directory
+    mode: 0755
 
 - name: Test the notify handler to restart the apache service
   debug:
@@ -53,7 +58,7 @@
     password: "{{ item.value }}"
     state: present
     mode: 0644
-  with_dict: "{{ combined_otvl.apache.test_htpasswd_users }}"
+  loop: "{{ combined_otvl.apache.test_htpasswd_users|dict2items}}"
   when: combined_otvl.apache.test_htpasswd_create
 
 - name: Collect only facts returned by facter
@@ -63,10 +68,31 @@
       - '!any'
       - facter
 
-- name: Loop over virtual hosts installation
-  include: install_virtual_host.yml
-  with_dict: "{{ combined_otvl.apache.virtual_hosts[ansible_nodename] }}"
+- name: Loop over sites installation
+  include: install_site.yml
+  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
   loop_control:
-    loop_var: current_virtual_host
+    loop_var: current_site
+
+- name: Create cert_bot_vh static site directory
+  file:
+    path: "{{ combined_otvl.apache.www }}/cert_bot_vh"
+    state: directory
+    mode: 0755
+
+- name: Add debian backports in /etc/apt/sources.list.d/debian-buster-backports.list
+  copy:
+    dest: /etc/apt/sources.list.d/debian-buster-backports.list
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      deb http://deb.debian.org/debian buster-backports main
+      deb-src http://deb.debian.org/debian buster-backports main
+
+- name: Install python-certbot-apache
+  command: "{{ combined_otvl.config_paths.sbin }}/otvl_apt_subs.sh python-certbot-apache -t buster-backports"
+  args:
+    creates: /usr/bin/certbot
 
 ###

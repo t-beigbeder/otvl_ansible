@@ -1,0 +1,78 @@
+---
+# main tasks file for otvl_service/otvl_web/back_end
+- name: debug
+  debug:
+    var: combined_otvl
+  when: combined_otvl.debug
+
+- name: Install virtualenv for otvl_web_service
+  command: "{{ combined_otvl.config_paths.sbin }}/otvl_apt_subs.sh virtualenv"
+  args:
+    creates: /usr/bin/virtualenv
+
+- name: Install git for otvl_web_service
+  command: "{{ combined_otvl.config_paths.sbin }}/otvl_apt_subs.sh git"
+  args:
+    creates: /usr/bin/git
+
+- name: Loop over sites installation (otvl_service/back_end)
+  include: install_site_apache_back_end.yml
+  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
+  loop_control:
+    loop_var: current_site
+
+- name: Create otvl_web_vuejs, otvl_web_server_venv and otvl_web_server_git package directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  with_items:
+  - "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs"
+  - "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv"
+  - "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_git"
+
+- name: Unarchive static_site_archive_file {{ combined_otvl.otvl_web.static_site_archive_file }} if configured
+  unarchive:
+    src: "{{ combined_otvl.otvl_web.static_site_archive_file }}"
+    dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs"
+    owner: root
+    group: root
+    mode: u+rwX,go+rX
+  when: "'static_site_archive_file' in combined_otvl.otvl_web"
+
+- name: Flag the archive version in {{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs_flag.txt
+  copy:
+    content: "{{ combined_otvl.otvl_web.static_site_archive_file }}"
+    dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs_flag.txt"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Unarchive virtualenv_archive_file {{ combined_otvl.otvl_web.virtualenv_archive_file }} if configured
+  unarchive:
+    src: "{{ combined_otvl.otvl_web.virtualenv_archive_file }}"
+    dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv"
+  when: "'virtualenv_archive_file' in combined_otvl.otvl_web"
+
+- name: Flag the archive version in {{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv_flag.txt
+  copy:
+    content: "{{ combined_otvl.otvl_web.virtualenv_archive_file }}"
+    dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv_flag.txt"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart the otvl_web.server python tornado services
+
+- name: Loop over sites installation for vuejs (otvl_service/back_end)
+  include: install_site_vuejs_back_end.yml
+  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
+  loop_control:
+    loop_var: current_site
+
+- name: Loop over sites installation for server (otvl_service/back_end)
+  include: install_site_server_back_end_item.yml
+  loop: "{{ combined_otvl.otvl_web.sites[otvl_logical_name].site_items }}"
+  loop_control:
+    loop_var: current_site_item
+
+###

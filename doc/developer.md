@@ -1,4 +1,4 @@
-# otvl ansible developper documentation
+# otvl ansible developer documentation
 ## Development environment
 ### system setup (debian)
   apt install virtualenv python3-dev python-crypto gcc
@@ -11,6 +11,7 @@
         [defaults]
         deprecation_warnings = False
         roles_path = :/path/to/otvl_ansible/src/ansible/playbooks:
+        allow_world_readable_tmpfiles = True
 
         [inventory]
         enable_plugins = ini, yaml, openstack

@@ -1,0 +1,20 @@
+---
+# main tasks file for otvl_service/otvl_web/front_end
+- name: debug
+  debug:
+    var: combined_otvl
+  when: combined_otvl.debug
+
+- name: Loop over sites for apache installation (otvl_service/front_end)
+  include_tasks: install_site_apache_front_end.yml
+  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
+  loop_control:
+    loop_var: current_site
+
+- name: Loop over sites for certbot configuration (otvl_service/front_end)
+  include_tasks: install_site_certbot_front_end.yml
+  with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
+  loop_control:
+    loop_var: current_site
+
+###

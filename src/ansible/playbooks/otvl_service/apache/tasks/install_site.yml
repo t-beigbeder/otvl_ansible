@@ -1,0 +1,37 @@
+---
+# install_site tasks file for otvl_service/apache
+
+- name: display the site information
+  debug:
+    msg: "site is {{ current_site.key }}: {{ current_site.value }}"
+  when: combined_otvl.debug
+
+- name: Enable apache packages required by {{ current_site.key }}
+  command: "a2enmod {{ item }}"
+  args:
+    creates: "/etc/apache2/mods-enabled/{{ item }}.load"
+  loop: "{{ current_site.value.apache_modules }}"
+  notify: Restart the apache service
+
+- name: Install the site configuration file {{ current_site.value.template }}
+  template:
+    src: "{{ current_site.value.template }}"
+    dest: "/etc/apache2/sites-available/{{ current_site.key }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart the apache service
+
+- name: Enable apache site configuration file {{ current_site.key }}
+  command: "a2ensite {{ current_site.key }}"
+  args:
+    creates: /etc/apache2/sites-enabled/{{ current_site.key }}.conf
+  notify: Restart the apache service
+
+- name: Loop over sites items (otvl_service/apache)
+  include: install_site_item.yml
+  loop: "{{ current_site.value.site_items }}"
+  loop_control:
+    loop_var: current_site_item
+
+###
