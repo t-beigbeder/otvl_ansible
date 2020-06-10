@@ -1,4 +1,4 @@
-# otvl ansible developper documentation
+# otvl ansible developer documentation
 ## Development environment
 ### system setup (debian)
   apt install virtualenv python3-dev python-crypto gcc

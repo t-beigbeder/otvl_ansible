@@ -4,7 +4,7 @@ Tools to deploy *otvl* components in local VMs and public cloud.
 Documentation index:
 
 - [user](user.md)
-- [developper](developper.md)
+- [developer](developer.md)
 
 References:
 
