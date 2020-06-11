@@ -17,6 +17,12 @@
   when: "'git' in current_site_item"
   register: otvl_web_server_git_checkout
 
+- name: Chmod the git project containing the site {{ current_site_item.name }} content if configured
+  command: >
+    chmod -R u+rwX,go+rX
+    {{ combined_otvl.config_paths.pkg }}/otvl_web_server_git/{{ current_site_item.name }}
+  when: "'git' in current_site_item and otvl_web_server_git_checkout.changed"
+
 - name: Clean-up the git project copy containing the site {{ current_site_item.name }} content if configured
   file:
     path: "{{ item }}"

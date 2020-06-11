@@ -55,6 +55,12 @@
     regexp: "=default_api_server_url"
     replace: "=https://{{ current_site_item.vars.server_name }}/api"
 
+- name: Configure vuejs static site {{ current_site_item.name }} title on
+  replace:
+    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
+    regexp: "<title>otvl_web_home_title"
+    replace: "<title>{{ current_site_item.vars.home_title }}"
+
 - name: Configure vuejs static site {{ current_site_item.name }} for robots.txt
   template:
     src: "apache/web/robots.txt"
