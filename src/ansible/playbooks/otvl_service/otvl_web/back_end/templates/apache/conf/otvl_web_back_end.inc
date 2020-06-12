@@ -1,6 +1,7 @@
 <VirtualHost {{ inventory_hostname }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.vars.web_port }}>
         ServerName {{ current_site_item.vars.server_name }}
         ServerAdmin webmaster@localhost
+        LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
         ErrorLog ${APACHE_LOG_DIR}/{{ current_site_item.name }}_static_error.log
         CustomLog ${APACHE_LOG_DIR}/{{ current_site_item.name }}_static_access.log combined
         DocumentRoot "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"

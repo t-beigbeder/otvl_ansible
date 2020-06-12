@@ -1,3 +1,8 @@
+<VirtualHost *:80>
+  ServerName {{ current_site_item.vars.server_name }}
+  Redirect / https://{{ current_site_item.vars.server_name }}
+</VirtualHost>
+
 <VirtualHost _default_:443>
   ServerName {{ current_site_item.vars.server_name }}
   ServerAdmin webmaster@localhost
@@ -8,9 +13,13 @@
   RewriteEngine on
 
   RewriteCond "%{REQUEST_URI}"  "^/assets/" [OR]
+  RewriteCond "%{REQUEST_URI}"  "^/css/" [OR]
+  RewriteCond "%{REQUEST_URI}"  "^/fonts/" [OR]
+  RewriteCond "%{REQUEST_URI}"  "^/js/" [OR]
+  RewriteCond "%{REQUEST_URI}"  "^/statics/" [OR]
   RewriteCond "%{REQUEST_URI}"  "^/api/" [OR]
   RewriteCond "%{REQUEST_URI}"  "^/favicon.ico$" [OR]
-  RewriteCond "%{REQUEST_URI}"  "^/statics/img/favicon.ico$" [OR]
+  RewriteCond "%{REQUEST_URI}"  "^/robots.txt$" [OR]
   RewriteCond "%{REQUEST_URI}"  "^/sitemap.xml$"
   RewriteRule ^ - [L]
 
@@ -27,6 +36,11 @@
   RewriteCond "%{HTTP_USER_AGENT}"  "facebookexternalhit"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "ia_archiver"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "DuckDuckBot"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "WhatsApp"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "Twitterbot"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "Applebot"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "AhrefsBot"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "PaperLiBot"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "otvl_end"
   RewriteRule "^/(.*)$"  "/api/html4/$1" [L,PT]
 
