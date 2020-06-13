@@ -1,0 +1,13 @@
+---
+# set flag file for specific flag (type/item)
+# dir copied for a site, etc.
+# vars:
+#   flag_type: type of file (archive delivered, git update...)
+#   flag_item: name of item flagged
+
+- name: Create flag file {{ combined_otvl.config_paths.data }}/installation_flags/{{ flag_type }}_{{ flag_item }}.txt
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/installation_flags/{{ flag_type }}_{{ flag_item }}.txt"
+    state: touch
+
+###

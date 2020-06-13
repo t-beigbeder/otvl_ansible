@@ -6,67 +6,79 @@
     msg: "site item is {{ current_site_item }}"
   when: combined_otvl.debug
 
-- name: Create vuejs static site directory for {{ current_site_item.name }}
-  file:
-    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}"
-    state: directory
-    mode: 0755
+- name: Flag absent to continue
+  include_tasks: "{{ role_path }}/../../base_service/tasks/get_flag_for.yml"
+  vars:
+    flag_type: static_site_archive_file
+    flag_item: "{{ current_site_item.name }}"
 
-- name: Copy vuejs static site flag for {{ current_site_item.name }}
-  copy:
-    src: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs_flag.txt"
-    remote_src: yes
-    dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/otvl_web_vuejs_flag.txt"
-    owner: root
-    group: root
-    mode: 0644
-  register: otvl_web_vuejs_flag
+- name: Create and configure vuejs static site directory for {{ current_site_item.name }}
+  block:
+  - name: Create vuejs static site directory for {{ current_site_item.name }}
+    file:
+      path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}"
+      state: directory
+      mode: 0755
 
-- name: Clean-up vuejs static site web directory for {{ current_site_item.name }}
-  file:
-    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
-    state: absent
-  when: otvl_web_vuejs_flag.changed
+  - name: Clean-up vuejs static site web directory for {{ current_site_item.name }}
+    file:
+      path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
+      state: absent
 
-- name: Copy vuejs static site for {{ current_site_item.name }}
-  copy:
-    src: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs/"
-    remote_src: yes
-    dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
-    force: no
-    owner: root
-    group: root
-    mode: u+rwX,go+rX
-  register: otvl_web_vuejs_copied
+  - name: Copy vuejs static site for {{ current_site_item.name }}
+    copy:
+      src: "{{ combined_otvl.config_paths.pkg }}/otvl_web_vuejs/"
+      remote_src: yes
+      dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
+      force: no
+      owner: root
+      group: root
+      mode: u+rwX,go+rX
 
-- name: Restore vuejs static site {{ current_site_item.name }} original index.html file
-  command: "mv {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html.ori {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
-  when: otvl_web_vuejs_copied.changed
+  - name: Restore {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html.ori
+    command: "mv {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html.ori {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
 
-- name: Configure vuejs static site {{ current_site_item.name }} for web on https://{{ current_site_item.vars.server_name }}
-  replace:
-    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
-    regexp: "=default_web_server_url"
-    replace: "=https://{{ current_site_item.vars.server_name }}"
+  - name: Configure default_web_server_url {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html
+    replace:
+      path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
+      regexp: '=default_web_server_url'
+      replace: '=https://{{ current_site_item.vars.server_name }}'
 
-- name: Configure vuejs static site {{ current_site_item.name }} for api on https://{{ current_site_item.vars.server_name }}/api
-  replace:
-    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
-    regexp: "=default_api_server_url"
-    replace: "=https://{{ current_site_item.vars.server_name }}/api"
+  - name: Configure default_api_server_url {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html
+    replace:
+      path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
+      regexp: '=default_api_server_url'
+      replace: "=https://{{ current_site_item.vars.server_name }}/api"
 
-- name: Configure vuejs static site {{ current_site_item.name }} title on
-  replace:
-    path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
-    regexp: "<title>otvl_web_home_title"
-    replace: "<title>{{ current_site_item.vars.home_title }}"
+  - name: Configure otvl_web_home_title {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html
+    replace:
+      path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
+      regexp: "<title>otvl_web_home_title"
+      replace: "<title>{{ current_site_item.vars.home_title }}"
 
-- name: Configure vuejs static site {{ current_site_item.name }} for robots.txt
-  template:
-    src: "apache/web/robots.txt"
-    dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/robots.txt"
-    owner: root
-    group: root
-    mode: 0644
+  - name: Template {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/robots.txt
+    template:
+      src: "apache/web/robots.txt"
+      dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/robots.txt"
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Flag present
+    include_tasks: "{{ role_path }}/../../base_service/tasks/set_flag_for.yml"
+    vars:
+      flag_type: static_site_archive_file
+      flag_item: "{{ current_site_item.name }}"
+  rescue:
+  - name: rescue for Create and configure vuejs static site directory for {{ current_site_item.name }}
+    debug:
+      msg: Create and configure vuejs static site directory for {{ current_site_item.name }}
+    when: combined_otvl.debug
+
+  when: "flag_file_state.failed"
+
+- name:
+  pause:
+  when: combined_otvl.pause
 
 ###
