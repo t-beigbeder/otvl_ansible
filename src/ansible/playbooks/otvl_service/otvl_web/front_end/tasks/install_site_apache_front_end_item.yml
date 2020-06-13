@@ -11,7 +11,7 @@
     path: "/etc/letsencrypt/archive/{{ current_site_item.vars.server_name }}"
   register: letsencrypt_archive_dir
 
-- name: Install the site item configuration file {{ current_site_item.template }}
+- name: Install the site item configuration file /etc/apache2/otvl_conf/{{ current_site_item.name }}.inc
   template:
     src: "{{ current_site_item.template }}"
     dest: "/etc/apache2/otvl_conf/{{ current_site_item.name }}.inc"

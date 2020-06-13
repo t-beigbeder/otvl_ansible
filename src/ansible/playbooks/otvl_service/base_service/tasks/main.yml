@@ -23,6 +23,11 @@
   set_fact:
     server_infra: "{{ combined_infra.servers[otvl_logical_name] }}"
 
+- name:
+  pause:
+    prompt: "Pause is enabled, do you want to continue?"
+  when: combined_otvl.pause
+
 - name: Create otvl root directories
   file:
     path: "{{ item }}"
@@ -33,6 +38,7 @@
   with_items:
     - "{{ combined_otvl.config_paths.sbin }}"
     - "{{ combined_otvl.config_paths.data }}"
+    - "{{ combined_otvl.config_paths.data }}/installation_flags"
     - "{{ combined_otvl.config_paths.backup }}"
     - "{{ combined_otvl.config_paths.delivery }}"
     - "{{ combined_otvl.config_paths.pkg }}"

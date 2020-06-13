@@ -6,7 +6,7 @@
     msg: "site item is {{ current_site_item }}"
   when: combined_otvl.debug
 
-- name: Install the site item apache configuration file {{ current_site_item.template }}
+- name: Install the site item apache configuration file /etc/apache2/otvl_conf/{{ current_site_item.name }}.inc
   template:
     src: "{{ current_site_item.template }}"
     dest: "/etc/apache2/otvl_conf/{{ current_site_item.name }}.inc"

@@ -1,0 +1,16 @@
+---
+# remove flag files for specific flag
+
+- name: Find flag files {{ combined_otvl.config_paths.data }}/installation_flags/{{ flag }}_*.txt
+  find:
+    paths: "{{ combined_otvl.config_paths.data }}/installation_flags"
+    patterns: "{{ flag }}_*.txt"
+  register: find_res
+
+- name: Remove flag files {{ combined_otvl.config_paths.data }}/installation_flags/{{ flag }}_*.txt
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ find_res.files }}"
+
+###
