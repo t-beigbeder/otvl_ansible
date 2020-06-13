@@ -10,7 +10,7 @@ ExecStart={{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv/bin/python \
           -c {{ current_site_item.name }}_server_config.yml \
           -p {{ current_site_item.api_port }} \
           -a {{ inventory_hostname }}{{ combined_infra.networks.appli.host_suffix }}
-WorkingDirectory={{ combined_otvl.config_paths.data }}
+WorkingDirectory={{ combined_otvl.config_paths.data }}/otvl_web
 User={{ combined_otvl.apache.user }}
 Group={{ combined_otvl.apache.group }}
 

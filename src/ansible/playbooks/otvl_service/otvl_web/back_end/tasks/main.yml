@@ -53,6 +53,7 @@
     dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web_server_venv"
   when: "'virtualenv_archive_file' in combined_otvl.otvl_web"
   register: virtualenv_archive_file_unarchived
+  notify: Restart the otvl_web.server python tornado services
 
 - name: Remove flags for virtualenv_archive_file if updated
   include_tasks: "{{ role_path }}/../../base_service/tasks/remove_flags_for.yml"
@@ -65,10 +66,6 @@
   with_dict: "{{ combined_otvl.apache.sites[otvl_logical_name] }}"
   loop_control:
     loop_var: current_site
-
-- name:
-  pause:
-  when: combined_otvl.pause
 
 - name: Loop over sites installation for server (otvl_service/back_end)
   include_tasks: install_site_server_back_end_item.yml

@@ -3,12 +3,12 @@ version:
   application: "1.0"
 
 {% if 'site_config_name' in current_site_item %}
-site_config_file: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/config/{{ current_site_item.site_config_name }}.yml"
+site_config_file: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}/config/{{ current_site_item.site_config_name }}.yml"
 {% else %}
-site_config_file: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/config/{{ current_site_item.name }}.yml"
+site_config_file: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}/config/{{ current_site_item.name }}.yml"
 {% endif %}
-pages_directory: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/pages"
-assets_directory: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/assets"
-j24bots_directory: "{{ combined_otvl.config_paths.data }}/{{ current_site_item.name }}/config/j24bots"
+pages_directory: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}/pages"
+assets_directory: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}/assets"
+j24bots_directory: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}/config/j24bots"
 
 sitemap_root: "https://{{ current_site_item.server_name }}"

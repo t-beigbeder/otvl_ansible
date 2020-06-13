@@ -38,6 +38,11 @@
   - name: Restore {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html.ori
     command: "mv {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html.ori {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
 
+  - name: Remove assets symlink from {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web
+    file:
+      path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/assets"
+      state: absent
+
   - name: Configure default_web_server_url {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html
     replace:
       path: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/index.html"
@@ -69,6 +74,12 @@
     vars:
       flag_type: static_site_archive_file
       flag_item: "{{ current_site_item.name }}"
+
+  - name: no op for notifying apache
+    debug:
+      msg: no op for notifying apache
+    notify: Restart the apache service
+
   rescue:
   - name: rescue for Create and configure vuejs static site directory for {{ current_site_item.name }}
     debug:
@@ -76,9 +87,5 @@
     when: combined_otvl.debug
 
   when: "flag_file_state.failed"
-
-- name:
-  pause:
-  when: combined_otvl.pause
 
 ###
