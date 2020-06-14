@@ -69,6 +69,16 @@
       group: root
       mode: 0644
 
+  - name: Copy additional add_to_document_root_path files to {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web
+    copy:
+      src: "{{ item }}"
+      dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
+      owner: root
+      group: root
+      mode: u+rwX,go+rX
+    with_fileglob: "{{ current_site_item.vars.add_to_document_root_path }}/*"
+    when: "'add_to_document_root_path' in current_site_item.vars"
+
   - name: Flag present
     include_tasks: "{{ role_path }}/../../base_service/tasks/set_flag_for.yml"
     vars:

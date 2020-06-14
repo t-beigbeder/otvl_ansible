@@ -1,9 +1,9 @@
 <VirtualHost {{ inventory_hostname }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.vars.web_port }}>
         ServerName {{ current_site_item.vars.server_name }}
         ServerAdmin webmaster@localhost
-        LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+        LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined-xff
         ErrorLog ${APACHE_LOG_DIR}/{{ current_site_item.name }}_static_error.log
-        CustomLog ${APACHE_LOG_DIR}/{{ current_site_item.name }}_static_access.log combined
+        CustomLog ${APACHE_LOG_DIR}/{{ current_site_item.name }}_static_access.log combined-xff
         DocumentRoot "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web"
         <Directory {{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web>
                 Require all granted

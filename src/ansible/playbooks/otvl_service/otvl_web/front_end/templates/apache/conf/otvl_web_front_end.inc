@@ -1,6 +1,6 @@
 <VirtualHost *:80>
   ServerName {{ current_site_item.vars.server_name }}
-  Redirect / https://{{ current_site_item.vars.server_name }}
+  Redirect / https://{{ current_site_item.vars.server_name }}/
 </VirtualHost>
 
 <VirtualHost _default_:443>
@@ -26,8 +26,12 @@
   RewriteCond "%{HTTP_USER_AGENT}"  "otvl_begin"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "Googlebot"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "Bingbot"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "BingPreview"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "YandexWebmaster"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "YandexBot"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "LinkedInBot"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "PocketParser"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "Slurp"  [OR]
-  RewriteCond "%{HTTP_USER_AGENT}"  "DuckDuckBot"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "Baiduspider"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "YandexBot"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "Sogou"  [OR]
