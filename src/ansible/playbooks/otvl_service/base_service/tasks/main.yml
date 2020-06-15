@@ -28,6 +28,11 @@
     prompt: "Pause is enabled, do you want to continue?"
   when: combined_otvl.pause
 
+- name:
+  pause:
+    prompt: "Ah ah! you want to deploy in production, do you want to continue?"
+  when: combined_otvl.prod
+
 - name: Create otvl root directories
   file:
     path: "{{ item }}"
