@@ -26,6 +26,7 @@
   RewriteCond "%{HTTP_USER_AGENT}"  "otvl_begin"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "Googlebot"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "Bingbot"  [OR]
+  RewriteCond "%{HTTP_USER_AGENT}"  "bingbot"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "BingPreview"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "YandexWebmaster"  [OR]
   RewriteCond "%{HTTP_USER_AGENT}"  "YandexBot"  [OR]
