@@ -297,9 +297,9 @@ class NetConf:
 
     def run(self):
         try:
-            self.logger.info("starting")
+            self.logger.debug("starting")
             result = self._do_it()
-            self.logger.info("exiting")
+            self.logger.debug("exiting")
             return result
         except Exception as e:
             self.logger.error(traceback.format_exc())

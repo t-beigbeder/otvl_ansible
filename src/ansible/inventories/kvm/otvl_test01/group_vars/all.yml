@@ -117,7 +117,7 @@ otvl:
           api_port: "9991"
           git:
             repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
-            version: "pri_dev_00001"
+            version: "pri_dev_00002"
             content_path: "server/data/test_site1"
           assets_path: "/home/guest/git/otvl_web/server/data/test_site1/assets"
         - name: site2
@@ -125,7 +125,7 @@ otvl:
           api_port: "9992"
           git:
             repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
-            version: "pri_dev_00001"
+            version: "pri_dev_00002"
             content_path: "server/data/test_site2"
           assets_path: "/home/guest/git/otvl_web/server/data/test_site2/assets"
         - name: acceptance_otvl_org
@@ -134,7 +134,7 @@ otvl:
           site_config_name: "otvl_org"
           git:
             repo: "ssh://guest@dxoffice/data/E4/projets/misc/entfram/d9devops/git_repos/pri/otvl_web.git"
-            version: "pri_dev_00001"
+            version: "pri_dev_00002"
             content_path: "server/data/test_acceptance_otvl_org"
           assets_path: "/home/guest/git/otvl_web/server/data/test_acceptance_otvl_org/assets"
 
