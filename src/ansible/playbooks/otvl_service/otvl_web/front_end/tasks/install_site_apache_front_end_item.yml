@@ -20,4 +20,24 @@
     mode: 0644
   notify: Restart the apache service
 
+- name: Install the site item private_area configuration file /etc/apache2/otvl_conf/{{ current_site_item.name }}-private_area_conf.inc
+  template:
+    src: "{{ current_site_item.vars.private_area_conf.apache_conf_path }}/{{ current_site_item.name }}-private_area_conf.inc"
+    dest: "/etc/apache2/otvl_conf/{{ current_site_item.name }}-private_area_conf.inc"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart the apache service
+  when: "'private_area_conf' in current_site_item.vars"
+
+- name: Install the site item private_area htpasswd file /etc/apache2/otvl_conf/{{ current_site_item.name }}-htpasswd
+  copy:
+    src: "{{ current_site_item.vars.private_area_conf.apache_conf_path }}/{{ current_site_item.name }}-htpasswd"
+    dest: "/etc/apache2/otvl_conf/{{ current_site_item.name }}-htpasswd"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart the apache service
+  when: "'private_area_conf' in current_site_item.vars"
+
 ###

@@ -67,4 +67,9 @@
   SSLCertificateKeyFile /etc/letsencrypt/live/{{ current_site_item.vars.server_name }}/privkey.pem
   Include /etc/letsencrypt/options-ssl-apache.conf
 {% endif %}
+
+{% if ('private_area_conf' in current_site_item.vars) %}
+  Include /etc/apache2/otvl_conf/{{ current_site_item.name }}-private_area_conf.inc
+{% endif %}
+
 </VirtualHost>
