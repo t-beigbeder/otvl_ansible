@@ -1,8 +1,0 @@
-plugin: openstack
-only_clouds:
-  - ovh
-
-groups:
-  iaas_configure: "'iaas_configure' in openstack.metadata.groups.split(',')"
-  bastion_controlled_group: "'bastion_controlled_group' in openstack.metadata.groups.split(',')"
-  bastion_group: "'bastion_group' in openstack.metadata.groups.split(',')"

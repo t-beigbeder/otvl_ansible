@@ -1,5 +1,0 @@
-plugin: openstack
-only_clouds:
-  - cloudwatt
-groups:
-  test03_group: true
