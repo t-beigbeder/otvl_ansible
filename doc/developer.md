@@ -46,11 +46,6 @@
     ssh localhost id
     # in a virtualenv
     cd otvl_ansible
-    ansible all -i dev/oan/ansible/inventories -m ping
-    ansible-playbook \
-    -i dev/oan/ansible/inventories \
-    -e @dev/oan/ansible/playbooks/extra_vars/ovh.yml \
-    dev/oan/ansible/playbooks/os_facts.yml
     ansible-playbook \
         -i src/ansible/inventories/ovh/sample \
         src/ansible/playbooks/iaas.yml
