@@ -122,7 +122,9 @@
     src: "{{ current_site_item.remote_assets_path }}/"
     remote_src: yes
     dest: "{{ combined_otvl.apache.www }}/{{ current_site_item.name }}/web/assets"
-    mode: "preserve"
+    owner: "{{ combined_otvl.apache.user }}"
+    group: "{{ combined_otvl.apache.group }}"
+    mode: u+rwX,go+rX
   when: "'remote_assets_path' in current_site_item"
 
 ###
