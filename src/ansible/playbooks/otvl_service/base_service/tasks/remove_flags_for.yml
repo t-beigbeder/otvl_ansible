@@ -1,0 +1,18 @@
+---
+# remove flag files for specific flag
+# vars:
+#   flag_type: type of file (archive delivered, git update...)
+
+- name: Find flag files {{ combined_otvl.config_paths.data }}/installation_flags/{{ flag_type }}_*.txt
+  find:
+    paths: "{{ combined_otvl.config_paths.data }}/installation_flags"
+    patterns: "{{ flag_type }}_*.txt"
+  register: find_res
+
+- name: Remove flag files {{ combined_otvl.config_paths.data }}/installation_flags/{{ flag_type }}_*.txt
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ find_res.files }}"
+
+###

@@ -1,8 +1,13 @@
 # otvl ansible developer documentation
+
 ## Development environment
+
 ### system setup (debian)
+
   apt install virtualenv python3-dev python-crypto gcc
+
 ### setup
+
     git clone URL_FOR_otvl_ansible.git
     cd otvl_ansible
     cp ansible_sample.cfg ansible.cfg
@@ -18,7 +23,12 @@
 
     # in a virtualenv
     pip install -r src/python/requirements-dev.txt
+    # or
+    pip install pip-tools
+    pip-sync src/python/requirements-dev.txt
+
 ### cloud
+
     vi ~/.config/openstack/clouds.yaml
         #
         clouds:
@@ -34,13 +44,8 @@
     eval `ssh-agent`
     ssh-add ~/.ssh/id_rsa
     ssh localhost id
-    # in a virtualenv, eg ~/tools/venv/otvl_ansible
+    # in a virtualenv
     cd otvl_ansible
-    ansible all -i dev/oan/ansible/inventories -m ping
-    ansible-playbook \
-    -i dev/oan/ansible/inventories \
-    -e @dev/oan/ansible/playbooks/extra_vars/ovh.yml \
-    dev/oan/ansible/playbooks/os_facts.yml
     ansible-playbook \
         -i src/ansible/inventories/ovh/sample \
         src/ansible/playbooks/iaas.yml
@@ -66,6 +71,7 @@ in the end you will...
             src/ansible/playbooks/iaas_destroy.yml
 
 ### configure cloud VMs
+
     ssh-add ~/.ssh/YOUR_PRIV_KEY_FILE
     ansible-playbook \
         --vault-password-file /tmp/vpf \

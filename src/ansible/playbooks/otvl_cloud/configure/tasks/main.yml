@@ -87,6 +87,13 @@
     warn: false
   notify: Enable the otvl_network_configurator timer
 
+- name: Install cryptography in virtualenv /srv/venv/otvl_cloud_init
+  command: /srv/venv/otvl_cloud_init/bin/pip install cryptography
+  args:
+    creates: /srv/venv/otvl_cloud_init/lib/python3.7/site-packages/cryptography
+    warn: false
+  notify: Enable the otvl_network_configurator timer
+
 - name: Create python directory for {{ otvl_logical_name }} server {{ inventory_hostname }}
   file:
     path: /srv/otvl/iaas/python
