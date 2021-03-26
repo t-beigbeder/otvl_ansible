@@ -4,86 +4,398 @@
 #
 #    pip-compile git/otvl_ansible/src/python/requirements-dev.in
 #
-ansible==2.9.12           # via -r git/otvl_ansible/src/python/requirements.txt
-appdirs==1.4.4            # via -r git/otvl_ansible/src/python/requirements.txt, openstacksdk
-attrs==20.1.0             # via -r git/otvl_ansible/src/python/requirements.txt, cmd2, jsonschema
-certifi==2020.6.20        # via -r git/otvl_ansible/src/python/requirements.txt, requests
-cffi==1.14.2              # via -r git/otvl_ansible/src/python/requirements.txt, cryptography
-chardet==3.0.4            # via -r git/otvl_ansible/src/python/requirements.txt, requests
-click==7.1.2              # via pip-tools
-cliff==3.4.0              # via -r git/otvl_ansible/src/python/requirements.txt, osc-lib, python-neutronclient, python-openstackclient
-cmd2==1.3.8               # via -r git/otvl_ansible/src/python/requirements.txt, cliff
-colorama==0.4.3           # via -r git/otvl_ansible/src/python/requirements.txt, cmd2
-coverage==5.2.1           # via -r git/otvl_ansible/src/python/requirements-dev.in
-cryptography==3.1         # via -r git/otvl_ansible/src/python/requirements.txt, ansible, openstacksdk, pyopenssl
-debtcollector==2.2.0      # via -r git/otvl_ansible/src/python/requirements.txt, oslo.config, oslo.context, oslo.log, oslo.utils, python-keystoneclient, python-neutronclient
-decorator==4.4.2          # via -r git/otvl_ansible/src/python/requirements.txt, dogpile.cache, openstacksdk
-dogpile.cache==1.0.2      # via -r git/otvl_ansible/src/python/requirements.txt, openstacksdk
-flake8==3.8.3             # via -r git/otvl_ansible/src/python/requirements-dev.in
-idna==2.10                # via -r git/otvl_ansible/src/python/requirements.txt, requests
-importlib-metadata==1.7.0  # via -r git/otvl_ansible/src/python/requirements.txt, cmd2, flake8, jsonschema, oslo.config, stevedore
-iso8601==0.1.12           # via -r git/otvl_ansible/src/python/requirements.txt, keystoneauth1, openstacksdk, oslo.utils, python-neutronclient, python-novaclient
-jinja2==2.11.2            # via -r git/otvl_ansible/src/python/requirements.txt, ansible
-jmespath==0.10.0          # via -r git/otvl_ansible/src/python/requirements.txt, openstacksdk
-jsonpatch==1.26           # via -r git/otvl_ansible/src/python/requirements.txt, openstacksdk, warlock
-jsonpointer==2.0          # via -r git/otvl_ansible/src/python/requirements.txt, jsonpatch
-jsonschema==3.2.0         # via -r git/otvl_ansible/src/python/requirements.txt, warlock
-keystoneauth1==4.2.1      # via -r git/otvl_ansible/src/python/requirements.txt, openstacksdk, osc-lib, python-cinderclient, python-glanceclient, python-keystoneclient, python-neutronclient, python-novaclient
-markupsafe==1.1.1         # via -r git/otvl_ansible/src/python/requirements.txt, jinja2
-mccabe==0.6.1             # via -r git/otvl_ansible/src/python/requirements-dev.in, flake8
-msgpack==1.0.0            # via -r git/otvl_ansible/src/python/requirements.txt, oslo.serialization
-munch==2.5.0              # via -r git/otvl_ansible/src/python/requirements.txt, openstacksdk
-mypy-extensions==0.4.3    # via mypy
-mypy==0.782               # via -r git/otvl_ansible/src/python/requirements-dev.in
-netaddr==0.8.0            # via -r git/otvl_ansible/src/python/requirements.txt, oslo.config, oslo.utils, python-neutronclient
-netifaces==0.10.9         # via -r git/otvl_ansible/src/python/requirements.txt, openstacksdk, oslo.utils
-openstacksdk==0.48.0      # via -r git/otvl_ansible/src/python/requirements.txt, os-client-config, osc-lib, python-openstackclient
-os-client-config==2.1.0   # via -r git/otvl_ansible/src/python/requirements.txt, python-neutronclient
-os-service-types==1.7.0   # via -r git/otvl_ansible/src/python/requirements.txt, keystoneauth1, openstacksdk
-osc-lib==2.2.0            # via -r git/otvl_ansible/src/python/requirements.txt, python-neutronclient, python-openstackclient
-oslo.config==8.3.1        # via -r git/otvl_ansible/src/python/requirements.txt, oslo.log, python-keystoneclient
-oslo.context==3.1.0       # via -r git/otvl_ansible/src/python/requirements.txt, oslo.log
-oslo.i18n==5.0.0          # via -r git/otvl_ansible/src/python/requirements.txt, osc-lib, oslo.config, oslo.log, oslo.utils, python-cinderclient, python-glanceclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
-oslo.log==4.4.0           # via -r git/otvl_ansible/src/python/requirements.txt, python-neutronclient
-oslo.serialization==4.0.0  # via -r git/otvl_ansible/src/python/requirements.txt, oslo.log, python-keystoneclient, python-neutronclient, python-novaclient
-oslo.utils==4.4.0         # via -r git/otvl_ansible/src/python/requirements.txt, osc-lib, oslo.log, oslo.serialization, python-cinderclient, python-glanceclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
-packaging==20.4           # via -r git/otvl_ansible/src/python/requirements.txt, oslo.utils
-pbr==5.4.5                # via -r git/otvl_ansible/src/python/requirements.txt, cliff, debtcollector, keystoneauth1, openstacksdk, os-service-types, osc-lib, oslo.context, oslo.i18n, oslo.log, oslo.serialization, oslo.utils, python-cinderclient, python-glanceclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, stevedore
-pep8==1.7.1               # via -r git/otvl_ansible/src/python/requirements-dev.in
-pip-tools==5.3.1          # via -r git/otvl_ansible/src/python/requirements-dev.in
-prettytable==0.7.2        # via -r git/otvl_ansible/src/python/requirements.txt, cliff, python-cinderclient, python-glanceclient, python-novaclient
-pycodestyle==2.6.0        # via flake8
-pycparser==2.20           # via -r git/otvl_ansible/src/python/requirements.txt, cffi
-pyflakes==2.2.0           # via -r git/otvl_ansible/src/python/requirements-dev.in, flake8
-pyinotify==0.9.6          # via -r git/otvl_ansible/src/python/requirements.txt, oslo.log
-pyopenssl==19.1.0         # via -r git/otvl_ansible/src/python/requirements.txt, python-glanceclient
-pyparsing==2.4.7          # via -r git/otvl_ansible/src/python/requirements.txt, cliff, oslo.utils, packaging
-pyperclip==1.8.0          # via -r git/otvl_ansible/src/python/requirements.txt, cmd2
-pyrsistent==0.16.0        # via -r git/otvl_ansible/src/python/requirements.txt, jsonschema
-python-cinderclient==7.1.0  # via -r git/otvl_ansible/src/python/requirements.txt, python-openstackclient
-python-dateutil==2.8.1    # via -r git/otvl_ansible/src/python/requirements.txt, oslo.log
-python-glanceclient==3.2.1  # via -r git/otvl_ansible/src/python/requirements.txt
-python-keystoneclient==4.1.0  # via -r git/otvl_ansible/src/python/requirements.txt, python-neutronclient, python-openstackclient
-python-neutronclient==7.2.0  # via -r git/otvl_ansible/src/python/requirements.txt
-python-novaclient==17.2.0  # via -r git/otvl_ansible/src/python/requirements.txt, python-openstackclient
-python-openstackclient==5.3.1  # via -r git/otvl_ansible/src/python/requirements.txt
-python-swiftclient==3.10.0  # via -r git/otvl_ansible/src/python/requirements.txt
-pytz==2020.1              # via -r git/otvl_ansible/src/python/requirements.txt, oslo.serialization, oslo.utils
-pyudev==0.22.0            # via -r git/otvl_ansible/src/python/requirements.txt
-pyyaml==5.3.1             # via -r git/otvl_ansible/src/python/requirements.txt, ansible, cliff, openstacksdk, oslo.config
-requests==2.24.0          # via -r git/otvl_ansible/src/python/requirements.txt, keystoneauth1, oslo.config, python-cinderclient, python-glanceclient, python-keystoneclient, python-neutronclient, python-swiftclient
-requestsexceptions==1.4.0  # via -r git/otvl_ansible/src/python/requirements.txt, openstacksdk
-rfc3986==1.4.0            # via -r git/otvl_ansible/src/python/requirements.txt, oslo.config
-simplejson==3.17.2        # via -r git/otvl_ansible/src/python/requirements.txt, osc-lib, python-cinderclient, python-neutronclient, python-novaclient
-six==1.15.0               # via -r git/otvl_ansible/src/python/requirements.txt, cliff, cryptography, debtcollector, jsonschema, keystoneauth1, munch, oslo.i18n, oslo.utils, packaging, pip-tools, pyopenssl, pyrsistent, python-cinderclient, python-dateutil, python-keystoneclient, python-openstackclient, python-swiftclient, pyudev, warlock
-stevedore==3.2.0          # via -r git/otvl_ansible/src/python/requirements.txt, cliff, dogpile.cache, keystoneauth1, osc-lib, oslo.config, python-keystoneclient, python-novaclient, python-openstackclient
-typed-ast==1.4.1          # via mypy
-typing-extensions==3.7.4.3  # via mypy
-urllib3==1.25.10          # via -r git/otvl_ansible/src/python/requirements.txt, requests
-warlock==1.3.3            # via -r git/otvl_ansible/src/python/requirements.txt, python-glanceclient
-wcwidth==0.2.5            # via -r git/otvl_ansible/src/python/requirements.txt, cmd2
-wrapt==1.12.1             # via -r git/otvl_ansible/src/python/requirements.txt, debtcollector, python-glanceclient
-zipp==3.1.0               # via -r git/otvl_ansible/src/python/requirements.txt, importlib-metadata
+ansible==2.9.12
+    # via -r requirements.txt
+appdirs==1.4.4
+    # via
+    #   -r requirements.txt
+    #   openstacksdk
+attrs==20.1.0
+    # via
+    #   -r requirements.txt
+    #   cmd2
+    #   jsonschema
+certifi==2020.6.20
+    # via
+    #   -r requirements.txt
+    #   requests
+cffi==1.14.2
+    # via
+    #   -r requirements.txt
+    #   cryptography
+chardet==3.0.4
+    # via
+    #   -r requirements.txt
+    #   requests
+click==7.1.2
+    # via pip-tools
+cliff==3.4.0
+    # via
+    #   -r requirements.txt
+    #   osc-lib
+    #   python-neutronclient
+    #   python-openstackclient
+cmd2==1.3.8
+    # via
+    #   -r requirements.txt
+    #   cliff
+colorama==0.4.3
+    # via
+    #   -r requirements.txt
+    #   cmd2
+coverage==5.2.1
+    # via -r requirements-dev.in
+cryptography==3.1
+    # via
+    #   -r requirements.txt
+    #   ansible
+    #   openstacksdk
+    #   pyopenssl
+debtcollector==2.2.0
+    # via
+    #   -r requirements.txt
+    #   oslo.config
+    #   oslo.context
+    #   oslo.log
+    #   oslo.utils
+    #   python-keystoneclient
+    #   python-neutronclient
+decorator==4.4.2
+    # via
+    #   -r requirements.txt
+    #   dogpile.cache
+    #   openstacksdk
+dogpile.cache==1.0.2
+    # via
+    #   -r requirements.txt
+    #   openstacksdk
+flake8==3.8.3
+    # via -r requirements-dev.in
+idna==2.10
+    # via
+    #   -r requirements.txt
+    #   requests
+iso8601==0.1.12
+    # via
+    #   -r requirements.txt
+    #   keystoneauth1
+    #   openstacksdk
+    #   oslo.utils
+    #   python-neutronclient
+    #   python-novaclient
+jinja2==2.11.2
+    # via
+    #   -r requirements.txt
+    #   ansible
+jmespath==0.10.0
+    # via
+    #   -r requirements.txt
+    #   openstacksdk
+jsonpatch==1.26
+    # via
+    #   -r requirements.txt
+    #   openstacksdk
+    #   warlock
+jsonpointer==2.0
+    # via
+    #   -r requirements.txt
+    #   jsonpatch
+jsonschema==3.2.0
+    # via
+    #   -r requirements.txt
+    #   warlock
+keystoneauth1==4.2.1
+    # via
+    #   -r requirements.txt
+    #   openstacksdk
+    #   osc-lib
+    #   python-cinderclient
+    #   python-glanceclient
+    #   python-keystoneclient
+    #   python-neutronclient
+    #   python-novaclient
+markupsafe==1.1.1
+    # via
+    #   -r requirements.txt
+    #   jinja2
+mccabe==0.6.1
+    # via
+    #   -r requirements-dev.in
+    #   flake8
+msgpack==1.0.0
+    # via
+    #   -r requirements.txt
+    #   oslo.serialization
+munch==2.5.0
+    # via
+    #   -r requirements.txt
+    #   openstacksdk
+mypy-extensions==0.4.3
+    # via mypy
+mypy==0.782
+    # via -r requirements-dev.in
+netaddr==0.8.0
+    # via
+    #   -r requirements.txt
+    #   oslo.config
+    #   oslo.utils
+    #   python-neutronclient
+netifaces==0.10.9
+    # via
+    #   -r requirements.txt
+    #   openstacksdk
+    #   oslo.utils
+openstacksdk==0.48.0
+    # via
+    #   -r requirements.txt
+    #   os-client-config
+    #   osc-lib
+    #   python-openstackclient
+os-client-config==2.1.0
+    # via
+    #   -r requirements.txt
+    #   python-neutronclient
+os-service-types==1.7.0
+    # via
+    #   -r requirements.txt
+    #   keystoneauth1
+    #   openstacksdk
+osc-lib==2.2.0
+    # via
+    #   -r requirements.txt
+    #   python-neutronclient
+    #   python-openstackclient
+oslo.config==8.3.1
+    # via
+    #   -r requirements.txt
+    #   oslo.log
+    #   python-keystoneclient
+oslo.context==3.1.0
+    # via
+    #   -r requirements.txt
+    #   oslo.log
+oslo.i18n==5.0.0
+    # via
+    #   -r requirements.txt
+    #   osc-lib
+    #   oslo.config
+    #   oslo.log
+    #   oslo.utils
+    #   python-cinderclient
+    #   python-glanceclient
+    #   python-keystoneclient
+    #   python-neutronclient
+    #   python-novaclient
+    #   python-openstackclient
+oslo.log==4.4.0
+    # via
+    #   -r requirements.txt
+    #   python-neutronclient
+oslo.serialization==4.0.0
+    # via
+    #   -r requirements.txt
+    #   oslo.log
+    #   python-keystoneclient
+    #   python-neutronclient
+    #   python-novaclient
+oslo.utils==4.4.0
+    # via
+    #   -r requirements.txt
+    #   osc-lib
+    #   oslo.log
+    #   oslo.serialization
+    #   python-cinderclient
+    #   python-glanceclient
+    #   python-keystoneclient
+    #   python-neutronclient
+    #   python-novaclient
+    #   python-openstackclient
+packaging==20.4
+    # via
+    #   -r requirements.txt
+    #   oslo.utils
+pbr==5.4.5
+    # via
+    #   -r requirements.txt
+    #   cliff
+    #   debtcollector
+    #   keystoneauth1
+    #   openstacksdk
+    #   os-service-types
+    #   osc-lib
+    #   oslo.context
+    #   oslo.i18n
+    #   oslo.log
+    #   oslo.serialization
+    #   oslo.utils
+    #   python-cinderclient
+    #   python-glanceclient
+    #   python-keystoneclient
+    #   python-neutronclient
+    #   python-novaclient
+    #   python-openstackclient
+    #   stevedore
+pep8==1.7.1
+    # via -r requirements-dev.in
+pip-tools==5.3.1
+    # via -r requirements-dev.in
+prettytable==0.7.2
+    # via
+    #   -r requirements.txt
+    #   cliff
+    #   python-cinderclient
+    #   python-glanceclient
+    #   python-novaclient
+pycodestyle==2.6.0
+    # via flake8
+pycparser==2.20
+    # via
+    #   -r requirements.txt
+    #   cffi
+pyflakes==2.2.0
+    # via
+    #   -r requirements-dev.in
+    #   flake8
+pyinotify==0.9.6
+    # via
+    #   -r requirements.txt
+    #   oslo.log
+pyopenssl==19.1.0
+    # via
+    #   -r requirements.txt
+    #   python-glanceclient
+pyparsing==2.4.7
+    # via
+    #   -r requirements.txt
+    #   cliff
+    #   oslo.utils
+    #   packaging
+pyperclip==1.8.0
+    # via
+    #   -r requirements.txt
+    #   cmd2
+pyrsistent==0.16.0
+    # via
+    #   -r requirements.txt
+    #   jsonschema
+python-cinderclient==7.1.0
+    # via
+    #   -r requirements.txt
+    #   python-openstackclient
+python-dateutil==2.8.1
+    # via
+    #   -r requirements.txt
+    #   oslo.log
+python-glanceclient==3.2.1
+    # via -r requirements.txt
+python-keystoneclient==4.1.0
+    # via
+    #   -r requirements.txt
+    #   python-neutronclient
+    #   python-openstackclient
+python-neutronclient==7.2.0
+    # via -r requirements.txt
+python-novaclient==17.2.0
+    # via
+    #   -r requirements.txt
+    #   python-openstackclient
+python-openstackclient==5.3.1
+    # via -r requirements.txt
+python-swiftclient==3.10.0
+    # via -r requirements.txt
+pytz==2020.1
+    # via
+    #   -r requirements.txt
+    #   oslo.serialization
+    #   oslo.utils
+pyudev==0.22.0
+    # via -r requirements.txt
+pyyaml==5.4
+    # via
+    #   -r requirements.txt
+    #   ansible
+    #   cliff
+    #   openstacksdk
+    #   oslo.config
+requests==2.24.0
+    # via
+    #   -r requirements.txt
+    #   keystoneauth1
+    #   oslo.config
+    #   python-cinderclient
+    #   python-glanceclient
+    #   python-keystoneclient
+    #   python-neutronclient
+    #   python-swiftclient
+requestsexceptions==1.4.0
+    # via
+    #   -r requirements.txt
+    #   openstacksdk
+rfc3986==1.4.0
+    # via
+    #   -r requirements.txt
+    #   oslo.config
+simplejson==3.17.2
+    # via
+    #   -r requirements.txt
+    #   osc-lib
+    #   python-cinderclient
+    #   python-neutronclient
+    #   python-novaclient
+six==1.15.0
+    # via
+    #   -r requirements.txt
+    #   cliff
+    #   cryptography
+    #   debtcollector
+    #   jsonschema
+    #   keystoneauth1
+    #   munch
+    #   oslo.i18n
+    #   oslo.utils
+    #   packaging
+    #   pip-tools
+    #   pyopenssl
+    #   pyrsistent
+    #   python-cinderclient
+    #   python-dateutil
+    #   python-keystoneclient
+    #   python-openstackclient
+    #   python-swiftclient
+    #   pyudev
+    #   warlock
+stevedore==3.2.0
+    # via
+    #   -r requirements.txt
+    #   cliff
+    #   dogpile.cache
+    #   keystoneauth1
+    #   osc-lib
+    #   oslo.config
+    #   python-keystoneclient
+    #   python-novaclient
+    #   python-openstackclient
+typed-ast==1.4.1
+    # via mypy
+typing-extensions==3.7.4.3
+    # via mypy
+urllib3==1.25.10
+    # via
+    #   -r requirements.txt
+    #   requests
+warlock==1.3.3
+    # via
+    #   -r requirements.txt
+    #   python-glanceclient
+wcwidth==0.2.5
+    # via
+    #   -r requirements.txt
+    #   cmd2
+wrapt==1.12.1
+    # via
+    #   -r requirements.txt
+    #   debtcollector
+    #   python-glanceclient
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
