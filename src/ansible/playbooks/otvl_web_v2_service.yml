@@ -1,0 +1,25 @@
+- hosts: "*"
+  gather_facts: False
+  tasks:
+  - name: Load default variables
+    include_vars:
+      dir: vars/defaults
+  tags: always
+
+- hosts: otvl_web_v2_build_group
+  gather_facts: False
+  become: yes
+  roles:
+  - otvl_service/otvl_web_v2/docker_build
+  tags:
+  - otvl_web_v2_build
+
+- hosts: otvl_web_v2_run_group
+  gather_facts: False
+  become: yes
+  roles:
+  - otvl_service/otvl_web_v2/docker_run
+  tags:
+  - otvl_web_v2_build
+
+###

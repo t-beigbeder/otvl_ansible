@@ -1,0 +1,12 @@
+---
+# meta file for otvl_service/docker/docker_build
+
+dependencies:
+  - role: otvl_service/docker/base_docker
+    tags:
+    - base_docker
+  - role: otvl_service/traefik
+    tags:
+    - docker_build
+
+###

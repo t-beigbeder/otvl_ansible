@@ -6,5 +6,5 @@ python-novaclient
 python-swiftclient
 python-openstackclient
 ansible
-openstacksdk
+openstacksdk>=0.39.0,<0.53
 pyudev

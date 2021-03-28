@@ -1,0 +1,42 @@
+---
+# run_site tasks file for otvl_service/otvl_web_v2/docker_run
+
+- name: run_site display the site {{ current_site_item.name }} information
+  debug:
+    msg: "site item is {{ current_site_item }}"
+  when: combined_otvl.debug
+
+- name: Create the site directory for the run for {{ current_site_item.name }}
+  ansible.builtin.file:
+    path: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}"
+    state: directory
+    mode: "755"
+
+- name: Loop over dirs for {{ current_site_item.name }}
+  include_tasks: run_site_set_run_dir.yml
+  loop: "{{ current_site_item.data }}"
+  loop_control:
+    loop_var: current_site_item_data_entry
+
+- name: Run the docker stack as a container service for {{ current_site_item.name }}
+  include_tasks: "otvl_service/docker/base_docker/tasks/declare_stkaas.yml"
+  vars:
+    service_name: "{{ current_site_item.name }}"
+    working_directory: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site{{ current_site_item.git.otvl_site.site_build_dir }}"
+    stk_env:
+      OTVL_WEB_REGISTRY: "{{ combined_otvl.otvl_web_v2.docker_registry }}"
+      OTVL_WEB_SERVER_NAME: "{{ current_site_item.server_name }}"
+      OTVL_WEB_APP_PORT: "{{ current_site_item.app_port }}"
+      OTVL_WEB_ASSETS_PATH: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}/assets"
+      OTVL_WEB_APP_DATA_PATH: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}"
+      OTVL_WEB_ENABLE_BOTS: "{{ (current_site_item.enable_bots|default(false)) | ternary('1', '', '') }}"
+
+- name: Add reverse proxy configuration for {{ current_site_item.name }}
+  template:
+    src: traefik/otvl_web_app.yml
+    dest: "{{ combined_otvl.config_paths.data }}/traefik/dynamic_conf/{{ current_site_item.name }}.yml"
+    owner: root
+    group: root
+    mode: "644"
+
+###

@@ -30,7 +30,7 @@
 
 - name:
   pause:
-    prompt: "Ah ah! you want to deploy in production, do you want to continue?"
+    prompt: "Well! you want to deploy in production, do you want to continue?"
   when: combined_otvl.prod
 
 - name: Create otvl root directories

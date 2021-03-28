@@ -1,0 +1,12 @@
+---
+# otvl_service/base_service/tasks/remove_service_status_file.yml
+# remove service status
+# vars:
+#   ssf_name: service status file name
+
+- name: "Service status {{ ssf_name }} removed"
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/installation_flags/ssf_{{ ssf_name }}.txt"
+    state: absent
+
+###

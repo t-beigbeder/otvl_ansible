@@ -1,0 +1,28 @@
+---
+# run_site_set_run_dir tasks file for otvl_service/otvl_web_v2/docker_run
+
+- name: run_site_set_run_dir_from_git display the site information
+  debug:
+    msg:
+    - "site_item item is {{ site_item }}"
+    - "data_entry item is {{ data_entry }}"
+  when: combined_otvl.debug
+
+- name: Checkout the git project containing run data site {{ site_item.name }} entry {{ data_entry.entry }}
+  git:
+    repo: "{{ data_entry.git.repo }}"
+    dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ site_item.name }}/{{ data_entry.git.name }}"
+    version: "{{ data_entry.git.version }}"
+    update: true
+    recursive: no
+    force: yes
+  when: "data_entry.git.repo | default('')"
+
+- name: Copy the git repo dir to the data run space for site {{ site_item.name }} entry {{ data_entry.entry }}
+  ansible.builtin.copy:
+    src: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ site_item.name }}/{{ data_entry.git.name }}/{{ data_entry.git.repo_entry }}"
+    remote_src: yes
+    dest: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ site_item.name }}/{{ data_entry.git.parent_dir | default('') }}"
+    mode: "u=rwX,g=rX,o=rX"
+
+###

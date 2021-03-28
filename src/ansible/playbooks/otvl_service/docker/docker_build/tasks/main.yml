@@ -1,0 +1,32 @@
+---
+# main tasks file for otvl_service/docker/docker_build
+
+
+- name: Install gnupg2 pass to enable docker login
+  ansible.builtin.apt:
+    pkg:
+      - gnupg2
+      - pass
+
+- name: Create the docker_registry_caas registry directory
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/docker_registry"
+    state: directory
+    mode: 0755
+
+- name: Run the docker registry as a container service
+  include_tasks: "otvl_service/docker/base_docker/tasks/declare_caas.yml"
+  vars:
+    service_name: docker_registry_caas
+    image_reference: registry:2
+    docker_extra_opts: "-p 5000:5000 -v {{ combined_otvl.config_paths.data }}/docker_registry:/var/lib/registry"
+
+- name: Configure traefik for access to the docker registry
+  template:
+    src: "traefik/{{ combined_otvl.traefik.docker_registry_conf | default('docker_registry.yml') }}"
+    dest: "{{ combined_otvl.config_paths.data }}/traefik/dynamic_conf/docker_registry.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+###

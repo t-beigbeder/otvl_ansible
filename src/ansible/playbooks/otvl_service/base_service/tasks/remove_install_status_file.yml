@@ -1,0 +1,12 @@
+---
+# otvl_service/base_service/tasks/remove_install_status_file.yml
+# remove install status
+# vars:
+#   isf_name: install status file name
+
+- name: "Install status {{ isf_name }} removed"
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/installation_flags/isf_{{ isf_name }}.txt"
+    state: absent
+
+###

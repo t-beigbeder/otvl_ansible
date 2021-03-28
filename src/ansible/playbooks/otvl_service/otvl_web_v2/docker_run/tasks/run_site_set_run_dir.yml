@@ -1,0 +1,31 @@
+---
+# run_site_set_run_dir tasks file for otvl_service/otvl_web_v2/docker_run
+
+- name: run_site_set_run_dir display the site {{ current_site_item_data_entry }} information
+  debug:
+    msg: "current_site_item_data_entry item is {{ current_site_item_data_entry }}"
+  when: combined_otvl.debug
+
+- name: run_site_set_run_dir checkout git repository for the site {{ current_site_item.name }} dir {{ current_site_item_data_entry.entry }}
+  include_tasks: run_site_set_run_dir_from_git.yml
+  vars:
+    site_item: "{{ current_site_item }}"
+    data_entry: "{{ current_site_item_data_entry }}"
+  when: "'git' in current_site_item_data_entry"
+
+- name: run_site_set_run_dir copy remote for the site {{ current_site_item.name }} dir {{ current_site_item_data_entry.entry }}
+  ansible.builtin.copy:
+    src: "{{ current_site_item_data_entry.remote_src }}"
+    remote_src: yes
+    dest: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}/{{ current_site_item_data_entry.parent_dir | default('') }}"
+    mode: "u=rwX,g=rX,o=rX"
+  when: "'remote_src' in current_site_item_data_entry"
+
+- name: run_site_set_run_dir ln -s for the site {{ current_site_item.name }} dir {{ current_site_item_data_entry.entry }}
+  ansible.builtin.file:
+    src: "{{ current_site_item_data_entry.sym_link_from }}"
+    dest: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}/{{ current_site_item_data_entry.entry }}"
+    state: link
+  when: "'sym_link_from' in current_site_item_data_entry"
+
+###

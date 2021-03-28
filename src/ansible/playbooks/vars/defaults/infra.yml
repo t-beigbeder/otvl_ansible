@@ -5,10 +5,8 @@ default_infra:
   debug: false
   image_name: image_name_to_be_defined
   key_name: key_name_to_be_defined
-  servers:
-    bastion:
-      flavor: bastion_flavor_to_be_defined
-      name: otvl-bastion
+  servers: {}
+
   networks:
     external:
       name: external_network_to_be_defined

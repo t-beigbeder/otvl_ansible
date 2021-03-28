@@ -1,0 +1,21 @@
+[Unit]
+Description=Runs docker container {{ service_name }} from {{ working_directory }}
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+TimeoutStartSec=240
+Restart=always
+RestartSec=120
+WorkingDirectory={{ working_directory }}
+{% for key, value in stk_env.items() %}
+Environment="{{ key }}={{ value }}"
+{% endfor %}
+ExecStartPre=-/usr/local/bin/docker-compose -p {{ service_name }} down
+ExecStartPre=-/usr/local/bin/docker-compose -p {{ service_name }} pull
+ExecStart=/usr/local/bin/docker-compose -p {{ service_name }} up --no-build
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target

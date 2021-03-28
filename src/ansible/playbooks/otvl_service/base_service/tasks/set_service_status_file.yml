@@ -1,0 +1,17 @@
+---
+# otvl_service/base_service/tasks/set_service_status_file.yml
+# read service status
+# vars:
+#   ssf_name: service status file name
+#   ssf_status: service status to be set
+#   ssf_force: yes/no force setting service status if file already present
+# returns set_ssf.changed if file created
+
+- name: "Service status {{ ssf_name }} created"
+  copy:
+    dest: "{{ combined_otvl.config_paths.data }}/installation_flags/ssf_{{ ssf_name }}.txt"
+    content: "{{ ssf_status }}"
+    force: "{{ ssf_force }}"
+  register: set_ssf
+
+###

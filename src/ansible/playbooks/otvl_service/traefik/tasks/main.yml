@@ -1,0 +1,33 @@
+---
+# main tasks file for otvl_service/traefik
+
+- name: Create the traefik configuration directory
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/traefik/dynamic_conf"
+    state: directory
+    mode: 0755
+
+- name: Create the traefik static configuration
+  template:
+    src: traefik/static_config.yml
+    dest: "{{ combined_otvl.config_paths.data }}/traefik/static_config.yml"
+    owner: root
+    group: root
+    mode: 0644
+  register: traefik_static_config
+
+- name: "Set traefik caas to be created if configuration changed"
+  include_tasks: "otvl_service/base_service/tasks/remove_service_status_file.yml"
+  vars:
+    ssf_name: traefik_caas
+  when: traefik_static_config.changed
+
+- name: Run the docker registry as a container service
+  include_tasks: "otvl_service/docker/base_docker/tasks/declare_caas.yml"
+  vars:
+    service_name: traefik_caas
+    image_reference: traefik:v2.4
+    docker_extra_opts: "{{ combined_otvl.traefik.docker_ports_mapping | default('-p 80:80 -p 443:443') }} {{ combined_otvl.traefik.docker_traefik_extra_opts | default('') }} -v {{ combined_otvl.config_paths.data }}/traefik:/traefik"
+    docker_run_args: "--configFile=/traefik/static_config.yml"
+
+###

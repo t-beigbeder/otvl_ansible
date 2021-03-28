@@ -1,0 +1,13 @@
+---
+# meta file for otvl_service/traefik
+
+dependencies:
+  - role: otvl_service/docker/base_docker
+    tags:
+    - base_docker
+
+  - role: otvl_service/base_service
+    tags:
+    - otvl_service_base
+
+###

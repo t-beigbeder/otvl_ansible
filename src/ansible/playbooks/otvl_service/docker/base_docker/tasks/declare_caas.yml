@@ -1,0 +1,58 @@
+---
+# otvl_service/docker/base_docker/tasks/declare_caas.yml
+# declare a systemd service to run a container
+# vars:
+#   service_name: systemd service name
+#   image_reference: reference of the image suitable to docker pull and docker run
+#   docker_extra_opts: -p 5000:5000 -v /mnt/registry:/var/lib/registry
+#   docker_run_args: "--configFile=/traefik/static_config.yml"
+
+- name: "Create {{ service_name }} systemd service file for the site"
+  template:
+    src: systemd/caas.service
+    dest: /etc/systemd/system/{{ service_name }}.service
+    owner: root
+    group: root
+    mode: 0644
+  register: caas_config
+
+- name: "Set {{ service_name }} to be created if configuration changed"
+  include_tasks: "otvl_service/base_service/tasks/remove_service_status_file.yml"
+  vars:
+    ssf_name: "{{ service_name }}"
+  when: caas_config.changed
+
+- name: "Set {{ service_name }} to be created the first time"
+  include_tasks: "otvl_service/base_service/tasks/set_service_status_file.yml"
+  vars:
+    ssf_name: "{{ service_name }}"
+    ssf_status: created
+    ssf_force: no
+
+- name: Create and run systemd service for {{ service_name }}
+
+  block:
+  - name: Enable {{ service_name }} systemd service
+    systemd:
+      name: "{{ service_name }}"
+      enabled: yes
+
+  - name: Restart {{ service_name }} systemd service
+    systemd:
+      name: "{{ service_name }}"
+      state: restarted
+      daemon_reload: yes
+
+  rescue:
+  - name: "Service {{ service_name }} creation failed, cancel status"
+    include_tasks: "otvl_service/base_service/tasks/remove_service_status_file.yml"
+    vars:
+      ssf_name: "{{ service_name }}"
+
+  - name: "Service {{ service_name }} creation failed, raise"
+    fail:
+      msg: "Service {{ service_name }} creation failed, raise"
+
+  when: set_ssf.changed
+
+###

@@ -1,0 +1,57 @@
+---
+# otvl_service/docker/base_docker/tasks/declare_stkaas.yml
+# declare a systemd service to run a container
+# vars:
+#   service_name: systemd service name without _stkaas suffix
+#   working_directory: where docker-compose.yml file is stored
+#   stk_env: environment for the stack to be used by docker-compose
+
+- name: "Create {{ service_name }}_stkaas systemd service file for the site"
+  template:
+    src: systemd/stkaas.service
+    dest: /etc/systemd/system/{{ service_name }}_stkaas.service
+    owner: root
+    group: root
+    mode: 0644
+  register: stkaas_config
+
+- name: "Set {{ service_name }}_stkaas to be created if configuration changed"
+  include_tasks: "otvl_service/base_service/tasks/remove_service_status_file.yml"
+  vars:
+    ssf_name: "{{ service_name }}_stkaas"
+  when: caas_config.changed
+
+- name: "Set {{ service_name }}_stkaas to be created the first time"
+  include_tasks: "otvl_service/base_service/tasks/set_service_status_file.yml"
+  vars:
+    ssf_name: "{{ service_name }}_stkaas"
+    ssf_status: created
+    ssf_force: no
+
+- name: Create and run systemd service for {{ service_name }}_stkaas
+
+  block:
+  - name: Enable {{ service_name }}_stkaas systemd service
+    systemd:
+      name: "{{ service_name }}_stkaas"
+      enabled: yes
+
+  - name: Restart {{ service_name }}_stkaas systemd service
+    systemd:
+      name: "{{ service_name }}_stkaas"
+      state: restarted
+      daemon_reload: yes
+
+  rescue:
+  - name: "Service {{ service_name }}_stkaas creation failed, cancel state"
+    include_tasks: "otvl_service/base_service/tasks/remove_service_status_file.yml"
+    vars:
+      ssf_name: "{{ service_name }}_stkaas"
+
+  - name: "Service {{ service_name }}_stkaas creation failed, raise"
+    fail:
+      msg: "Service {{ service_name }}_stkaas creation failed, raise"
+
+  when: set_ssf.changed
+
+###

@@ -1,0 +1,33 @@
+log:
+  level: INFO
+
+api:
+  insecure: false
+
+providers:
+  file:
+    directory: /traefik/dynamic_conf
+    watch: true
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+
+  websecure:
+    address: ':443'
+    http:
+      tls:
+        certResolver: le-resolver
+
+certificatesResolvers:
+  le-resolver:
+    acme:
+      #caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      caServer: https://acme-v02.api.letsencrypt.org/directory
+      storage: /traefik/acme.json
+      httpChallenge:
+        entryPoint: web

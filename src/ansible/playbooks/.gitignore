@@ -1,2 +1,2 @@
-files
-templates
+src/ansible/playbooks/files
+src/ansible/playbooks/templates

@@ -1,0 +1,19 @@
+[Unit]
+Description=Runs docker container {{ service_name }} from image {{ image_reference }}
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+TimeoutStartSec=240
+Restart=always
+RestartSec=120
+ExecStartPre=-/usr/bin/docker stop {{ service_name }}
+ExecStartPre=-/usr/bin/docker rm {{ service_name }}
+ExecStartPre=/usr/bin/docker pull {{ image_reference }}
+ExecStartPre=-/usr/bin/docker network create --driver bridge {{ service_name }}
+ExecStart=/usr/bin/docker run --rm {{ docker_extra_opts }} --name {{ service_name }} --network {{ service_name }} {{ image_reference }} {{ docker_run_args | default("") }}
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target

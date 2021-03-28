@@ -1,0 +1,84 @@
+http:
+  routers:
+
+    to-{{ current_site_item.name }}-api-private-https:
+      rule: "Host(`{{ current_site_item.server_name }}`) && Path(`/api/v2/content/private{n:.*}`,`/api/v2/content/prive{n:.*}`,`/api/v2/html/private{n:.*}`,`/api/v2/html/prive{n:.*}`)"
+      middlewares:
+      - {{ current_site_item.name }}-private-basic-auth
+      service: {{ current_site_item.name }}-api
+      tls:
+        certResolver: le-resolver
+
+    to-{{ current_site_item.name }}-api-sitemap-https:
+      rule: "Host(`{{ current_site_item.server_name }}`) && PathPrefix(`/sitemap.xml`)"
+      middlewares:
+      - {{ current_site_item.name }}-add-api
+      service: {{ current_site_item.name }}-api
+      tls:
+        certResolver: le-resolver
+
+    to-{{ current_site_item.name }}-api-https:
+      rule: "Host(`{{ current_site_item.server_name }}`) && PathPrefix(`/api/`)"
+      service: {{ current_site_item.name }}-api
+      tls:
+        certResolver: le-resolver
+
+    to-{{ current_site_item.name }}-api-html-private-https:
+      rule: "Host(`{{ current_site_item.server_name }}`) && Path(`/private{n:.*}`,`/prive{n:.*}`) && HeadersRegexp(`User-Agent`, `(otvl_begin|Googlebot|Bingbot|bingbot|BingPreview|YandexWebmaster|YandexBot|LinkedInBot|PocketParser|Slurp|Baiduspider|Sogou|Exabot|facebot|facebookexternalhit|ia_archiver|DuckDuckBot|WhatsApp|Twitterbot|Applebot|AhrefsBot|PaperLiBot|otvl_end)`)"
+      priority: 4
+      middlewares:
+      - {{ current_site_item.name }}-private-basic-auth
+      - {{ current_site_item.name }}-add-api-html
+      service: {{ current_site_item.name }}-api
+      tls:
+        certResolver: le-resolver
+
+    to-{{ current_site_item.name }}-api-html-https:
+      rule: "Host(`{{ current_site_item.server_name }}`) && HeadersRegexp(`User-Agent`, `(otvl_begin|Googlebot|Bingbot|bingbot|BingPreview|YandexWebmaster|YandexBot|LinkedInBot|PocketParser|Slurp|Baiduspider|Sogou|Exabot|facebot|facebookexternalhit|ia_archiver|DuckDuckBot|WhatsApp|Twitterbot|Applebot|AhrefsBot|PaperLiBot|otvl_end)`)"
+      priority: 3
+      middlewares:
+      - {{ current_site_item.name }}-add-api-html
+      service: {{ current_site_item.name }}-api
+      tls:
+        certResolver: le-resolver
+
+    to-{{ current_site_item.name }}-otvl-web-sample-private-https:
+      rule: "Host(`{{ current_site_item.server_name }}`) && Path(`/private{n:.*}`,`/prive{n:.*}`)"
+      priority: 2
+      middlewares:
+      - {{ current_site_item.name }}-private-basic-auth
+      service: {{ current_site_item.name }}-app
+      tls:
+        certResolver: le-resolver
+
+    to-{{ current_site_item.name }}-otvl-web-sample-https:
+      rule: "Host(`{{ current_site_item.server_name }}`)"
+      priority: 1
+      service: {{ current_site_item.name }}-app
+      tls:
+        certResolver: le-resolver
+
+  middlewares:
+    {{ current_site_item.name }}-add-api:
+      addPrefix:
+        prefix: "/api/v2"
+
+    {{ current_site_item.name }}-add-api-html:
+      addPrefix:
+        prefix: "/api/v2/html"
+
+    {{ current_site_item.name }}-private-basic-auth:
+      basicAuth:
+        users:
+          - "qigonggo:$apr1$BZ3stzt5$FlYaD1Nt37KqjddDbpNaQ."
+
+  services:
+    {{ current_site_item.name }}-app:
+      loadBalancer:
+        servers:
+        - url: http://{{ inventory_hostname }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.local_app_port }}
+
+    {{ current_site_item.name }}-api:
+      loadBalancer:
+        servers:
+        - url: http://{{ inventory_hostname }}{{ combined_infra.networks.appli.host_suffix }}:{{ current_site_item.local_api_port }}
