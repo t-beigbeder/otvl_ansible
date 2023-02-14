@@ -30,6 +30,7 @@ default_infra:
     bastion_access: otvl-bastion-access-sg
     admin_traffic: otvl-admin-traffic-sg
     appli_traffic: otvl-appli-traffic-sg
+    ext_access: otvl-ext-sg
 
   dns:
     resolv_conf_content: |

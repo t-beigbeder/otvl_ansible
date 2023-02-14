@@ -10,5 +10,6 @@
   loop: "{{ combined_infra.servers|dict2items }}"
   loop_control:
     loop_var: var_server
+  when: "'bastion_group' in var_server.value.groups or not create_only_bastion"
 
 ###

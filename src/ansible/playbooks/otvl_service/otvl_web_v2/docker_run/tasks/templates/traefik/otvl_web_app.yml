@@ -10,7 +10,7 @@ http:
         certResolver: le-resolver
 
     to-{{ current_site_item.name }}-api-sitemap-https:
-      rule: "Host(`{{ current_site_item.server_name }}`) && PathPrefix(`/sitemap.xml`)"
+      rule: "Host(`{{ current_site_item.server_name }}`) && Path(`/sitemap.xml`)"
       middlewares:
       - {{ current_site_item.name }}-add-api
       service: {{ current_site_item.name }}-api
@@ -20,6 +20,13 @@ http:
     to-{{ current_site_item.name }}-api-https:
       rule: "Host(`{{ current_site_item.server_name }}`) && PathPrefix(`/api/`)"
       service: {{ current_site_item.name }}-api
+      tls:
+        certResolver: le-resolver
+
+    to-{{ current_site_item.name }}-nobot:
+      rule: "Host(`{{ current_site_item.server_name }}`) && (PathPrefix(`/assets/`) || Path(`/favicon.ico`,`/robots.txt`))"
+      priority: 5
+      service: {{ current_site_item.name }}-app
       tls:
         certResolver: le-resolver
 
@@ -42,7 +49,7 @@ http:
       tls:
         certResolver: le-resolver
 
-    to-{{ current_site_item.name }}-otvl-web-sample-private-https:
+    to-{{ current_site_item.name }}-private-https:
       rule: "Host(`{{ current_site_item.server_name }}`) && Path(`/private{n:.*}`,`/prive{n:.*}`)"
       priority: 2
       middlewares:
@@ -51,7 +58,7 @@ http:
       tls:
         certResolver: le-resolver
 
-    to-{{ current_site_item.name }}-otvl-web-sample-https:
+    to-{{ current_site_item.name }}-https:
       rule: "Host(`{{ current_site_item.server_name }}`)"
       priority: 1
       service: {{ current_site_item.name }}-app

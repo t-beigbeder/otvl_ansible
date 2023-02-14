@@ -4,38 +4,18 @@
   set_fact:
     combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
 
-- name: Install virtualenv for ansible on the bastion
-  command: apt-get install -y --no-install-recommends virtualenv
-  args:
-    creates: /usr/bin/virtualenv
-    warn: false
-
-- name: Install git for ansible on the bastion
-  command: apt-get install -y --no-install-recommends git
-  args:
-    creates: /usr/bin/git
-    warn: false
-
-- name: Create venv directory on the bastion
-  file:
-    path: "{{ combined_otvl.config_paths.pkg }}/venv"
-    state: directory
-    mode: 0755
-
-- name: Create ansible virtualenv on the bastion
-  command: virtualenv -p python3 "{{ combined_otvl.config_paths.pkg }}/venv/ansible"
-  args:
-    creates: "{{ combined_otvl.config_paths.pkg }}/venv/ansible/bin/activate"
-
-- name: Install ansible in virtualenv on the bastion
-  command: "{{ combined_otvl.config_paths.pkg }}/venv/ansible/bin/pip install ansible"
-  args:
-    creates: "{{ combined_otvl.config_paths.pkg }}/venv/ansible/bin/ansible"
-
 - name: Copy ssh admin private key to on the bastion
   copy:
     src: ssh/admin_key
     dest: /home/{{ combined_otvl.config_vars.admin_user }}/.ssh/{{ combined_otvl.config_vars.admin_key }}
+    owner: "{{ combined_otvl.config_vars.admin_user }}"
+    group: "{{ combined_otvl.config_vars.admin_user }}"
+    mode: 0600
+
+- name: Copy ssh admin public key to on the bastion
+  copy:
+    src: ssh/admin_key.pub
+    dest: /home/{{ combined_otvl.config_vars.admin_user }}/.ssh/{{ combined_otvl.config_vars.admin_key }}.pub
     owner: "{{ combined_otvl.config_vars.admin_user }}"
     group: "{{ combined_otvl.config_vars.admin_user }}"
     mode: 0600

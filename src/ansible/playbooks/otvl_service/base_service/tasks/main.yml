@@ -59,4 +59,28 @@
     - otvl_apt_subs.sh
     - otvl_sbin_lib.sh
 
+- name: Install system pre-requisites
+  ansible.builtin.apt:
+    pkg:
+      - fail2ban
+      - rsync
+    state: present
+    update_cache: yes
+    install_recommends: no
+
+- name: Enable journald persistence
+  file:
+    path: /var/log/journal
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  register: journal_dir
+
+- name: Restart systemd-journald systemd service
+  systemd:
+    name: systemd-journald
+    state: restarted
+  when: journal_dir.changed
+
 ###

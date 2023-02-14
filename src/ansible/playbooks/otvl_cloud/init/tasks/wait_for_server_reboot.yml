@@ -5,6 +5,7 @@
   wait_for_connection:
     delay: 45
     timeout: 320
+  when: "not (inhibit_wait_for_server_reboot | default(false))"
 
 - name: "wait_for_server_reboot_add_delay"
   wait_for:

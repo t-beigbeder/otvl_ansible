@@ -29,6 +29,7 @@
       OTVL_WEB_APP_PORT: "{{ current_site_item.app_port }}"
       OTVL_WEB_ASSETS_PATH: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}/assets"
       OTVL_WEB_APP_DATA_PATH: "{{ combined_otvl.config_paths.data }}/otvl_web/{{ current_site_item.name }}"
+      OTVL_WEB_FULL_ACCESS_LOG: "{{ (current_site_item.full_access_log|default(true)) | ternary('1', '', '') }}"
       OTVL_WEB_ENABLE_BOTS: "{{ (current_site_item.enable_bots|default(false)) | ternary('1', '', '') }}"
 
 - name: Add reverse proxy configuration for {{ current_site_item.name }}

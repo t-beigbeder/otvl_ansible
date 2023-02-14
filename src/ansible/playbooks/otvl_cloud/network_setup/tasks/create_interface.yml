@@ -18,20 +18,19 @@
   register:
     otvl_os_port
 
-- name: "Retrieve facts about the {{ var_server.key }} server {{ var_server.value.name }} on openstack"
-  os_server_facts:
+- openstack.cloud.server_info:
     cloud: "{{ cloud_name }}"
-    server: "{{ var_server.value.name }}"
     filters:
       metadata:
         hostname: "{{ var_server.value.name }}"
+  register: os_server_info
   when: "otvl_os_port.changed or otvl_os_port.port.status == 'DOWN' or combined_infra.otvl_configure.force_otvl_os_port_check"
 
 - name: "Attach interface {{ var_ip.key }} interface on {{ var_server.value.name }}"
   shell: "{{ combined_infra.otvl_configure.openstack_path }}/openstack --os-cloud {{ cloud_name }} server add port {{ var_server.value.name }} {{ var_server.key }}_{{ var_ip.key }}"
   ignore_errors: yes
   register: otvl_shell_os_server_add_port
-  when: "(otvl_os_port.changed or otvl_os_port.port.status == 'DOWN' or combined_infra.otvl_configure.force_otvl_os_port_check) and (openstack_servers[0].addresses[combined_infra.networks[var_ip.key].name] is not defined)"
+  when: "(otvl_os_port.changed or otvl_os_port.port.status == 'DOWN' or combined_infra.otvl_configure.force_otvl_os_port_check) and (os_server_info.openstack_servers[0].addresses[combined_infra.networks[var_ip.key].name] is not defined)"
 
 - name: "Handle otvl_shell_os_server_add_port errors for the {{ var_ip.key }} interface on {{ var_server.value.name }}"
   os_port:

@@ -5,6 +5,10 @@
   set_fact:
     combined_infra: "{{ default_infra | combine(infra, recursive=True) }}"
 
+- name:
+  pause:
+    prompt: "Pause is enabled to confirm cloud is {{ cloud_name }}, do you want to continue?"
+
 - name: Loop over internal networks
   include_tasks: create_network.yml
   loop: "{{ combined_infra.networks|dict2items }}"
@@ -49,6 +53,47 @@
     remote_ip_prefix: ::/0
   when: combined_infra.security_groups.require_open_egress
 
+- name: Create a security group {{ combined_infra.security_groups.ext_access }} for http[s] and outbound access
+  os_security_group:
+    cloud: "{{ cloud_name }}"
+    state: present
+    name: "{{ combined_infra.security_groups.ext_access }}"
+
+- name: Create a security group rule HTTP on {{ combined_infra.security_groups.ext_access }}
+  os_security_group_rule:
+    cloud: "{{ cloud_name }}"
+    security_group: "{{ combined_infra.security_groups.ext_access }}"
+    protocol: tcp
+    port_range_min: 80
+    port_range_max: 80
+    remote_ip_prefix: 0.0.0.0/0
+
+- name: Create a security group rule HTTPS on {{ combined_infra.security_groups.ext_access }}
+  os_security_group_rule:
+    cloud: "{{ cloud_name }}"
+    security_group: "{{ combined_infra.security_groups.ext_access }}"
+    protocol: tcp
+    port_range_min: 443
+    port_range_max: 443
+    remote_ip_prefix: 0.0.0.0/0
+
+- name: Create a security group rule egress v4 on {{ combined_infra.security_groups.ext_access }}
+  os_security_group_rule:
+    cloud: "{{ cloud_name }}"
+    security_group: "{{ combined_infra.security_groups.ext_access }}"
+    direction: egress
+    remote_ip_prefix: 0.0.0.0/0
+  when: combined_infra.security_groups.require_open_egress
+
+- name: Create a security group rule egress v6 on {{ combined_infra.security_groups.ext_access }}
+  os_security_group_rule:
+    cloud: "{{ cloud_name }}"
+    security_group: "{{ combined_infra.security_groups.ext_access }}"
+    direction: egress
+    ethertype: IPv6
+    remote_ip_prefix: ::/0
+  when: combined_infra.security_groups.require_open_egress
+
 - name: Create a security group {{ combined_infra.security_groups.admin_traffic }} for admin internal traffic
   os_security_group:
     cloud: "{{ cloud_name }}"
@@ -82,5 +127,6 @@
 - name: Loop over servers
   include_tasks: create_server.yml
   loop: "{{ combined_infra.servers|dict2items }}"
+  when: "'bastion_group' in item.value.groups or not create_only_bastion"
 
 ###

@@ -20,6 +20,6 @@
   loop: "{{ combined_otvl.otvl_web_v2.sites[otvl_logical_name].site_items }}"
   loop_control:
     loop_var: current_site_item
-  when: "(current_site_item.skip_deployment | default(false)) != true"
+  when: "(current_site_item.skip_deploy | default(false)) != true"
 
 ###

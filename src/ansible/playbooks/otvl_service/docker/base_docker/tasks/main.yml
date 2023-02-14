@@ -47,4 +47,16 @@
     dest: /usr/local/bin/docker-compose
     mode: 755
 
+- name: Configure the docker daemon
+  ansible.builtin.copy:
+    src: "{{ combined_otvl.docker.daemon_json_path | default('files/docker/daemon.json') }}"
+    dest: "/etc/docker/daemon.json"
+  register: docker_daemon_json_path
+
+- name: Restart docker systemd service
+  systemd:
+    name: docker
+    state: restarted
+  when: docker_daemon_json_path.changed
+
 ###

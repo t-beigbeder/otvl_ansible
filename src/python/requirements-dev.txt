@@ -4,8 +4,6 @@
 #
 #    pip-compile src/python/requirements-dev.in
 #
---index-url http://localhost:3141/root/pypi/+simple/
-
 ansible-base==2.10.6
     # via
     #   -r src/python/requirements.txt
@@ -81,15 +79,6 @@ idna==2.10
     # via
     #   -r src/python/requirements.txt
     #   requests
-importlib-metadata==3.7.3
-    # via
-    #   -r src/python/requirements.txt
-    #   cmd2
-    #   flake8
-    #   jsonschema
-    #   openstacksdk
-    #   oslo.config
-    #   stevedore
 iso8601==0.1.14
     # via
     #   -r src/python/requirements.txt
@@ -387,10 +376,7 @@ stevedore==3.3.0
 typed-ast==1.4.2
     # via mypy
 typing-extensions==3.7.4.3
-    # via
-    #   -r src/python/requirements.txt
-    #   importlib-metadata
-    #   mypy
+    # via mypy
 urllib3==1.26.4
     # via
     #   -r src/python/requirements.txt
@@ -408,10 +394,6 @@ wrapt==1.12.1
     #   -r src/python/requirements.txt
     #   debtcollector
     #   python-glanceclient
-zipp==3.4.1
-    # via
-    #   -r src/python/requirements.txt
-    #   importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip

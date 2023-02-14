@@ -1,5 +1,5 @@
 log:
-  level: INFO
+  level: "{{ combined_otvl.traefik.log_level | default('INFO') }}"
 
 api:
   insecure: false
@@ -26,7 +26,6 @@ entryPoints:
 certificatesResolvers:
   le-resolver:
     acme:
-      #caServer: https://acme-staging-v02.api.letsencrypt.org/directory
       caServer: https://acme-v02.api.letsencrypt.org/directory
       storage: /traefik/acme.json
       httpChallenge:
