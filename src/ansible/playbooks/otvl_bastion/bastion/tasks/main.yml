@@ -4,20 +4,139 @@
   set_fact:
     combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
 
-- name: Copy ssh admin private key to on the bastion
+- name: Copy ssh admin private key on the bastion
   copy:
-    src: ssh/admin_key
+    src: override/bastion/ssh/id_rsa
     dest: /home/{{ combined_otvl.config_vars.admin_user }}/.ssh/{{ combined_otvl.config_vars.admin_key }}
     owner: "{{ combined_otvl.config_vars.admin_user }}"
     group: "{{ combined_otvl.config_vars.admin_user }}"
     mode: 0600
 
-- name: Copy ssh admin public key to on the bastion
+- name: Copy ssh admin public key on the bastion
   copy:
-    src: ssh/admin_key.pub
+    src: override/bastion/ssh/id_rsa.pub
     dest: /home/{{ combined_otvl.config_vars.admin_user }}/.ssh/{{ combined_otvl.config_vars.admin_key }}.pub
     owner: "{{ combined_otvl.config_vars.admin_user }}"
     group: "{{ combined_otvl.config_vars.admin_user }}"
     mode: 0600
+
+- name: Install packages for devops automation
+  ansible.builtin.apt:
+    pkg:
+    - git
+    - virtualenv
+    - python3-dev
+    - gcc
+    - rsync
+    update_cache: yes
+    install_recommends: no
+    state: present
+
+- name: "Create devops user {{ combined_otvl.config_vars.devops_user }}"
+  ansible.builtin.user:
+    name: "{{ combined_otvl.config_vars.devops_user }}"
+    append: yes
+    shell: /bin/bash
+
+- name: "Make devops user {{ combined_otvl.config_vars.devops_user }} sudoer wo passwd"
+  copy:
+    content: "{{ combined_otvl.config_vars.devops_user }} ALL=(ALL) NOPASSWD:ALL"
+    dest: /etc/sudoers.d/devops_nopasswd
+    mode: 0440
+
+- name: "Add devops key as authorized for ssh localhost"
+  ansible.posix.authorized_key:
+    user: "{{ combined_otvl.config_vars.devops_user }}"
+    state: present
+    key: "{{ lookup('file', 'override/bastion/ssh/id_rsa_devops.pub') }}"
+
+- name: Copy ssh devops private key on the bastion
+  copy:
+    src: override/bastion/ssh/id_rsa_devops
+    dest: /home/{{ combined_otvl.config_vars.devops_user }}/.ssh/{{ combined_otvl.config_vars.devops_key }}
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+    mode: 0600
+
+- name: Copy ssh devops public key on the bastion
+  copy:
+    src: override/bastion/ssh/id_rsa_devops.pub
+    dest: /home/{{ combined_otvl.config_vars.devops_user }}/.ssh/{{ combined_otvl.config_vars.devops_key }}.pub
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+    mode: 0600
+
+- name: Checkout git otvl_ansible
+  git:
+    repo: "{{ combined_otvl.config_vars.otvl_ansible_git_repo }}"
+    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible"
+    update: true
+    recursive: no
+    force: yes
+
+- name: Create virtualenv otvl_ansible/venv
+  command: "virtualenv -p python3 /home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv"
+  args:
+    creates: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv"
+    warn: false
+
+- name: Install requirements in virtualenv otvl_ansible/venv
+  command: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv/bin/pip install -r /home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl_ansible/src/python/requirements.txt"
+  args:
+    creates: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv/bin/openstack"
+    warn: false
+
+- name: Copy ansible configuration on the bastion
+  copy:
+    src: override/bastion/ansible/ansible.cfg
+    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/ansible.cfg"
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+    mode: 0600
+
+#- name: Copy ansible inventory git repository on the bastion
+#  copy:
+#    src: "{{ combined_otvl.config_vars.otvl_anprin_local_git_repo_tgz }}"
+#    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/otvl_anprin.tgz"
+#    owner: "{{ combined_otvl.config_vars.devops_user }}"
+#    group: "{{ combined_otvl.config_vars.devops_user }}"
+#  register: otvl_anprin_local_git_repo_tgz_copy
+
+- name: Extract ansible inventory git repository on the bastion
+  unarchive:
+    src: "{{ combined_otvl.config_vars.otvl_anprin_local_git_repo_tgz }}"
+    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/otvl_anprin.git"
+#  when: otvl_anprin_local_git_repo_tgz_copy.changed
+
+- name: Checkout git ansible inventory
+  git:
+    repo: "/home/{{ combined_otvl.config_vars.devops_user }}/otvl_anprin.git"
+    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_anprin"
+    update: true
+    recursive: no
+    force: yes
+
+- name: Create symbolic links to ansible inventory override files
+  ansible.builtin.file:
+    src: ../../../../otvl_anprin/src/ansible/playbooks/files
+    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/src/ansible/playbooks/files"
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+    state: link
+
+- name: Create symbolic links to ansible inventory override templates
+  ansible.builtin.file:
+    src: ../../../../otvl_anprin/src/ansible/playbooks/templates
+    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/src/ansible/playbooks/templates"
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+    state: link
+
+- name: Give files ownership to devops user
+  ansible.builtin.file:
+    dest: "/home/{{ combined_otvl.config_vars.devops_user }}"
+    recurse: yes
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
 
 ###

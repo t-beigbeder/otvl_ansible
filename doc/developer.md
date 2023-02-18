@@ -4,7 +4,7 @@
 
 ### system setup (debian)
 
-  apt install virtualenv python3-dev python-crypto gcc
+  apt install virtualenv python3-dev gcc
 
 ### setup
 

@@ -102,6 +102,21 @@
   register:
     otvl_os_security_group_admin
 
+- name: Create a security group rule ICMP on {{ combined_infra.security_groups.appli_traffic }} for admin internal traffic
+  os_security_group_rule:
+    cloud: "{{ cloud_name }}"
+    security_group: "{{ combined_infra.security_groups.admin_traffic }}"
+    protocol: icmp
+    remote_ip_prefix: "{{ combined_infra.networks.admin.cidr }}"
+  when: otvl_os_security_group_admin.changed
+
+- name: Create a security group rule ingress v4 on {{ combined_infra.security_groups.appli_traffic }} for admin internal traffic
+  os_security_group_rule:
+    cloud: "{{ cloud_name }}"
+    security_group: "{{ combined_infra.security_groups.admin_traffic }}"
+    remote_ip_prefix: "{{ combined_infra.networks.admin.cidr }}"
+  when: otvl_os_security_group_admin.changed
+
 - name: Create a security group {{ combined_infra.security_groups.appli_traffic }} for application internal traffic
   os_security_group:
     cloud: "{{ cloud_name }}"

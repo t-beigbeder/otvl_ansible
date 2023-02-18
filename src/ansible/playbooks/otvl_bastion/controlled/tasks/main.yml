@@ -8,6 +8,6 @@
   authorized_key:
     user: "{{ combined_otvl.config_vars.admin_user }}"
     state: present
-    key: "{{ lookup('file', 'ssh/admin_key.pub') }}"
+    key: "{{ lookup('file', 'override/bastion/ssh/id_rsa.pub') }}"
 
 ###

@@ -12,6 +12,10 @@ default_otvl:
   config_vars:
     admin_user: otvl_admin_user
     admin_key: otvl_admin_key
+    devops_user: devops
+    devops_key: id_rsa_devops
+    otvl_ansible_git_repo: https://github.com/t-beigbeder/otvl_ansible
+    otvl_anprin_local_git_repo_tgz: /path/to/bare/otvl_anprin.git.tar.gz
   apache:
     www: /otvl/www
     user: www-data
