@@ -4,22 +4,6 @@
   set_fact:
     combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
 
-- name: Copy ssh admin private key on the bastion
-  copy:
-    src: override/bastion/ssh/id_rsa
-    dest: /home/{{ combined_otvl.config_vars.admin_user }}/.ssh/{{ combined_otvl.config_vars.admin_key }}
-    owner: "{{ combined_otvl.config_vars.admin_user }}"
-    group: "{{ combined_otvl.config_vars.admin_user }}"
-    mode: 0600
-
-- name: Copy ssh admin public key on the bastion
-  copy:
-    src: override/bastion/ssh/id_rsa.pub
-    dest: /home/{{ combined_otvl.config_vars.admin_user }}/.ssh/{{ combined_otvl.config_vars.admin_key }}.pub
-    owner: "{{ combined_otvl.config_vars.admin_user }}"
-    group: "{{ combined_otvl.config_vars.admin_user }}"
-    mode: 0600
-
 - name: Install packages for devops automation
   ansible.builtin.apt:
     pkg:
@@ -44,28 +28,6 @@
     dest: /etc/sudoers.d/devops_nopasswd
     mode: 0440
 
-- name: "Add devops key as authorized for ssh localhost"
-  ansible.posix.authorized_key:
-    user: "{{ combined_otvl.config_vars.devops_user }}"
-    state: present
-    key: "{{ lookup('file', 'override/bastion/ssh/id_rsa_devops.pub') }}"
-
-- name: Copy ssh devops private key on the bastion
-  copy:
-    src: override/bastion/ssh/id_rsa_devops
-    dest: /home/{{ combined_otvl.config_vars.devops_user }}/.ssh/{{ combined_otvl.config_vars.devops_key }}
-    owner: "{{ combined_otvl.config_vars.devops_user }}"
-    group: "{{ combined_otvl.config_vars.devops_user }}"
-    mode: 0600
-
-- name: Copy ssh devops public key on the bastion
-  copy:
-    src: override/bastion/ssh/id_rsa_devops.pub
-    dest: /home/{{ combined_otvl.config_vars.devops_user }}/.ssh/{{ combined_otvl.config_vars.devops_key }}.pub
-    owner: "{{ combined_otvl.config_vars.devops_user }}"
-    group: "{{ combined_otvl.config_vars.devops_user }}"
-    mode: 0600
-
 - name: Checkout git otvl_ansible
   git:
     repo: "{{ combined_otvl.config_vars.otvl_ansible_git_repo }}"
@@ -81,7 +43,7 @@
     warn: false
 
 - name: Install requirements in virtualenv otvl_ansible/venv
-  command: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv/bin/pip install -r /home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl_ansible/src/python/requirements.txt"
+  command: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv/bin/pip install -r /home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/src/python/requirements.txt"
   args:
     creates: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv/bin/openstack"
     warn: false
@@ -94,18 +56,10 @@
     group: "{{ combined_otvl.config_vars.devops_user }}"
     mode: 0600
 
-#- name: Copy ansible inventory git repository on the bastion
-#  copy:
-#    src: "{{ combined_otvl.config_vars.otvl_anprin_local_git_repo_tgz }}"
-#    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/otvl_anprin.tgz"
-#    owner: "{{ combined_otvl.config_vars.devops_user }}"
-#    group: "{{ combined_otvl.config_vars.devops_user }}"
-#  register: otvl_anprin_local_git_repo_tgz_copy
-
 - name: Extract ansible inventory git repository on the bastion
   unarchive:
     src: "{{ combined_otvl.config_vars.otvl_anprin_local_git_repo_tgz }}"
-    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/otvl_anprin.git"
+    dest: "/home/{{ combined_otvl.config_vars.devops_user }}"
 #  when: otvl_anprin_local_git_repo_tgz_copy.changed
 
 - name: Checkout git ansible inventory
@@ -132,11 +86,64 @@
     group: "{{ combined_otvl.config_vars.devops_user }}"
     state: link
 
-- name: Give files ownership to devops user
+- name: Give files read access to devops user
   ansible.builtin.file:
     dest: "/home/{{ combined_otvl.config_vars.devops_user }}"
     recurse: yes
+    mode: ugo+rX
+
+- name: "Add devops key as authorized for ssh localhost"
+  ansible.posix.authorized_key:
+    user: "{{ combined_otvl.config_vars.devops_user }}"
+    state: present
+    key: "{{ lookup('file', 'override/bastion/ssh/id_rsa_devops.pub') }}"
+
+- name: Copy ssh devops private key on the bastion
+  copy:
+    src: override/bastion/ssh/id_rsa_devops
+    dest: /home/{{ combined_otvl.config_vars.devops_user }}/.ssh/{{ combined_otvl.config_vars.devops_key }}
     owner: "{{ combined_otvl.config_vars.devops_user }}"
     group: "{{ combined_otvl.config_vars.devops_user }}"
+    mode: 0600
+
+- name: Copy ssh devops public key on the bastion
+  copy:
+    src: override/bastion/ssh/id_rsa_devops.pub
+    dest: /home/{{ combined_otvl.config_vars.devops_user }}/.ssh/{{ combined_otvl.config_vars.devops_key }}.pub
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+    mode: 0600
+
+- name: Create openstack configuration dir on the bastion
+  file:
+    path: /home/{{ combined_otvl.config_vars.devops_user }}/.config/openstack
+    state: directory
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+    mode: 0700
+
+- name: Copy openstack configuration on the bastion
+  copy:
+    src: override/bastion/openstack/clouds.yaml
+    dest: /home/{{ combined_otvl.config_vars.devops_user }}/.config/openstack/clouds.yaml
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+    mode: 0600
+
+- name: Copy ssh admin private key on the bastion
+  copy:
+    src: override/bastion/ssh/id_rsa_admin
+    dest: /home/{{ combined_otvl.config_vars.admin_user }}/.ssh/{{ combined_otvl.config_vars.admin_key }}
+    owner: "{{ combined_otvl.config_vars.admin_user }}"
+    group: "{{ combined_otvl.config_vars.admin_user }}"
+    mode: 0600
+
+- name: Copy ssh admin public key on the bastion
+  copy:
+    src: override/bastion/ssh/id_rsa_admin.pub
+    dest: /home/{{ combined_otvl.config_vars.admin_user }}/.ssh/{{ combined_otvl.config_vars.admin_key }}.pub
+    owner: "{{ combined_otvl.config_vars.admin_user }}"
+    group: "{{ combined_otvl.config_vars.admin_user }}"
+    mode: 0600
 
 ###
