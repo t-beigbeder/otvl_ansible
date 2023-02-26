@@ -4,7 +4,7 @@ python-keystoneclient
 python-neutronclient
 python-novaclient
 python-swiftclient
-python-openstackclient
+python-openstackclient<=6.0.0
 ansible
-openstacksdk
+openstacksdk<=0.98.999
 pyudev
