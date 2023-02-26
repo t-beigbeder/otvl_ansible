@@ -146,12 +146,12 @@
     var: os_server_info
   when: combined_infra.debug
 
-- name: "Populate otvl_iaas_ip fact for the {{ item.key }} server {{ item.value.name }} with the public IP {{ os_server_info.openstack_servers[0].interface_ip }}"
+- name: "Populate otvl_iaas_ip fact for the {{ item.key }} server {{ item.value.name }} with the public IP {{ os_server_info.openstack_servers[0].public_v4 }}"
   block:
-    - name: "Set otvl_iaas_ip fact for the {{ item.key }} server {{ item.value.name }} with the public IP {{ os_server_info.openstack_servers[0].interface_ip }}"
+    - name: "Set otvl_iaas_ip fact for the {{ item.key }} server {{ item.value.name }} with the public IP {{ os_server_info.openstack_servers[0].public_v4 }}"
       set_fact:
-        otvl_iaas_ip: "{{ otvl_iaas_ip | default({}) | combine( {item.key: os_server_info.openstack_servers[0].interface_ip} ) }}"
-    - name: "Force notify otvl_iaas_ip fact for the {{ item.key }} server {{ item.value.name }} with the public IP {{ os_server_info.openstack_servers[0].interface_ip }}"
+        otvl_iaas_ip: "{{ otvl_iaas_ip | default({}) | combine( {item.key: os_server_info.openstack_servers[0].public_v4} ) }}"
+    - name: "Force notify otvl_iaas_ip fact for the {{ item.key }} server {{ item.value.name }} with the public IP {{ os_server_info.openstack_servers[0].public_v4 }}"
       command: /bin/true
       notify:
         - wait_for_otvl_iaas_ip
