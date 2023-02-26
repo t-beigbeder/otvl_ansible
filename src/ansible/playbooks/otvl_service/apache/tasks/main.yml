@@ -39,7 +39,6 @@
   command: apt-get install -y --no-install-recommends python3-passlib
   args:
     creates: /usr/lib/python3/dist-packages/passlib/__init__.py
-    warn: false
   when: combined_otvl.apache.test_htpasswd_create
 
 - name: Create the htpasswd directory

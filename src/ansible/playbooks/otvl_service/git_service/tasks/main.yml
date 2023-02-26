@@ -9,7 +9,6 @@
   command: apt-get install -y --no-install-recommends git
   args:
     creates: /usr/bin/git
-    warn: false
 
 - name: Create git project root
   file:

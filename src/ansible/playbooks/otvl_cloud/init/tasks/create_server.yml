@@ -92,8 +92,9 @@
           allow-hotplug $nic_dev
           iface $nic_dev inet dhcp
           EOF
-
-          if [ "`hostname | grep bastion`" != "" ] ; then sed -i -e 's=#precedence ::ffff:0:0/96  100=precedence ::ffff:0:0/96  100=' /etc/gai.conf ; fi
+          
+          # routes only configured for IPV4, use it
+          sed -i -e 's=#precedence ::ffff:0:0/96  100=precedence ::ffff:0:0/96  100=' /etc/gai.conf
           
           echo `date`: command $0 is exiting
           echo `date`: reboot

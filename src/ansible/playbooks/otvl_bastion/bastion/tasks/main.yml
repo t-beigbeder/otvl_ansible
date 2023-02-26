@@ -40,13 +40,11 @@
   command: "virtualenv -p python3 /home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv"
   args:
     creates: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv"
-    warn: false
 
 - name: Install requirements in virtualenv otvl_ansible/venv
   command: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv/bin/pip install -r /home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/src/python/requirements.txt"
   args:
     creates: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv/bin/openstack"
-    warn: false
 
 - name: Copy ansible configuration on the bastion
   copy:
