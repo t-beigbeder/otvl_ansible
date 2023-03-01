@@ -31,6 +31,7 @@
 - name: Checkout git otvl_ansible
   git:
     repo: "{{ combined_otvl.config_vars.otvl_ansible_git_repo }}"
+    version: "{{ combined_otvl.config_vars.otvl_ansible_git_version }}"
     dest: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible"
     update: true
     recursive: no

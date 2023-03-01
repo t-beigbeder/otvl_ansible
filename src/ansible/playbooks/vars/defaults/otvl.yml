@@ -15,6 +15,7 @@ default_otvl:
     devops_user: devops
     devops_key: id_rsa_devops
     otvl_ansible_git_repo: https://github.com/t-beigbeder/otvl_ansible
+    otvl_ansible_git_version: master
     otvl_anprin_local_git_repo_tgz: /path/to/bare/otvl_anprin.git.tar.gz
   apache:
     www: /otvl/www
