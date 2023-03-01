@@ -1,0 +1,19 @@
+- openstack.cloud.server_info:
+    cloud: "{{ cloud_name }}"
+    detailed: true
+    filters:
+      metadata:
+        hostname: "{{ item.value.name }}"
+  register: os_server_info
+
+- name: "Remove cloud init access to {{ item.key }} server {{ item.value.name }}"
+  debug:
+    msg: "Remove cloud init access to {{ item.key }} server {{ item.value.name }} value {{ item.value }} os_server_info {{ os_server_info }}"
+#  openstack.cloud.server:
+#    cloud: "{{ cloud_name }}"
+#    name: "{{ item.value.name }}"
+#    image: "{{ combined_infra.image_name }}"
+#    flavor: "{{ item.value.flavor }}"
+#    security_groups:
+#    - "{{ combined_infra.security_groups.ext_access }}"
+  when: "'bastion_controlled_group' in item.value.groups"

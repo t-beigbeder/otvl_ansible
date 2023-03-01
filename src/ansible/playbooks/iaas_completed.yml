@@ -1,0 +1,13 @@
+- hosts: "*"
+  gather_facts: False
+  tasks:
+  - name: Load default variables
+    include_vars:
+      dir: vars/defaults
+
+- hosts: localhost
+  gather_facts: False
+  roles:
+  - otvl_cloud/completed
+  tags:
+  - otvl_iaas_completed

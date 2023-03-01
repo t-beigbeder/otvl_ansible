@@ -117,4 +117,6 @@ venv.bak/
 # dev configuration
 ansible.cfg
 
+tmp
+
 # the end

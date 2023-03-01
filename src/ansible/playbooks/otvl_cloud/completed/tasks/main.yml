@@ -1,0 +1,7 @@
+- name: combine default with actual infra data
+  set_fact:
+    combined_infra: "{{ default_infra | combine(infra, recursive=True) }}"
+
+- name: Loop over servers
+  include_tasks: completed_server.yml
+  loop: "{{ combined_infra.servers|dict2items }}"
