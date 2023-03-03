@@ -8,6 +8,25 @@
         hostname: "{{ item.value.name }}"
   register: os_server_info
 
+- name: set security groups for bastion server {{ item.value.name }}
+  set_fact:
+    otvl_server_security_groups:
+    - "{{ combined_infra.security_groups.bastion_access }}"
+    - "{{ combined_infra.security_groups.cloud_init_access }}"
+    - "{{ combined_infra.security_groups.ext_access }}"
+  when: "'bastion_group' in item.value.groups"
+
+- name: set security groups for non bastion server {{ item.value.name }}
+  set_fact:
+    otvl_server_security_groups:
+    - "{{ combined_infra.security_groups.cloud_init_access }}"
+    - "{{ combined_infra.security_groups.ext_access }}"
+  when: "'bastion_group' not in item.value.groups"
+
+- name: "Debugging otvl_server_security_groups"
+  debug:
+    var: otvl_server_security_groups
+
 - name: "Debugging os_server_info about the {{ item.key }} server {{ item.value.name }} on openstack"
   debug:
     var: os_server_info
@@ -23,9 +42,7 @@
     key_name: "{{ combined_infra.key_name }}"
     wait: yes
     nics: net-name={{ combined_infra.networks.external.name }}
-    security_groups:
-    - "{{ combined_infra.security_groups.cloud_init_access }}"
-    - "{{ combined_infra.security_groups.ext_access }}"
+    security_groups: "{{ otvl_server_security_groups }}"
     userdata: |
       #cloud-config
       write_files:

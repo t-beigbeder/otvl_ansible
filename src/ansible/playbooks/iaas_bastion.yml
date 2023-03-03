@@ -59,3 +59,10 @@
   - otvl_bastion/controlled
   tags:
   - otvl_bastion
+
+- hosts: localhost
+  gather_facts: False
+  roles:
+  - otvl_bastion/completed
+  tags:
+  - otvl_bastion

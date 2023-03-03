@@ -27,6 +27,7 @@ default_infra:
   security_groups:
     require_open_egress: True
     cloud_init_access: otvl-cloud-init-access-sg
+    bastion_name: bastion_name_is_undefined
     bastion_access: otvl-bastion-access-sg
     admin_traffic: otvl-admin-traffic-sg
     appli_traffic: otvl-appli-traffic-sg
