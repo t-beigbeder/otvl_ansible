@@ -4,6 +4,26 @@
 - name: combine default with actual infra data
   set_fact:
     combined_infra: "{{ default_infra | combine(infra, recursive=True) }}"
+#
+#- name: "ports info"
+#  openstack.cloud.port_info:
+#    cloud: "{{ cloud_name }}"
+#  register: os_ports_info
+#
+#- name: "public port info"
+#  set_fact:
+#    otvl_pp_id: "{{ var_port[0].id }}"
+#  loop: "{{ os_ports_info.openstack_ports | subelements('fixed_ips') }}"
+#  loop_control:
+#    label: "{{ var_port[0].id }}"
+#    loop_var: var_port
+#  when: "{{ var_port[1].ip_address == var_ip }}"
+#  vars:
+#    var_ip: "57.128.87.166"
+#
+#- name: "debug public port"
+#  debug:
+#    var: otvl_pp_id
 
 - name:
   pause:
