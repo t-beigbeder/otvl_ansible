@@ -8,25 +8,6 @@
         hostname: "{{ item.value.name }}"
   register: os_server_info
 
-- name: set security groups for bastion server {{ item.value.name }}
-  set_fact:
-    otvl_server_security_groups:
-    - "{{ combined_infra.security_groups.bastion_access }}"
-    - "{{ combined_infra.security_groups.cloud_init_access }}"
-    - "{{ combined_infra.security_groups.ext_access }}"
-  when: "'bastion_group' in item.value.groups"
-
-- name: set security groups for non bastion server {{ item.value.name }}
-  set_fact:
-    otvl_server_security_groups:
-    - "{{ combined_infra.security_groups.cloud_init_access }}"
-    - "{{ combined_infra.security_groups.ext_access }}"
-  when: "'bastion_group' not in item.value.groups"
-
-#- name: "Debugging otvl_server_security_groups"
-#  debug:
-#    var: otvl_server_security_groups
-
 - name: "Debugging os_server_info about the {{ item.key }} server {{ item.value.name }} on openstack"
   debug:
     var: os_server_info
@@ -42,7 +23,8 @@
     key_name: "{{ combined_infra.key_name }}"
     wait: yes
     nics: net-name={{ combined_infra.networks.external.name }}
-#    security_groups: "{{ otvl_server_security_groups }}"
+    security_groups:
+    - "{{ combined_infra.security_groups.ext_access }}"
     userdata: |
       #cloud-config
       write_files:
@@ -174,34 +156,5 @@
         - wait_for_otvl_iaas_ip
 
   when: otvl_os_server.changed
-
-- name: "Get ports info"
-  openstack.cloud.port_info:
-    cloud: "{{ cloud_name }}"
-  register: os_ports_info
-
-- openstack.cloud.server_info:
-    cloud: "{{ cloud_name }}"
-    filters:
-      metadata:
-        hostname: "{{ item.value.name }}"
-  register: os_server_info
-
-- name: "Set otvl_iaas_ip fact for the {{ item.key }} server {{ item.value.name }} with the public IP {{ os_server_info.openstack_servers[0].public_v4 }}"
-  set_fact:
-    otvl_iaas_ip: "{{ otvl_iaas_ip | default({}) | combine( {item.key: os_server_info.openstack_servers[0].public_v4} ) }}"
-
-- name: "Set public port info for the server"
-  set_fact:
-    otvl_pp_id: "{{ var_port[0].id }}"
-  loop: "{{ os_ports_info.openstack_ports | subelements('fixed_ips') }}"
-  loop_control:
-    label: "{{ var_port[0].id }}"
-    loop_var: var_port
-  when: "{{ var_port[1].ip_address == otvl_iaas_ip }}"
-
-- name: "debug public port"
-  debug:
-    var: otvl_pp_id
 
 ###

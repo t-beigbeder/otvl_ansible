@@ -4,26 +4,6 @@
 - name: combine default with actual infra data
   set_fact:
     combined_infra: "{{ default_infra | combine(infra, recursive=True) }}"
-#
-#- name: "ports info"
-#  openstack.cloud.port_info:
-#    cloud: "{{ cloud_name }}"
-#  register: os_ports_info
-#
-#- name: "public port info"
-#  set_fact:
-#    otvl_pp_id: "{{ var_port[0].id }}"
-#  loop: "{{ os_ports_info.openstack_ports | subelements('fixed_ips') }}"
-#  loop_control:
-#    label: "{{ var_port[0].id }}"
-#    loop_var: var_port
-#  when: "{{ var_port[1].ip_address == var_ip }}"
-#  vars:
-#    var_ip: "57.128.87.166"
-#
-#- name: "debug public port"
-#  debug:
-#    var: otvl_pp_id
 
 - name:
   pause:
@@ -31,7 +11,7 @@
 
 - name: Loop over internal networks
   include_tasks: create_network.yml
-  loop: "{{ combined_infra.networks|dict2items }}"
+  loop: "{{ combined_infra.networks | dict2items }}"
   when: item.key != "external"
 
 - name: Create a security group {{ combined_infra.security_groups.cloud_init_access }} for cloud init access
@@ -78,15 +58,6 @@
     cloud: "{{ cloud_name }}"
     state: present
     name: "{{ combined_infra.security_groups.bastion_access }}"
-
-- name: Create a security group rule SSH on {{ combined_infra.security_groups.bastion_access }} for bastion access
-  os_security_group_rule:
-    cloud: "{{ cloud_name }}"
-    security_group: "{{ combined_infra.security_groups.bastion_access }}"
-    protocol: tcp
-    port_range_min: 22
-    port_range_max: 22
-    remote_ip_prefix: 0.0.0.0/0
 
 - name: Create a security group {{ combined_infra.security_groups.ext_access }} for http[s] and outbound access
   os_security_group:
@@ -174,9 +145,23 @@
     remote_ip_prefix: "{{ combined_infra.networks.appli.cidr }}"
   when: otvl_os_security_group_admin.changed
 
-- name: Loop over servers
+- name: Loop over servers for creation
   include_tasks: create_server.yml
-  loop: "{{ combined_infra.servers|dict2items }}"
+  loop: "{{ combined_infra.servers | dict2items }}"
+  loop_control:
+    label: "{{ item.value.name }}"
+  when: "'bastion_group' in item.value.groups or not create_only_bastion"
+
+- name: "Get ports info"
+  openstack.cloud.port_info:
+    cloud: "{{ cloud_name }}"
+  register: otvl_os_ports_info
+
+- name: Loop over servers for public port protection
+  include_tasks: protect_server_pp.yml
+  loop: "{{ combined_infra.servers | dict2items }}"
+  loop_control:
+    label: "{{ item.value.name }}"
   when: "'bastion_group' in item.value.groups or not create_only_bastion"
 
 ###
