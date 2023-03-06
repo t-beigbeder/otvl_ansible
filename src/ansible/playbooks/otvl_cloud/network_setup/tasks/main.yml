@@ -7,9 +7,10 @@
 
 - name: Loop over servers
   include_tasks: create_interfaces.yml
-  loop: "{{ combined_infra.servers|dict2items }}"
+  loop: "{{ combined_infra.servers | dict2items }}"
   loop_control:
     loop_var: var_server
+    label: "{{ var_server }}"
   when: "'bastion_group' in var_server.value.groups or not create_only_bastion"
 
 ###
