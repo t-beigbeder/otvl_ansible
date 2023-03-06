@@ -1,0 +1,89 @@
+- hosts: "*"
+  gather_facts: False
+  tasks:
+  - name: Load default variables
+    include_vars:
+      dir: vars/defaults
+  tags: always
+
+- hosts: otvl_v4_dkr
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/traefik
+  tags:
+    - traefik
+
+- hosts: otvl_v4_dkr
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_dkr
+  tags:
+    - otvl_v4_dkr
+
+- hosts: localhost
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/k3s/control/prepare
+  tags:
+    - otvl_v4_k3s
+
+- hosts: otvl_v4_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/k3s
+  tags:
+    - otvl_v4_k3s
+
+- hosts: localhost
+  gather_facts: False
+  become: no
+  roles:
+    - otvl_service/k3s/control/configure
+  tags:
+    - otvl_v4_k3s
+
+- hosts: otvl_v4_build
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_web_v4/docker_build
+  tags:
+    - otvl_v4_build
+
+- hosts: otvl_v4_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_web_v4/deploy/host
+  tags:
+    - otvl_v4_deploy
+
+- hosts: localhost
+  gather_facts: False
+  become: no
+  roles:
+    - otvl_service/otvl_web_v4/deploy
+  tags:
+    - otvl_v4_deploy
+
+- hosts: otvl_v4_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_cabri/host
+  tags:
+    - otvl_v4_cabri
+
+- hosts: localhost
+  gather_facts: False
+  become: no
+  roles:
+    - otvl_service/otvl_cabri
+  tags:
+    - otvl_v4_cabri
+
+###

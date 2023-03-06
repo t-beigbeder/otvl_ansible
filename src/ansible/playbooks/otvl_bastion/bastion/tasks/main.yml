@@ -28,14 +28,20 @@
     dest: /etc/sudoers.d/devops_nopasswd
     mode: 0440
 
-- name: Checkout git otvl_ansible
+- name: Get stat of otvl_ansible checkout
+  ansible.builtin.stat:
+    path: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible"
+  register: otvl_ansible_st
+
+- name: Checkout git otvl_ansible once
   git:
     repo: "{{ combined_otvl.config_vars.otvl_ansible_git_repo }}"
     version: "{{ combined_otvl.config_vars.otvl_ansible_git_version }}"
     dest: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible"
-    update: true
+    update: false
     recursive: no
-    force: yes
+    force: no
+  when: otvl_ansible_st.stat.isdir is not defined
 
 - name: Create virtualenv otvl_ansible/venv
   command: "virtualenv -p python3 /home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_ansible/venv"
@@ -55,19 +61,26 @@
     group: "{{ combined_otvl.config_vars.devops_user }}"
     mode: 0600
 
-- name: Extract ansible inventory git repository on the bastion
+- name: Get stat of ansible inventory checkout
+  ansible.builtin.stat:
+    path: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_anprin"
+  register: otvl_anprin_st
+
+- name: Extract ansible inventory git repository on the bastion once
   unarchive:
     src: "{{ combined_otvl.config_vars.otvl_anprin_local_git_repo_tgz }}"
     dest: "/home/{{ combined_otvl.config_vars.devops_user }}"
 #  when: otvl_anprin_local_git_repo_tgz_copy.changed
+  when: otvl_anprin_st.stat.isdir is not defined
 
-- name: Checkout git ansible inventory
+- name: Checkout git ansible inventory once
   git:
     repo: "/home/{{ combined_otvl.config_vars.devops_user }}/otvl_anprin.git"
     dest: "/home/{{ combined_otvl.config_vars.devops_user }}/locgit/otvl/otvl_anprin"
-    update: true
+    update: false
     recursive: no
-    force: yes
+    force: no
+  when: otvl_anprin_st.stat.isdir is not defined
 
 - name: Create symbolic links to ansible inventory override files
   ansible.builtin.file:
@@ -76,6 +89,7 @@
     owner: "{{ combined_otvl.config_vars.devops_user }}"
     group: "{{ combined_otvl.config_vars.devops_user }}"
     state: link
+  when: otvl_ansible_st.stat.isdir is not defined
 
 - name: Create symbolic links to ansible inventory override templates
   ansible.builtin.file:
@@ -84,6 +98,7 @@
     owner: "{{ combined_otvl.config_vars.devops_user }}"
     group: "{{ combined_otvl.config_vars.devops_user }}"
     state: link
+  when: otvl_ansible_st.stat.isdir is not defined
 
 - name: Give files read access to devops user
   ansible.builtin.file:

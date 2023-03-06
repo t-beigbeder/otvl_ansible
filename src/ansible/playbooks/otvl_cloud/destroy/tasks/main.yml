@@ -7,12 +7,25 @@
   loop: "{{ combined_infra.servers|dict2items }}"
   loop_control:
     loop_var: var_server
+  when:
+    - "iaas_servers is defined and var_server.key in iaas_servers"
 
 - name: Loop over servers
   include_tasks: destroy_server.yml
   loop: "{{ combined_infra.servers|dict2items }}"
+  when:
+    - "iaas_servers is defined and item.key in iaas_servers"
 
 - name: Loop over internal networks
   include_tasks: destroy_network.yml
   loop: "{{ combined_infra.networks|dict2items }}"
-  when: item.key != "external"
+  when:
+  - item.key != "external"
+  - iaas_servers is not defined
+
+- name: Destroy the security group {{ combined_infra.security_groups.bastion_access }} for bastion access
+  os_security_group:
+    cloud: "{{ cloud_name }}"
+    state: absent
+    name: "{{ combined_infra.security_groups.bastion_access }}"
+  when: iaas_servers is not defined

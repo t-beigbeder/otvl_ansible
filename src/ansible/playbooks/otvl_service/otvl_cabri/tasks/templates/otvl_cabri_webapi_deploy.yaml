@@ -1,0 +1,191 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ current_webapi_item.name }}-webapi
+data:
+  "custom-init.sh": |
+    copt="--pfile /etc/cabri-pfile --cdir /data/cdir"
+    ccmd="/usr/local/bin/cabri $copt"
+    mkdir -p /data/cdir /data/backups/cdir && \
+      $ccmd cli config --get
+    urls=
+    for dss in $* ; do
+      urls="$urls `sh /etc/config/init-dss.sh $dss`"
+    done
+    ts=`date +%Y%m%d-%H:%M:%S`
+    tar czf /data/backups/cdir/cdir.$ts.tgz data/cdir
+    cmd="$ccmd webapi $urls --haslog"
+    echo $cmd
+    $cmd
+    sleep 3600
+  "init-dss.sh": |
+    dt=`echo $1 | cut -d':' -f1`
+    dn=`echo $1 | cut -d':' -f2`
+    echo ${dt}+http://0.0.0.0:{{ current_webapi_item.webapi_port }}/data/dss/${dn}@${dn}
+    copt="--pfile /etc/cabri-pfile --cdir /data/cdir"
+    ccmd="/usr/local/bin/cabri $copt"
+    OBS_ENV="--obsrg $OVHRG --obsep $OVHEP --obsct $dn --obsak $OVHAK --obssk $OVHSK"
+    $ccmd cli s3tools $OBS_ENV --cnx
+    if [ $? -ne 0 ] ; then echo >&2 "$OBS_ENV has connexion issues" ; fi
+    ts=`date +%Y%m%d-%H:%M:%S`
+    if [ ! -d /data/dss/$dn ] ; then
+      mkdir -p /data/dss/$dn /data/backups/$dn && \
+      $ccmd cli dss make $OBS_ENV $dt:/data/dss/$dn && \
+      $ccmd cli dss reindex $dt:/data/dss/$dn && \
+      tar czf /data/backups/$dn/$dn.$ts.tgz data/dss/$dn
+    else
+      $ccmd cli dss unlock $dt:/data/dss/$dn && \
+      tar czf /data/backups/$dn/$dn.$ts.tgz data/dss/$dn
+    fi
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ current_webapi_item.name }}-webapi
+  labels:
+    app.kubernetes.io/name: {{ current_webapi_item.name }}-webapi
+spec:
+  securityContext:
+    runAsUser: {{ current_webapi_item.uid }}
+    runAsGroup: {{ current_webapi_item.uid }}
+    fsGroup: {{ current_webapi_item.fs_group }}
+  containers:
+    - name: webapi
+      image: "{{ combined_otvl.otvl_web_v5.cabri_webapi_image }}"
+      env:
+      - name: HOME
+        value: /home/sa
+{% for nkey, nvalue in current_webapi_item.ovh_config.items() %}
+      - name: {{ nkey }}
+        value: {{ nvalue }}
+{% endfor %}
+      command: ["/bin/sh"]
+      args: ["/etc/config/custom-init.sh", "{{ current_webapi_item.dsss | join(' ') }}"]
+      ports:
+        - containerPort: {{ current_webapi_item.webapi_port }}
+      volumeMounts:
+        - name: "webapi-vol"
+          mountPath: /data
+        - name: "config-vol"
+          mountPath: /etc/config
+
+  volumes:
+    - name: webapi-vol
+      persistentVolumeClaim:
+        claimName: "{{ current_webapi_item.name }}-webapi-pvc"
+    - name: config-vol
+      configMap:
+        name: "{{ current_webapi_item.name }}-webapi"
+
+  restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ current_webapi_item.name }}-warp
+data:
+  "static-config.yml": |
+    log:
+      level: INFO
+    providers:
+      file:
+        filename: /traefik/dynamic-conf.yml
+        watch: true
+    entryPoints:
+      web:
+        address: ':8080'
+  "dynamic-conf.yml": |
+    http:
+      routers:
+        to-private:
+          rule: "PathPrefix(`/`)"
+          priority: 1
+          middlewares:
+            - "private-basic-auth"
+          service: webapi    
+      middlewares:
+        "private-basic-auth":
+          basicAuth:
+            users:
+{% for auth_line in current_webapi_item.ingress_auth %}
+              - "{{ auth_line }}"
+{% endfor %}
+      services:
+        "webapi":
+          loadBalancer:
+            servers:
+              - url: "http://{{ current_webapi_item.name }}-webapi:{{ current_webapi_item.webapi_port }}"
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ current_webapi_item.name }}-warp
+  labels:
+    app.kubernetes.io/name: {{ current_webapi_item.name }}-warp
+spec:
+  securityContext:
+    runAsUser: {{ current_webapi_item.uid }}
+    runAsGroup: {{ current_webapi_item.uid }}
+  containers:
+    - name: traefik
+      image: "{{ combined_otvl.traefik.image }}"
+      command: ["/usr/local/bin/traefik"]
+      args: ["--configFile=/traefik/static-config.yml"]
+      ports:
+        - containerPort: {{ combined_otvl.otvl_web_v5.router_port }}
+      volumeMounts:
+        - name: "config-vol"
+          mountPath: /traefik
+  volumes:
+    - name: config-vol
+      configMap:
+        name: "{{ current_webapi_item.name }}-warp"
+
+  restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_webapi_item.name }}-webapi"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_webapi_item.name }}-webapi
+  ports:
+    - name: "webapi-port"
+      port: {{ current_webapi_item.webapi_port }}
+      protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_webapi_item.name }}-warp"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_webapi_item.name }}-warp
+  ports:
+      - name: "warp-port"
+        port: {{ combined_otvl.otvl_web_v5.router_port }}
+        protocol: TCP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ current_webapi_item.name }}-warp"
+spec:
+  rules:
+    - host: "{{ current_webapi_item.ingress_host }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name:  "{{ current_webapi_item.name }}-warp"
+                port:
+                  number: {{ combined_otvl.otvl_web_v5.router_port }}

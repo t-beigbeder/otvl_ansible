@@ -1,0 +1,27 @@
+---
+# main tasks file for otvl_service/otvl_web_v4/deploy/host
+
+- name: Load default otvl (base) variables
+  include_vars:
+    dir: "{{ role_path }}/../../../../vars/defaults"
+
+- name: combine default with actual otvl config data (base)
+  set_fact:
+    combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+
+- name: Create a directory for mounting local configuration files into PODs
+  file:
+    path: /srv/data/pods-cf
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Loop over sites for setting local configuration files
+  include_tasks: config_site.yml
+  loop: "{{ combined_otvl.otvl_web_v4.site_items }}"
+  loop_control:
+    loop_var: current_site_item
+  when: not (current_site_item.skip_deploy | default(false))
+
+###

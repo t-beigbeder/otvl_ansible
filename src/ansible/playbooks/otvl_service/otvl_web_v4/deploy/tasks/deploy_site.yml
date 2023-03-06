@@ -1,0 +1,143 @@
+---
+# deploy_site tasks file for otvl_service/otvl_web_v4/deploy
+
+- name: deploy_site display the site {{ current_site_item.name }} information
+  debug:
+    msg: "site item is {{ current_site_item }}"
+  when: combined_otvl.debug
+
+- name: debug this template
+  template:
+    src: otvl_web_deploy.yaml
+    dest: "/tmp/otvl_web_deploy.yaml"
+  when: combined_otvl.debug
+
+- name: Create a StorageClass for the site {{ current_site_item.name }} Pod API
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: "{{ current_site_item.name }}-api-sc"
+      provisioner: kubernetes.io/no-provisioner
+      volumeBindingMode: WaitForFirstConsumer
+
+- name: Create a storage PersistentVolume for the site {{ current_site_item.name }} Pod API
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ current_site_item.name }}-api-pv"
+      spec:
+        capacity:
+          storage: 768Mi
+        accessModes:
+          - ReadWriteOnce
+        persistentVolumeReclaimPolicy: Retain
+        storageClassName: "{{ current_site_item.name }}-api-sc"
+        local:
+          path: /srv/data/{{ current_site_item.name }}-api-pv
+        nodeAffinity:
+          required:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - "{{ combined_otvl.k3s.single_node_hostname }}"
+
+- name: Create a storage PersistentVolumeClaim for the site {{ current_site_item.name }} Pod API
+  kubernetes.core.k8s:
+    namespace: "default"
+    state: present
+    definition:
+      kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: "{{ current_site_item.name }}-api-pvc"
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: "{{ current_site_item.name }}-api-sc"
+        resources:
+          requests:
+            storage: 768Mi
+
+- name: Create a StorageClass for the site {{ current_site_item.name }} Pod App
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: "{{ current_site_item.name }}-app-sc"
+      provisioner: kubernetes.io/no-provisioner
+      volumeBindingMode: WaitForFirstConsumer
+
+- name: Create a storage PersistentVolume for the site {{ current_site_item.name }} Pod App
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ current_site_item.name }}-app-pv"
+      spec:
+        capacity:
+          storage: 768Mi
+        accessModes:
+          - ReadWriteOnce
+        persistentVolumeReclaimPolicy: Retain
+        storageClassName: "{{ current_site_item.name }}-app-sc"
+        local:
+          path: /srv/data/{{ current_site_item.name }}-app-pv
+        nodeAffinity:
+          required:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - "{{ combined_otvl.k3s.single_node_hostname }}"
+
+- name: Create a storage PersistentVolumeClaim for the site {{ current_site_item.name }} Pod App
+  kubernetes.core.k8s:
+    namespace: "default"
+    state: present
+    definition:
+      kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: "{{ current_site_item.name }}-app-pvc"
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: "{{ current_site_item.name }}-app-sc"
+        resources:
+          requests:
+            storage: 768Mi
+
+- name: Kubectl delete site {{ current_site_item.name }} pods deployment
+  block:
+    - command:
+        cmd: "kubectl delete --ignore-not-found=true -f -"
+        stdin: "{{ lookup('template', 'otvl_web_deploy.yaml') }}"
+      register: kdelete
+    - debug: var=kdelete.cmd
+    - debug: var=kdelete.stderr_lines
+    - debug: var=kdelete.stdout_lines
+  when: not (current_site_item.skip_undeploy | default(false))
+
+- name: Kubectl apply site {{ current_site_item.name }} pods deployment
+  block:
+    - command:
+        cmd: "kubectl apply -f -"
+        stdin: "{{ lookup('template', 'otvl_web_deploy.yaml') }}"
+      register: kapply
+    - debug: var=kapply.cmd
+    - debug: var=kapply.stderr_lines
+    - debug: var=kapply.stdout_lines
+  when: not (current_site_item.skip_kdeploy | default(false))

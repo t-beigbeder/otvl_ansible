@@ -68,7 +68,7 @@
           #!/bin/sh
           echo `date`: command $0 is starting
           systemctl enable /etc/systemd/system/otvl_display_net_conf.service
-          apt-get update && apt-get install -y --no-install-recommends virtualenv libudev1
+          apt-get update && apt-get install -y --no-install-recommends virtualenv libudev1 ifupdown
           virtualenv -p python3 /srv/venv/otvl_cloud_init
           /srv/venv/otvl_cloud_init/bin/pip install pyudev
           /srv/venv/otvl_cloud_init/bin/python /root/otvl_cloud_init_py_check.py || exit 1
@@ -91,6 +91,12 @@
           allow-hotplug $nic_dev
           iface $nic_dev inet dhcp
           EOF
+      
+          # no swap in OVH!
+          fallocate -l 1G /swapfile
+          chmod 600 /swapfile
+          mkswap /swapfile
+          echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
           
           # routes only configured for IPV4, use it
           sed -i -e 's=#precedence ::ffff:0:0/96  100=precedence ::ffff:0:0/96  100=' /etc/gai.conf

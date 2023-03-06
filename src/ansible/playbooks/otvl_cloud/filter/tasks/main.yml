@@ -1,0 +1,16 @@
+- name: combine default with actual infra data
+  set_fact:
+    combined_infra: "{{ default_infra | combine(infra, recursive=True) }}"
+
+- name: Loop over servers
+  include_tasks: filter_server.yml
+  loop: "{{ combined_infra.servers|dict2items }}"
+  when:
+    - "'bastion_group' in item.value.groups or not create_only_bastion"
+    - "iaas_servers is defined and item.key in iaas_servers"
+
+- name: Test expression
+  debug:
+    msg: "test"
+  when:
+  - iaas_servers is not defined

@@ -1,0 +1,25 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    persistence:
+      enabled: true
+    logs:
+      general:
+        level: INFO
+    ports:
+      web:
+        redirectTo:
+          port: websecure
+      websecure:
+        tls:
+          certResolver: leresolver
+    certResolvers:
+      leresolver:
+        storage: /data/acme.json
+        tlsChallenge: false
+        httpChallenge:
+          entryPoint: web

@@ -1,0 +1,9 @@
+synchronize:
+  period: 60
+  actions:
+    - type: cmd
+      base:
+        verbose: false
+        dispOut: false
+        dispErr: false
+      cmdLine: cabri cli sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/assets@ -rv --summary --noacl

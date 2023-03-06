@@ -1,0 +1,53 @@
+- hosts: "*"
+  gather_facts: False
+  tasks:
+  - name: Load default variables
+    include_vars:
+      dir: vars/defaults
+  tags: always
+
+- hosts: iaas_init
+  gather_facts: False
+  roles:
+  - otvl_cloud/init
+  tags:
+  - otvl_iaas_init
+
+- hosts: iaas_init
+  gather_facts: False
+  tasks:
+  - name: Refresh inventory
+    meta: refresh_inventory
+  tags:
+  - otvl_iaas_configure
+
+- hosts: "*"
+  gather_facts: False
+  tasks:
+  - name: Load default variables after refresh
+    include_vars:
+      dir: vars/defaults
+  tags: always
+
+- hosts: bastion_controlled_group
+  gather_facts: False
+  become: yes
+  roles:
+  - otvl_cloud/configure
+  tags:
+  - otvl_iaas_configure
+
+- hosts: iaas_network_setup
+  gather_facts: False
+  roles:
+  - otvl_cloud/network_setup
+  tags:
+  - otvl_iaas_network_setup
+
+- hosts: bastion_controlled_group
+  gather_facts: False
+  become: yes
+  roles:
+  - otvl_bastion/controlled
+  tags:
+  - otvl_bastion

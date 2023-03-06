@@ -1,9 +1,5 @@
 ---
 # main tasks file for otvl_service/git_service
-- name: debug
-  debug:
-    var: combined_otvl
-  when: combined_otvl.debug
 
 - name: Install git for ansible on the git server
   command: apt-get install -y --no-install-recommends git

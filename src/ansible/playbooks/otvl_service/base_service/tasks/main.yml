@@ -62,7 +62,6 @@
 - name: Install system pre-requisites
   ansible.builtin.apt:
     pkg:
-      - fail2ban
       - rsync
     state: present
     update_cache: yes

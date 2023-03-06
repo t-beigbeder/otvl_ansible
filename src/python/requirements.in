@@ -8,3 +8,4 @@ python-openstackclient<=6.0.0
 ansible
 openstacksdk<=0.98.999
 pyudev
+kubernetes

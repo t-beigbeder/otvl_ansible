@@ -1,0 +1,100 @@
+---
+# build_site tasks file for otvl_service/otvl_web_v5/build
+
+- name: build_site display the site {{ current_site_item.name }} information
+  debug:
+    msg: "site item is {{ current_site_item }}"
+  when: combined_otvl.debug
+
+- name: set the site build dir when cloned from git
+  set_fact:
+    site_build_dir: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site{{ current_site_item.git.otvl_site.build_dir }}"
+  when: current_site_item.dev_build_dir is not defined
+
+- name: set the site build dir when developing
+  set_fact:
+    site_build_dir: "{{ current_site_item.dev_build_dir }}"
+  when: current_site_item.dev_build_dir is defined
+
+- name: Checkout the git project containing otvl_web v4 for {{ current_site_item.name }}
+  git:
+    repo: "{{ current_site_item.git.otvl_web.repo }}"
+    dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_web"
+    version: "{{ current_site_item.git.otvl_web.version }}"
+    update: true
+    recursive: no
+    force: yes
+  register: otvl_web_git_checkout
+  when: current_site_item.dev_build_dir is not defined
+
+- name: Checkout the git project containing the site for {{ current_site_item.name }}
+  git:
+    repo: "{{ current_site_item.git.otvl_site.repo }}"
+    dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site"
+    version: "{{ current_site_item.git.otvl_site.version }}"
+    update: true
+    recursive: no
+    force: yes
+  register: otvl_site_git_checkout
+  when: current_site_item.dev_build_dir is not defined
+
+- name: Purge the otvl_web dir for site {{ current_site_item.name }}
+  file:
+    path: "{{ site_build_dir }}/otvl_web"
+    state: absent
+  when:
+  - "otvl_site_git_checkout.changed or otvl_web_git_checkout.changed"
+  - current_site_item.dev_build_dir is not defined
+  register: otvl_site_git_checkout_purged
+
+- name: Copy the otvl_web dir to the site {{ current_site_item.name }}
+  ansible.builtin.copy:
+    src: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_web"
+    remote_src: yes
+    dest: "{{ site_build_dir }}"
+  register: otvl_site_git_updated
+  when: current_site_item.dev_build_dir is not defined
+
+- name: Trigger build execution if site {{ current_site_item.name }} updated
+  include_tasks: "otvl_service/base_service/tasks/remove_install_status_file.yml"
+  vars:
+    isf_name: "{{ current_site_item.name }}_built"
+  when: otvl_site_git_updated.changed or current_site_item.dev_build_dir is defined
+
+- name: "Set the {{ current_site_item.name }} to be built the first time"
+  include_tasks: "otvl_service/base_service/tasks/set_install_status_file.yml"
+  vars:
+    isf_name: "{{ current_site_item.name }}_built"
+    isf_status: built
+    isf_force: no
+
+- name: Build the site {{ current_site_item.name }}
+  block:
+    - command:
+        cmd: "nerdctl build -t {{ current_site_item.images.app }} -f otvl-web-app/Dockerfile ."
+        chdir: "{{ site_build_dir }}"
+      register: nerdctl_build_app
+    - debug: var=nerdctl_build_app.cmd
+    - debug: var=nerdctl_build_app.stderr_lines
+    - debug: var=nerdctl_build_app.stdout_lines
+    - command:
+        cmd: "nerdctl build -t {{ current_site_item.images.api }} ./otvl_web/server"
+        chdir: "{{ site_build_dir }}"
+      register: nerdctl_build_api
+    - debug: var=nerdctl_build_api.cmd
+    - debug: var=nerdctl_build_api.stderr_lines
+    - debug: var=nerdctl_build_api.stdout_lines
+
+  rescue:
+  - name: "Site {{ current_site_item.name }} building failed, cancel build"
+    include_tasks: "otvl_service/base_service/tasks/remove_install_status_file.yml"
+    vars:
+      isf_name: "{{ current_site_item.name }}_built"
+
+  - name: "Site {{ current_site_item.name }} building failed, raise"
+    fail:
+      msg: "Site {{ current_site_item.name }} building failed, raise"
+
+  when: set_isf.changed
+
+###

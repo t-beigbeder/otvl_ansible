@@ -1,0 +1,83 @@
+---
+# deploy_webapi tasks file for otvl_service/otvl_cabri
+
+- name: deploy_webapi display the webapi {{ current_webapi_item.name }} information
+  debug:
+    msg: "site webapi is {{ current_webapi_item }}"
+  when: combined_otvl.debug
+
+- name: Create a StorageClass for the webapi {{ current_webapi_item.name }} Pod
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: "{{ current_webapi_item.name }}-webapi-sc"
+      provisioner: kubernetes.io/no-provisioner
+      volumeBindingMode: WaitForFirstConsumer
+
+- name: Create a storage PersistentVolume for the webapi {{ current_webapi_item.name }} Pod
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ current_webapi_item.name }}-webapi-pv"
+      spec:
+        capacity:
+          storage: 768Mi
+        accessModes:
+          - ReadWriteOnce
+        persistentVolumeReclaimPolicy: Retain
+        storageClassName: "{{ current_webapi_item.name }}-webapi-sc"
+        local:
+          path: "/srv/data/{{ current_webapi_item.name }}-webapi-pv"
+        nodeAffinity:
+          required:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - "{{ combined_otvl.k3s.single_node_hostname }}"
+
+- name: Create a storage PersistentVolumeClaim for the webapi {{ current_webapi_item.name }} Pod
+  kubernetes.core.k8s:
+    namespace: "default"
+    state: present
+    definition:
+      kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: "{{ current_webapi_item.name }}-webapi-pvc"
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: "{{ current_webapi_item.name }}-webapi-sc"
+        resources:
+          requests:
+            storage: 768Mi
+
+- name: Kubectl delete webapi {{ current_webapi_item.name }} pod deployment
+  block:
+    - command:
+        cmd: "kubectl delete --ignore-not-found=true -f -"
+        stdin: "{{ lookup('template', 'otvl_cabri_webapi_deploy.yaml') }}"
+      register: kdelete
+    - debug: var=kdelete.cmd
+    - debug: var=kdelete.stderr_lines
+    - debug: var=kdelete.stdout_lines
+  when: not (current_webapi_item.skip_undeploy | default(false))
+
+- name: Kubectl apply webapi {{ current_webapi_item.name }} pod deployment
+  block:
+    - command:
+        cmd: "kubectl apply -f -"
+        stdin: "{{ lookup('template', 'otvl_cabri_webapi_deploy.yaml') }}"
+      register: kapply
+    - debug: var=kapply.cmd
+    - debug: var=kapply.stderr_lines
+    - debug: var=kapply.stdout_lines
+  when: not (current_webapi_item.skip_kdeploy | default(false))

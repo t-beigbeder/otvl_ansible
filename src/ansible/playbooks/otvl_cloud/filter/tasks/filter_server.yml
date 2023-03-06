@@ -1,0 +1,4 @@
+- name: "Filter the {{ item.key }} server {{ item.value.name }}"
+  debug:
+    var: item.value.name
+

@@ -1,0 +1,72 @@
+---
+# main tasks file for otvl_service/otvl_buildkit
+
+- name: Create the buildkit installation directory
+  file:
+    dest: "{{ combined_otvl.config_paths.delivery }}/buildkit"
+    state: directory
+    mode: 0755
+
+- name: Download buildkit
+  ansible.builtin.get_url:
+    url: https://github.com/moby/buildkit/releases/download/v0.12.4/buildkit-v0.12.4.linux-amd64.tar.gz
+    dest: "{{ combined_otvl.config_paths.delivery }}/buildkit-v0.12.4.linux-amd64.tar.gz"
+    checksum: sha256:75ffe406e4284b77af35447d829767cfa935eb7dd2ea2e3407223d6885bd8ebd
+  register: buildkit_download
+
+- name: Purge the buildkit installation directory
+  file:
+    dest: "{{ combined_otvl.config_paths.delivery }}/buildkit/bin"
+    state: absent
+  when: buildkit_download.changed
+
+- name: Extract buildkit
+  ansible.builtin.unarchive:
+    src: "{{ combined_otvl.config_paths.delivery }}/buildkit-v0.12.4.linux-amd64.tar.gz"
+    remote_src: yes
+    dest: "{{ combined_otvl.config_paths.delivery }}/buildkit"
+  register: buildkit_extract
+  when: buildkit_download.changed
+
+- name: Install buildkit
+  ansible.builtin.copy:
+    src: "{{ combined_otvl.config_paths.delivery }}/buildkit/bin"
+    remote_src: true
+    dest: "/usr/local"
+  when: buildkit_extract.changed
+
+- name: Create the buildkit configuration directory
+  file:
+    dest: "/etc/buildkit"
+    state: directory
+    mode: 0755
+
+- name: Create the buildkit configuration file
+  copy:
+    dest: "/etc/buildkit/buildkitd.toml"
+    src: "buildkitd.toml"
+    mode: 0644
+
+- name: "Create buildkit systemd service file"
+  template:
+    src: systemd/buildkit.service
+    dest: /etc/systemd/system/buildkit.service
+    owner: root
+    group: root
+    mode: 0644
+  register: buildkit_config
+
+- name: Create and run systemd service for buildkit
+  block:
+    - name: Enable buildkit systemd service
+      systemd:
+        name: "buildkit"
+        enabled: yes
+    - name: Restart {{ service_name }} systemd service
+      systemd:
+        name: "buildkit"
+        state: restarted
+        daemon_reload: yes
+  when: buildkit_config.changed
+
+###

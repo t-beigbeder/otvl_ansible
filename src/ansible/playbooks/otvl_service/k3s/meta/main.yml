@@ -1,0 +1,10 @@
+---
+# meta file for otvl_service/k3s
+
+dependencies:
+
+  - role: otvl_service/base_service
+    tags:
+    - otvl_service_base
+
+###

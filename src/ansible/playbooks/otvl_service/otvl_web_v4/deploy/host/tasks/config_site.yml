@@ -1,0 +1,89 @@
+---
+# config_site tasks file for otvl_service/otvl_web_v4/deploy/host
+
+- name: config_site display the site {{ current_site_item.name }} information
+  debug:
+    msg: "site item is {{ current_site_item }}"
+  when: combined_otvl.debug
+
+- name: Create a directory for volume of the site {{ current_site_item.name }} Pod API
+  file:
+    path: /srv/data/{{ current_site_item.name }}-api-pv
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Create configuration file for cabri sync of the site {{ current_site_item.name }} Pod API
+  template:
+    src: "cabri-sfile-api.yaml"
+    dest: "/srv/data/pods-cf/cabri-sfile-api-{{ current_site_item.name }}.yaml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create a directory for volume of the site {{ current_site_item.name }} Pod App
+  file:
+    path: /srv/data/{{ current_site_item.name }}-app-pv
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Create configuration file for cabri git sync of the site {{ current_site_item.name }} Pod App
+  template:
+    src: "cabri-sfile-git-app.yaml"
+    dest: "/srv/data/pods-cf/cabri-sfile-app-{{ current_site_item.name }}.yaml"
+    owner: root
+    group: root
+    mode: 0644
+  when: current_site_item.git_assets
+
+- name: Create configuration file for cabri nongit sync of the site {{ current_site_item.name }} Pod App
+  template:
+    src: "cabri-sfile-nongit-app.yaml"
+    dest: "/srv/data/pods-cf/cabri-sfile-app-{{ current_site_item.name }}.yaml"
+    owner: root
+    group: root
+    mode: 0644
+  when: not current_site_item.git_assets
+
+- name: Create script for apache startup of the site {{ current_site_item.name }} Pod App
+  template:
+    src: "apache-custo-init-app.sh"
+    dest: "/srv/data/pods-cf/apache-custo-init-app-{{ current_site_item.name }}.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create script for sync startup of the site {{ current_site_item.name }} Pod App
+  template:
+    src: "apache-custo-init-sync.sh"
+    dest: "/srv/data/pods-cf/apache-custo-init-sync-{{ current_site_item.name }}.sh"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create a directory for router of the site {{ current_site_item.name }} Pod API
+  file:
+    path: /srv/data/pods-cf/{{ current_site_item.name }}-traefik
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create static configuration file for router of the site {{ current_site_item.name }} Pod API
+  template:
+    src: "traefik_static_config.yml"
+    dest: "/srv/data/pods-cf/{{ current_site_item.name }}-traefik/static_config.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create dynamic configuration file for router of the site {{ current_site_item.name }} Pod API
+  template:
+    src: "traefik_dynamic_conf.yml"
+    dest: "/srv/data/pods-cf/{{ current_site_item.name }}-traefik/dynamic_conf.yml"
+    owner: root
+    group: root
+    mode: 0644

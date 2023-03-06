@@ -1,0 +1,11 @@
+log:
+  level: INFO
+
+providers:
+  file:
+    filename: /traefik/dynamic_conf.yml
+    watch: true
+
+entryPoints:
+  web:
+    address: ':5000'

@@ -1,0 +1,82 @@
+- hosts: "*"
+  gather_facts: False
+  tasks:
+  - name: Load default variables
+    include_vars:
+      dir: vars/defaults
+  tags: always
+
+- hosts: localhost
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/k3s/control/prepare
+  tags:
+    - otvl_v5_k3s
+
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/k3s
+  tags:
+    - otvl_v5_k3s
+
+- hosts: localhost
+  gather_facts: False
+  become: no
+  roles:
+    - otvl_service/k3s/control/configure
+  tags:
+    - otvl_v5_k3s
+
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_ctr/host
+  tags:
+    - otvl_ctr
+
+- hosts: localhost
+  gather_facts: False
+  become: no
+  roles:
+    - otvl_service/otvl_ctr
+  tags:
+    - otvl_ctr
+
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_buildkit
+    - otvl_service/otvl_nerdctl
+  tags:
+    - otvl_nerdctl
+
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_web_v5/cbuild
+  tags:
+    - otvl_v5_build
+
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_web_v5/deploy/host
+  tags:
+    - otvl_v5_deploy
+
+- hosts: localhost
+  gather_facts: False
+  become: no
+  roles:
+    - otvl_service/otvl_web_v5/deploy
+  tags:
+    - otvl_v5_deploy
+
+###

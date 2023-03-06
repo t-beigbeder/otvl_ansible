@@ -1,0 +1,50 @@
+---
+# main tasks file for otvl_service/otvl_ctr/host
+
+- name: Create the docker registry configuration directory
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/otvl_ctr"
+    state: directory
+    mode: 0755
+
+- name: Create the docker registry directory
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/otvl_ctr/docker_registry"
+    state: directory
+    owner: "{{ combined_otvl.ctr.uid }}"
+    group: "{{ combined_otvl.ctr.uid }}"
+    mode: 0755
+
+- name: Create the docker registry configuration file
+  template:
+    src: "otvl_ctr/config.yml"
+    dest: "{{ combined_otvl.config_paths.data }}/otvl_ctr/config.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create a directory for router of the ctr
+  file:
+    path: /srv/data/pods-cf/ctr-traefik
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create static configuration file for router of the ctr
+  template:
+    src: "traefik_static_config.yml"
+    dest: "/srv/data/pods-cf/ctr-traefik/static_config.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create dynamic configuration file for router of the ctr
+  template:
+    src: "traefik_dynamic_conf.yml"
+    dest: "/srv/data/pods-cf/ctr-traefik/dynamic_conf.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+###
