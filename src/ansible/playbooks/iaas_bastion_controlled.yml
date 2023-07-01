@@ -29,7 +29,7 @@
       dir: vars/defaults
   tags: always
 
-- hosts: iaas_configure
+- hosts: bastion_controlled_group
   gather_facts: False
   become: yes
   roles:
