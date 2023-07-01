@@ -16,3 +16,9 @@
   include_tasks: destroy_network.yml
   loop: "{{ combined_infra.networks|dict2items }}"
   when: item.key != "external"
+
+- name: Destroy the security group {{ combined_infra.security_groups.bastion_access }} for bastion access
+  os_security_group:
+    cloud: "{{ cloud_name }}"
+    state: absent
+    name: "{{ combined_infra.security_groups.bastion_access }}"

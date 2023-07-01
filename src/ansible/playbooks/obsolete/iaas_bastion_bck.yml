@@ -29,7 +29,7 @@
       dir: vars/defaults
   tags: always
 
-- hosts: bastion_group
+- hosts: iaas_configure
   gather_facts: False
   become: yes
   roles:
@@ -51,3 +51,13 @@
   - otvl_bastion/bastion
   tags:
   - otvl_bastion
+
+- hosts: bastion_controlled_group
+  gather_facts: False
+  become: yes
+  roles:
+  - otvl_bastion/controlled
+  tags:
+  - otvl_bastion
+
+###
