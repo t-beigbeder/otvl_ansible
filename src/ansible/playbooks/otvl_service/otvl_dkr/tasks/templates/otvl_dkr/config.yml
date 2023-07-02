@@ -11,10 +11,6 @@ http:
   addr: :5000
   headers:
     X-Content-Type-Options: [nosniff]
-auth:
-  htpasswd:
-    realm: otvl-dkr
-    path: /etc/otvl-dkr-passwd
 health:
   storagedriver:
     enabled: true

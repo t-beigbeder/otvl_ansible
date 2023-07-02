@@ -22,7 +22,7 @@
     ssf_name: traefik_caas
   when: traefik_static_config.changed
 
-- name: Run the docker registry as a container service
+- name: Run traefik as a container service
   include_tasks: "otvl_service/docker/base_docker/tasks/declare_caas.yml"
   vars:
     service_name: traefik_caas
