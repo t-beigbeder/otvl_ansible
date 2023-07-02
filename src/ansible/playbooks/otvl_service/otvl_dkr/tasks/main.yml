@@ -1,8 +1,42 @@
 ---
 # main tasks file for otvl_service/otvl_dkr
 
-- name:
-  pause:
-    prompt: "Pause is enabled in otvl_service/otvl_dkr, do you want to continue?"
+- name: Install python3-passlib to enable htpasswd
+  ansible.builtin.apt:
+    pkg: python3-passlib
+
+- name: Create the docker_registry_caas registry directory
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/docker_registry"
+    state: directory
+    mode: 0755
+
+- name: Create the docker registry configuration directory
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/otvl_dkr"
+    state: directory
+    mode: 0755
+
+- name: Create the docker registry configuration file
+  template:
+    src: "otvl_dkr/{{ combined_otvl.otvl_dkr.config_file | default('config.yml') }}"
+    dest: "{{ combined_otvl.config_paths.data }}/otvl_dkr/config.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create the docker registry htpasswd file
+  community.general.htpasswd:
+    path: "{{ combined_otvl.config_paths.data }}/otvl_dkr/otvl-dkr-passwd"
+    name: dkr
+    password: dkr123
+    crypt_scheme: bcrypt
+
+- name: Run the docker registry as a container service
+  include_tasks: "otvl_service/docker/base_docker/tasks/declare_caas.yml"
+  vars:
+    service_name: docker_registry_caas
+    image_reference: registry:2
+    docker_extra_opts: "-p 5000:5000 -v {{ combined_otvl.config_paths.data }}/otvl_dkr/otvl-dkr-passwd:/etc/otvl-dkr-passwd -v {{ combined_otvl.config_paths.data }}/otvl_dkr/config.yml:/etc/docker/registry/config.yml -v {{ combined_otvl.config_paths.data }}/docker_registry:/var/lib/registry"
 
 ###
