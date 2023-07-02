@@ -26,7 +26,7 @@
   include_tasks: "otvl_service/docker/base_docker/tasks/declare_caas.yml"
   vars:
     service_name: traefik_caas
-    image_reference: traefik:v2.9
+    image_reference: traefik:v2.10
     docker_extra_opts: "{{ combined_otvl.traefik.docker_ports_mapping | default('-p 80:80 -p 443:443') }} {{ combined_otvl.traefik.docker_traefik_extra_opts | default('') }} -v {{ combined_otvl.config_paths.data }}/traefik:/traefik"
     docker_run_args: "--configFile=/traefik/static_config.yml"
 

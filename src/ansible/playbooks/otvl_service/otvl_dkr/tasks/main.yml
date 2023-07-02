@@ -1,0 +1,8 @@
+---
+# main tasks file for otvl_service/otvl_dkr
+
+- name:
+  pause:
+    prompt: "Pause is enabled in otvl_service/otvl_dkr, do you want to continue?"
+
+###
