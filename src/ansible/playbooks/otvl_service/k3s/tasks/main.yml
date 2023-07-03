@@ -1,0 +1,13 @@
+---
+# main tasks file for otvl_service/k3s
+
+- name: Check k3s cluster presence
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/k3s.service"
+  register: k3s_service_st
+
+- name: Install the k3s cluster
+  shell: "curl -sfL https://get.k3s.io | sh -"
+  when: k3s_service_st.stat.isreg is not defined
+
+###

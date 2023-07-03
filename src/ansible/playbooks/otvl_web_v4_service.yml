@@ -10,8 +10,24 @@
   gather_facts: False
   become: yes
   roles:
-  - otvl_service/otvl_dkr
+    - otvl_service/traefik
   tags:
-  - otvl_v4_dkr
+    - traefik
+
+- hosts: otvl_v4_dkr
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_dkr
+  tags:
+    - otvl_v4_dkr
+
+- hosts: otvl_v4_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/k3s
+  tags:
+    - otvl_v4_k3s
 
 ###
