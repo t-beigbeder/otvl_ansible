@@ -10,4 +10,8 @@
   shell: "curl -sfL https://get.k3s.io | sh -"
   when: k3s_service_st.stat.isreg is not defined
 
+- name: Configure the k3s private registry
+  template:
+    src: registries.yaml
+    dest: /etc/rancher/k3s/registries.yaml
 ###

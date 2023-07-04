@@ -150,7 +150,9 @@
   loop: "{{ combined_infra.servers | dict2items }}"
   loop_control:
     label: "{{ item.value.name }}"
-  when: "'bastion_group' in item.value.groups or not create_only_bastion"
+  when:
+    - "'bastion_group' in item.value.groups or not create_only_bastion"
+    - "iaas_servers is defined and item.key in iaas_servers"
 
 - name: "Get ports info"
   openstack.cloud.port_info:
@@ -162,6 +164,8 @@
   loop: "{{ combined_infra.servers | dict2items }}"
   loop_control:
     label: "{{ item.value.name }}"
-  when: "'bastion_group' in item.value.groups or not create_only_bastion"
+  when:
+    - "'bastion_group' in item.value.groups or not create_only_bastion"
+    - "iaas_servers is defined and item.key in iaas_servers"
 
 ###
