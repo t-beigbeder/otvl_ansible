@@ -6,6 +6,11 @@
     path: "/etc/systemd/system/k3s.service"
   register: k3s_service_st
 
+- name: Configure traefik ingress controller
+  template:
+    src: traefik-config.yaml
+    dest: /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+
 - name: Install the k3s cluster
   shell: "curl -sfL https://get.k3s.io | sh -"
   when: k3s_service_st.stat.isreg is not defined
