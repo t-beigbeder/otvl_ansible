@@ -11,7 +11,7 @@
     src: traefik-config.yaml
     dest: /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
 
-- name: Install the k3s cluster
+- name: Install the k3s cluster if absent
   shell: "curl -sfL https://get.k3s.io | sh -"
   when: k3s_service_st.stat.isreg is not defined
 
