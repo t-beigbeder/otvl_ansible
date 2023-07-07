@@ -5,17 +5,19 @@ metadata:
   namespace: kube-system
 spec:
   valuesContent: |-
-    logs.general.level: DEBUG
-    ports.websecure.tls.certResolver:
-      address: ':443'
-      http:
-        tls:
-          certResolver: le-resolver
+    logs:
+      general:
+        level: DEBUG
+    ports:
+      websecure:
+        http:
+          tls:
+            certResolver: leresolver
 
-    certificatesResolvers:
-      le-resolver:
-        acme:
-          caServer: https://acme-v02.api.letsencrypt.org/directory
-          storage: /traefik/acme.json
-          httpChallenge:
-            entryPoint: web    
+    certResolvers:
+      leresolver:
+        caServer: https://acme-v02.api.letsencrypt.org/directory
+        storage: /data/acme.json
+        tlsChallenge: false
+        httpChallenge:
+          entryPoint: web
