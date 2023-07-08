@@ -13,4 +13,30 @@
     owner: "{{ combined_otvl.config_vars.devops_user }}"
     group: "{{ combined_otvl.config_vars.devops_user }}"
 
+- name: Create kube config local
+  file:
+    path: "/home/{{ combined_otvl.config_vars.devops_user }}/.kube"
+    state: directory
+    mode: 0700
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+
+- name: Check kubectl presence
+  ansible.builtin.stat:
+    path: "/usr/local/bin/kubectl"
+  register: kctl_st
+
+- name: Download kubectl if absent
+  shell: "curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  when: kctl_st.stat.isreg is not defined
+  register: kctl_dl
+
+- name: Install kubectl
+  ansible.builtin.copy:
+    src: kubectl
+    remote_src: true
+    dest: "/usr/local/bin/kubectl"
+    mode: "0755"
+  when: kctl_dl.changed
+
 ###

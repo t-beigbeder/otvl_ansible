@@ -5,8 +5,27 @@
   set_fact:
     combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
 
-- name: debug remote content from file
-  ansible.builtin.slurp:
-    src: "/home/{{ combined_otvl.config_vars.devops_user }}/.k3s"
+- name: Configure access to k3s api server
+  ansible.builtin.copy:
+    src: "/home/{{ combined_otvl.config_vars.devops_user }}/.k3s/{{ combined_otvl.k3s.api_server }}/srv/data/otvl/k3s/k3s.yaml"
+    remote_src: true
+    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/.kube/config"
+    mode: "0600"
+
+- name: Create a pod
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: "utilitypod-1"
+        namespace: default
+        labels:
+          app: galaxy
+      spec:
+        containers:
+          - name: utilitypod
+            image: busybox
 
 ###

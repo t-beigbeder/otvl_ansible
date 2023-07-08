@@ -40,7 +40,7 @@
 
 - hosts: localhost
   gather_facts: False
-  become: yes
+  become: no
   roles:
     - otvl_service/k3s/control/configure
   tags:
