@@ -14,7 +14,7 @@
 
 - name: Create a pod
   kubernetes.core.k8s:
-    state: present
+    state: absent
     definition:
       apiVersion: v1
       kind: Pod
