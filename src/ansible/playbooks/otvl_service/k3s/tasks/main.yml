@@ -46,9 +46,19 @@
     src: registries.yaml
     dest: /etc/rancher/k3s/registries.yaml
 
-- name: Wait for cluster up if just installed
-  command: "sleep 1"
-  when: k3s_service_st.stat.isreg is not defined
+- name: Make k3s cluster config copy readable
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    remote_src: true
+    dest: "{{ combined_otvl.config_paths.data }}/otvl/k3s/k3s.yaml"
+    mode: "0644"
+
+- name: Fetch k3s cluster config for access from localhost
+  ansible.builtin.fetch:
+    src: "{{ combined_otvl.config_paths.data }}/otvl/k3s/k3s.yaml"
+    dest: "/home/{{ combined_otvl.config_vars.devops_user }}/.k3s"
+  vars:
+    ansible_become: false
 
 - name: Configure k3s pvc
   command: "kubectl apply -f {{ combined_otvl.config_paths.data }}/otvl/k3s/pvc-acme.yaml"

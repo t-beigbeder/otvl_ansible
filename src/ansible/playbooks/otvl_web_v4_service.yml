@@ -22,11 +22,27 @@
   tags:
     - otvl_v4_dkr
 
+- hosts: localhost
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/k3s/control/prepare
+  tags:
+    - otvl_v4_k3s
+
 - hosts: otvl_v4_k3s
   gather_facts: False
   become: yes
   roles:
     - otvl_service/k3s
+  tags:
+    - otvl_v4_k3s
+
+- hosts: localhost
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/k3s/control/configure
   tags:
     - otvl_v4_k3s
 

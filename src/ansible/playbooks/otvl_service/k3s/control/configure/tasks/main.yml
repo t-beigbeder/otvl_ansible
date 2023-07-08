@@ -1,0 +1,12 @@
+---
+# main tasks file for otvl_service/k3s/control/configure
+
+- name: combine default with actual otvl config data
+  set_fact:
+    combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+
+- name: debug remote content from file
+  ansible.builtin.slurp:
+    src: "/home/{{ combined_otvl.config_vars.devops_user }}/.k3s"
+
+###

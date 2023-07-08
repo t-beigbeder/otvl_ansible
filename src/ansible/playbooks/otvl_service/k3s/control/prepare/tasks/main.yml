@@ -1,0 +1,16 @@
+---
+# main tasks file for otvl_service/k3s/control/prepare
+
+- name: combine default with actual otvl config data
+  set_fact:
+    combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+
+- name: Create k3s local
+  file:
+    path: "/home/{{ combined_otvl.config_vars.devops_user }}/.k3s"
+    state: directory
+    mode: 0700
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+
+###
