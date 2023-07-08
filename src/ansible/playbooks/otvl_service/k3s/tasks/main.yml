@@ -1,15 +1,41 @@
 ---
 # main tasks file for otvl_service/k3s
 
-- name: Check k3s cluster presence
-  ansible.builtin.stat:
-    path: "/etc/systemd/system/k3s.service"
-  register: k3s_service_st
+- name: Create k3s configuration yaml directory
+  file:
+    path: "{{ combined_otvl.config_paths.data }}/otvl/k3s"
+    state: directory
+    mode: 0755
+
+- name: Install k3s configuration yaml pvc acme
+  template:
+    src: pvc-acme.yaml
+    dest: "{{ combined_otvl.config_paths.data }}/otvl/k3s"
+  register: pvc_acme_dlv
+
+- name: Install pvc acme test
+  template:
+    src: test-pvc-acme.yaml
+    dest: "{{ combined_otvl.config_paths.data }}/otvl/k3s"
+  register: pvc_acme_dlv
+
+- name: Create k3s manifests directory
+  file:
+    path: /var/lib/rancher/k3s/server/manifests
+    state: directory
+    mode: 0755
 
 - name: Configure traefik ingress controller
   template:
     src: traefik-config.yaml
     dest: /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+  when: combined_otvl.k3s.traefik.customize
+  register: tci_st
+
+- name: Check k3s cluster presence
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/k3s.service"
+  register: k3s_service_st
 
 - name: Install the k3s cluster if absent
   shell: "curl -sfL https://get.k3s.io | sh -"
@@ -19,4 +45,13 @@
   template:
     src: registries.yaml
     dest: /etc/rancher/k3s/registries.yaml
+
+- name: Wait for cluster up if just installed
+  command: "sleep 1"
+  when: k3s_service_st.stat.isreg is not defined
+
+- name: Configure k3s pvc
+  command: "kubectl apply -f {{ combined_otvl.config_paths.data }}/otvl/k3s/pvc-acme.yaml"
+  when: pvc_acme_dlv.changed or k3s_service_st.stat.isreg is not defined
+
 ###

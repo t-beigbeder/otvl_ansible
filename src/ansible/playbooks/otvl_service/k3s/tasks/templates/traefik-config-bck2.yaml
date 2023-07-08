@@ -7,6 +7,7 @@ spec:
   valuesContent: |-
     persistence:
       enabled: true
+      existingClaim: traefik-acme-pvc
     logs:
       general:
         level: DEBUG
@@ -21,3 +22,11 @@ spec:
         tlsChallenge: false
         httpChallenge:
           entryPoint: web
+    deployment:
+      initContainers:
+        - name: volume-permissions
+          image: busybox:latest
+          command: ["sh", "-c", "touch /data/acme.json; chmod -v 600 /data/acme.json"]
+          volumeMounts:
+            - mountPath: /data
+              name: data
