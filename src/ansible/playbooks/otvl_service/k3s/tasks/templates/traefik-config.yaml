@@ -9,7 +9,7 @@ spec:
       enabled: true
     logs:
       general:
-        level: DEBUG
+        level: INFO
     ports:
       websecure:
         tls:

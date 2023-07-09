@@ -8,7 +8,7 @@
   loop_control:
     loop_var: var_server
   when:
-    - "iaas_servers is defined and item.key in iaas_servers"
+    - "iaas_servers is defined and var_server.key in iaas_servers"
 
 - name: Loop over servers
   include_tasks: destroy_server.yml

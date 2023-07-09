@@ -7,18 +7,6 @@
     state: directory
     mode: 0755
 
-- name: Install k3s configuration yaml pvc acme
-  template:
-    src: pvc-acme.yaml
-    dest: "{{ combined_otvl.config_paths.data }}/otvl/k3s"
-  register: pvc_acme_dlv
-
-- name: Install pvc acme test
-  template:
-    src: test-pvc-acme.yaml
-    dest: "{{ combined_otvl.config_paths.data }}/otvl/k3s"
-  register: pvc_acme_dlv
-
 - name: Create k3s manifests directory
   file:
     path: /var/lib/rancher/k3s/server/manifests
@@ -65,9 +53,5 @@
     dest: "/home/{{ combined_otvl.config_vars.devops_user }}/.k3s"
   vars:
     ansible_become: false
-
-- name: Configure k3s pvc
-  command: "kubectl apply -f {{ combined_otvl.config_paths.data }}/otvl/k3s/pvc-acme.yaml"
-  when: pvc_acme_dlv.changed or k3s_service_st.stat.isreg is not defined
 
 ###
