@@ -66,6 +66,16 @@
           requests:
             storage: 128Mi
 
+- name: Test a pod with local storage delete
+  kubernetes.core.k8s:
+    namespace: "default"
+    state: absent
+    definition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: www
+
 - name: Test a pod with local storage
   kubernetes.core.k8s:
     namespace: "default"
@@ -78,9 +88,10 @@
         labels:
           name: www
       spec:
-        securityContext:
-          runAsUser: 3000
-          runAsGroup: 3000
+#        securityContext:
+#          runAsUser: 3000
+#          runAsGroup: 3000
+#          fsGroup: 2000
         containers:
           - name: www
             image: nginx:alpine
@@ -89,10 +100,20 @@
                 name: www
             volumeMounts:
               - name: www-persistent-storage
-                mountPath: /usr/share/nginx/html
+                mountPath: /mnt/data
+              - name: www-persistent-storage2
+                mountPath: /mnt/data2
         volumes:
           - name: www-persistent-storage
             persistentVolumeClaim:
               claimName: test-claim
+          - name: www-persistent-storage2
+            local:
+              path: /srv/data/test-local-storage2
+        initContainers:
+          - name: init-myservice
+            image: busybox:1.28
+            command: ['sh', '-c', "date > $$"]
+
 
 ###
