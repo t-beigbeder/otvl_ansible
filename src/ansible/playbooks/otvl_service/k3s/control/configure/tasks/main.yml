@@ -12,108 +12,15 @@
     dest: "/home/{{ combined_otvl.config_vars.devops_user }}/.kube/config"
     mode: "0600"
 
-- name: Create a storage StorageClass
+- name: Create a StorageClass for single node local storage
   kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: storage.k8s.io/v1
       kind: StorageClass
       metadata:
-        name: test-local-storage
+        name: otvl-single-node-local-storage
       provisioner: kubernetes.io/no-provisioner
       volumeBindingMode: WaitForFirstConsumer
-
-- name: Create a storage PersistentVolume
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: PersistentVolume
-      metadata:
-        name: test-local-pv
-      spec:
-        capacity:
-          storage: 128Mi
-        accessModes:
-          - ReadWriteOnce
-        persistentVolumeReclaimPolicy: Retain
-        storageClassName: test-local-storage
-        local:
-          path: /srv/data/test-local-storage
-        nodeAffinity:
-          required:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - otk3s
-
-- name: Create a storage PersistentVolumeClaim
-  kubernetes.core.k8s:
-    namespace: "default"
-    state: present
-    definition:
-      kind: PersistentVolumeClaim
-      apiVersion: v1
-      metadata:
-        name: test-claim
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        storageClassName: test-local-storage
-        resources:
-          requests:
-            storage: 128Mi
-
-- name: Test a pod with local storage delete
-  kubernetes.core.k8s:
-    namespace: "default"
-    state: absent
-    definition:
-      apiVersion: v1
-      kind: Pod
-      metadata:
-        name: www
-
-- name: Test a pod with local storage
-  kubernetes.core.k8s:
-    namespace: "default"
-    state: present
-    definition:
-      apiVersion: v1
-      kind: Pod
-      metadata:
-        name: www
-        labels:
-          name: www
-      spec:
-#        securityContext:
-#          runAsUser: 3000
-#          runAsGroup: 3000
-#          fsGroup: 2000
-        containers:
-          - name: www
-            image: nginx:alpine
-            ports:
-              - containerPort: 80
-                name: www
-            volumeMounts:
-              - name: www-persistent-storage
-                mountPath: /mnt/data
-              - name: www-persistent-storage2
-                mountPath: /mnt/data2
-        volumes:
-          - name: www-persistent-storage
-            persistentVolumeClaim:
-              claimName: test-claim
-          - name: www-persistent-storage2
-            local:
-              path: /srv/data/test-local-storage2
-        initContainers:
-          - name: init-myservice
-            image: busybox:1.28
-            command: ['sh', '-c', "date > $$"]
-
 
 ###

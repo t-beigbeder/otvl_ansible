@@ -1,0 +1,9 @@
+---
+# meta file for otvl_service/otvl_web_v2/docker_build
+
+dependencies:
+  - role: otvl_service/docker/docker_build
+    tags:
+    - base_docker
+
+###
