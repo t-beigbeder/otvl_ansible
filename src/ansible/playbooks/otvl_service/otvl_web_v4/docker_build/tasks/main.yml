@@ -1,13 +1,35 @@
 ---
-# main tasks file for otvl_service/otvl_web_v2/docker_build
+# main tasks file for otvl_service/otvl_web_v4/docker_build
 
-- name: Install git for otvl_web_v2/docker_build
+- name: Install gnupg2 pass to enable docker login and git for building
   ansible.builtin.apt:
-    pkg: git
+    pkg:
+      - gnupg2
+      - pass
+      - git
+
+- name: Create helm download directory
+  file:
+    path: "{{ combined_otvl.config_paths.delivery }}/helm"
+    state: directory
+    mode: 0755
+
+- name: Download and extract helm release
+  ansible.builtin.unarchive:
+    src: https://get.helm.sh/helm-v3.12.2-linux-amd64.tar.gz
+    dest: "{{ combined_otvl.config_paths.delivery }}/helm"
+    remote_src: yes
+
+- name: Install helm
+  ansible.builtin.copy:
+    src: "{{ combined_otvl.config_paths.delivery }}/helm/linux-amd64/helm"
+    dest: /usr/local/bin/helm
+    remote_src: yes
+    mode: '0755'
 
 - name: Loop over sites for building images
   include_tasks: build_site.yml
-  loop: "{{ combined_otvl.otvl_web_v2.sites[otvl_logical_name].site_items }}"
+  loop: "{{ combined_otvl.otvl_web_v4.site_items }}"
   loop_control:
     loop_var: current_site_item
   when: "(current_site_item.skip_build | default(false)) != true"

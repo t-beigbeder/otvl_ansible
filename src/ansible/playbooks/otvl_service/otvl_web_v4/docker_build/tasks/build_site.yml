@@ -1,12 +1,12 @@
 ---
-# build_site tasks file for otvl_service/otvl_web_v2/docker_build
+# build_site tasks file for otvl_service/otvl_web_v4/docker_build
 
 - name: build_site display the site {{ current_site_item.name }} information
   debug:
     msg: "site item is {{ current_site_item }}"
   when: combined_otvl.debug
 
-- name: Checkout the git project containing otvl_web v2 for {{ current_site_item.name }}
+- name: Checkout the git project containing otvl_web v4 for {{ current_site_item.name }}
   git:
     repo: "{{ current_site_item.git.otvl_web.repo }}"
     dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_web"
@@ -57,8 +57,8 @@
 
   block:
     - command:
-        cmd: "docker login {{ combined_otvl.otvl_web_v2.docker_registry }} -u {{ combined_otvl.otvl_web_v2.docker_login }} --password-stdin"
-        stdin: "{{ combined_otvl.otvl_web_v2.docker_password }}"
+        cmd: "docker login {{ combined_otvl.otvl_web_v4.docker_registry }} -u {{ combined_otvl.otvl_web_v4.docker_login }} --password-stdin"
+        stdin: "{{ combined_otvl.otvl_web_v4.docker_password }}"
       register: docker_login
     - debug: var=docker_login.cmd
     - debug: var=docker_login.stderr_lines
@@ -68,7 +68,7 @@
         cmd: docker-compose build --pull
         chdir: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site{{ current_site_item.git.otvl_site.site_build_dir }}"
       environment:
-        OTVL_WEB_REGISTRY: "{{ combined_otvl.otvl_web_v2.docker_registry }}"
+        OTVL_WEB_REGISTRY: "{{ combined_otvl.otvl_web_v4.docker_registry }}"
       register: docker_compose_build
     - debug: var=docker_compose_build.cmd
     - debug: var=docker_compose_build.stderr_lines
@@ -78,7 +78,7 @@
         cmd: docker-compose push
         chdir: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site{{ current_site_item.git.otvl_site.site_build_dir }}"
       environment:
-        OTVL_WEB_REGISTRY: "{{ combined_otvl.otvl_web_v2.docker_registry }}"
+        OTVL_WEB_REGISTRY: "{{ combined_otvl.otvl_web_v4.docker_registry }}"
       register: docker_compose_push
     - debug: var=docker_compose_push.cmd
     - debug: var=docker_compose_push.stderr_lines
@@ -89,7 +89,7 @@
     include_tasks: "otvl_service/base_service/tasks/remove_install_status_file.yml"
     vars:
       isf_name: "{{ current_site_item.name }}_built"
-  - debug: var=combined_otvl.otvl_web_v2.docker_password
+  - debug: var=combined_otvl.otvl_web_v4.docker_password
 
   - name: "Site {{ current_site_item.name }} building failed, raise"
     fail:

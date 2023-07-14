@@ -22,7 +22,7 @@
 
 - name: Add docker repository into sources list
   ansible.builtin.apt_repository:
-    repo: deb http://download.docker.com/linux/debian buster stable
+    repo: "deb http://download.docker.com/linux/debian {{ combined_otvl.docker.debian | default(\"buster\") }} stable"
     state: present
 
 - name: Install docker run-time and CLI

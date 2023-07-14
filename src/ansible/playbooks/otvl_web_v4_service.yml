@@ -46,4 +46,12 @@
   tags:
     - otvl_v4_k3s
 
+- hosts: otvl_v4_build
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_web_v4/docker_build
+  tags:
+    - otvl_v4_build
+
 ###
