@@ -8,17 +8,25 @@
       - pass
       - git
 
+- name: Create otvl_web_v4 delivery directory
+  file:
+    path: "{{ combined_otvl.config_paths.delivery }}/otvl_web_v4"
+    state: directory
+    mode: 0755
+
 - name: Create helm download directory
   file:
     path: "{{ combined_otvl.config_paths.delivery }}/helm"
     state: directory
     mode: 0755
+  when: combined_otvl.otvl_web_v4.has_helm | default(false)
 
 - name: Download and extract helm release
   ansible.builtin.unarchive:
     src: https://get.helm.sh/helm-v3.12.2-linux-amd64.tar.gz
     dest: "{{ combined_otvl.config_paths.delivery }}/helm"
     remote_src: yes
+  when: combined_otvl.otvl_web_v4.has_helm | default(false)
 
 - name: Install helm
   ansible.builtin.copy:
@@ -26,12 +34,33 @@
     dest: /usr/local/bin/helm
     remote_src: yes
     mode: '0755'
+  when: combined_otvl.otvl_web_v4.has_helm | default(false)
+
+- name: Docker login for builds
+  block:
+    - command:
+        cmd: "docker login {{ combined_otvl.otvl_web_v4.docker_registry }} -u {{ combined_otvl.otvl_web_v4.docker_login }} --password-stdin"
+        stdin: "{{ combined_otvl.otvl_web_v4.docker_password }}"
+      register: docker_login
+    - debug: var=docker_login.cmd
+    - debug: var=docker_login.stderr_lines
+    - debug: var=docker_login.stdout_lines
+
+- name: Docker build cabri schedule image dockerfile
+  block:
+    - command:
+        cmd: "docker build -t {{ combined_otvl.otvl_web_v4.cabri_sched_image }} -"
+        stdin: "{{ lookup('template', 'cabri_sched_dockerfile') }}"
+      register: docker_build
+    - debug: var=docker_build.cmd
+    - debug: var=docker_build.stderr_lines
+    - debug: var=docker_build.stdout_lines
 
 - name: Loop over sites for building images
   include_tasks: build_site.yml
   loop: "{{ combined_otvl.otvl_web_v4.site_items }}"
   loop_control:
     loop_var: current_site_item
-  when: "(current_site_item.skip_build | default(false)) != true"
+  when: not (current_site_item.skip_build | default(false))
 
 ###

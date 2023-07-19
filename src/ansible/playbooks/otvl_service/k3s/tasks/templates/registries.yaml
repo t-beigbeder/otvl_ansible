@@ -2,3 +2,8 @@ mirrors:
   docker.io:
     endpoint:
       - "https://{{ combined_otvl.k3s.dkr }}"
+configs:
+  "{{ combined_otvl.k3s.dkr }}":
+    auth:
+      username: "{{ combined_otvl.otvl_web_v4.docker_login }}"
+      password: "{{ combined_otvl.otvl_web_v4.docker_password }}"
