@@ -1,5 +1,5 @@
 mirrors:
-  docker.io:
+  "{{ combined_otvl.k3s.dkr }}":
     endpoint:
       - "https://{{ combined_otvl.k3s.dkr }}"
 configs:

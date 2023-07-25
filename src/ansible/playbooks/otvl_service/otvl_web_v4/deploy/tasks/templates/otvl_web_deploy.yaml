@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ current_site_item.name }}_api
+spec:
+  containers:
+    - name: {{ current_site_item.name }}_api_sync
+      image: dkr.otvl.org/cabrisched:0.2.2
+  restartPolicy: OnFailure

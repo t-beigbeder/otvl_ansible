@@ -17,7 +17,7 @@ RUN touch $PFILE && \
     chmod ugo+rwX /home && \
     echo "mkdir -p $VHOME" > /entrypoint.sh && \
     echo "export HOME=$VHOME" >> /entrypoint.sh && \
-    echo "\$*" >> /entrypoint.sh && \
+    echo "exec \$*" >> /entrypoint.sh && \
     chmod ugo+rx /entrypoint.sh
 USER $SAUID
 ENTRYPOINT /entrypoint.sh /usr/local/bin/cabri schedule --pfile $PFILE --sfile $SFILE $*
