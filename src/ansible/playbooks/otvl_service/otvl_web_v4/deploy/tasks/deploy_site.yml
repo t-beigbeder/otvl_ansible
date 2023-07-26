@@ -6,10 +6,25 @@
     msg: "site item is {{ current_site_item }}"
   when: combined_otvl.debug
 
+- name: debug this template
+  template:
+    src: otvl_web_deploy.yaml
+    dest: "/tmp/otvl_web_deploy.yaml"
+
+- name: Kubectl delete site {{ current_site_item.name }} pods deployment
+  block:
+    - command:
+        cmd: "kubectl delete --ignore-not-found=true -f -"
+        stdin: "{{ lookup('template', 'otvl_web_deploy.yaml') }}"
+      register: kdelete
+    - debug: var=kdelete.cmd
+    - debug: var=kdelete.stderr_lines
+    - debug: var=kdelete.stdout_lines
+
 - name: Kubectl apply site {{ current_site_item.name }} pods deployment
   block:
     - command:
-        cmd: "kubectl apply  -"
+        cmd: "kubectl apply -f -"
         stdin: "{{ lookup('template', 'otvl_web_deploy.yaml') }}"
       register: kapply
     - debug: var=kapply.cmd
