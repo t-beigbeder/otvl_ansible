@@ -10,6 +10,50 @@
   template:
     src: otvl_web_deploy.yaml
     dest: "/tmp/otvl_web_deploy.yaml"
+  when: combined_otvl.debug
+
+- name: Create a storage PersistentVolume for the the site {{ current_site_item.name }} Pod API
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ current_site_item.name }}-api-pv"
+      spec:
+        capacity:
+          storage: 768Mi
+        accessModes:
+          - ReadWriteOnce
+        persistentVolumeReclaimPolicy: Retain
+        storageClassName: otvl-single-node-local-storage
+        local:
+          path: /srv/data/{{ current_site_item.name }}-api-pv
+        nodeAffinity:
+          required:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - "{{ combined_otvl.k3s.single_node_hostname }}"
+
+- name: Create a storage PersistentVolumeClaim for the the site {{ current_site_item.name }} Pod API
+  kubernetes.core.k8s:
+    namespace: "default"
+    state: present
+    definition:
+      kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: "{{ current_site_item.name }}-api-pvc"
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: otvl-single-node-local-storage
+        resources:
+          requests:
+            storage: 768Mi
 
 - name: Kubectl delete site {{ current_site_item.name }} pods deployment
   block:
@@ -20,6 +64,7 @@
     - debug: var=kdelete.cmd
     - debug: var=kdelete.stderr_lines
     - debug: var=kdelete.stdout_lines
+  when: not (current_site_item.skip_undeploy | default(false))
 
 - name: Kubectl apply site {{ current_site_item.name }} pods deployment
   block:

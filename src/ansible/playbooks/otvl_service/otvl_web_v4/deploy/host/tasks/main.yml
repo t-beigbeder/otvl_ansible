@@ -1,0 +1,19 @@
+---
+# main tasks file for otvl_service/otvl_web_v4/deploy/host
+
+- name: Load default otvl (base) variables
+  include_vars:
+    dir: "{{ role_path }}/../../../../vars/defaults"
+
+- name: combine default with actual otvl config data (base)
+  set_fact:
+    combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+
+- name: Loop over sites for deploying pods
+  include_tasks: deploy_site.yml
+  loop: "{{ combined_otvl.otvl_web_v4.site_items }}"
+  loop_control:
+    loop_var: current_site_item
+  when: not (current_site_item.skip_deploy | default(false))
+
+###

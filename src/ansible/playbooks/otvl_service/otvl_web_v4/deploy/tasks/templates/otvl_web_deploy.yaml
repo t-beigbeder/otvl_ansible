@@ -5,14 +5,26 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ current_site_item.name }}-api
 spec:
+  securityContext:
+    runAsUser: {{ current_site_item.uid }}
+    runAsGroup: {{ current_site_item.uid }}
+    fsGroup: {{ current_site_item.fs_group }}
   containers:
   - name: {{ current_site_item.name }}-api-sync
     image: dkr.otvl.org/cabrisched:0.2.2
     command: ["/bin/sh"]
     args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri-sfile.yaml --http"]
     ports:
-      - containerPort: 3000
+      - containerPort: {{ current_site_item.api_port }}
         name: {{ current_site_item.name }}-apisp
+    volumeMounts:
+      - name: "{{ current_site_item.name }}-api-vol"
+        mountPath: /data
+  volumes:
+    - name: "{{ current_site_item.name }}-api-vol"
+      persistentVolumeClaim:
+        claimName: "{{ current_site_item.name }}-api-pvc"
+
   restartPolicy: OnFailure
 
 ---
@@ -26,7 +38,7 @@ spec:
   ports:
     - name: {{ current_site_item.name }}-apissp
       protocol: TCP
-      port: 3000
+      port: {{ current_site_item.api_port }}
       targetPort: {{ current_site_item.name }}-apisp
 
 ---
@@ -38,7 +50,7 @@ metadata:
     ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   rules:
-    - host: test2.k3s.otvl.org
+    - host: {{ current_site_item.ingress_host }}
       http:
         paths:
           - path: /
@@ -47,4 +59,4 @@ spec:
               service:
                 name:  {{ current_site_item.name }}-api-sync-service
                 port:
-                  number: 3000
+                  number: {{ current_site_item.api_port }}
