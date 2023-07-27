@@ -13,7 +13,7 @@ spec:
   - name: {{ current_site_item.name }}-api-sync
     image: dkr.otvl.org/cabrisched:0.2.2
     command: ["/bin/sh"]
-    args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri-sfile.yaml --http"]
+    args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri-sfile.yaml --http --address :{{ current_site_item.api_port }}"]
     ports:
       - containerPort: {{ current_site_item.api_port }}
         name: {{ current_site_item.name }}-apisp
