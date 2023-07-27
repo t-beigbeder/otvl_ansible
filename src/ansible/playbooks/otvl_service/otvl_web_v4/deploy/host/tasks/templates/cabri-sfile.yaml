@@ -1,0 +1,10 @@
+synchronize:
+  period: 60
+  actions:
+    - type: cmd
+      cmdLine: mkdir -p /tmp/git
+    - type: git
+      gitSpec:
+        repoUrl: "{{ current_site_item.git.otvl_site.repo }}"
+        branch: "{{ current_site_item.git.otvl_site.version }}"
+        clonePath: "/tmp/git/otvl_sites/{{ current_site_item.git.otvl_site.clone_dir }}"
