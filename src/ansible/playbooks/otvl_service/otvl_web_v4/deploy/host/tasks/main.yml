@@ -9,8 +9,16 @@
   set_fact:
     combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
 
+- name: Create a directory for mounting local configuration files into PODs
+  file:
+    path: /srv/data/pods-cf
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
 - name: Loop over sites for deploying pods
-  include_tasks: deploy_site.yml
+  include_tasks: config_site.yml
   loop: "{{ combined_otvl.otvl_web_v4.site_items }}"
   loop_control:
     loop_var: current_site_item
