@@ -9,8 +9,10 @@ spec:
       enabled: true
     logs:
       general:
-        level: INFO
+        level: DEBUG
     ports:
+      web:
+        redirectTo: websecure
       websecure:
         tls:
           certResolver: leresolver
