@@ -66,26 +66,33 @@ spec:
       targetPort: {{ current_site_item.name }}-pi
 
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
 metadata:
   name: {{ current_site_item.name }}-api-sync
+  namespace: default
 spec:
-  rules:
-  - host: {{ current_site_item.ingress_host }}
-    http:
-      paths:
-      - path: /sync
-        pathType: Prefix
-        backend:
-          service:
-            name:  {{ current_site_item.name }}-api
-            port:
-              number: {{ current_site_item.api_sync_port }}
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name:  {{ current_site_item.name }}-api
-            port:
-              number: {{ current_site_item.api_port }}
+  routes:
+    - kind: Rule
+      match: "Host(`{{ current_site_item.ingress_host }}`) && PathPrefix(`/sync`)"
+      services:
+        - name:  {{ current_site_item.name }}-api
+          port: {{ current_site_item.api_sync_port }}
+      middlewares:
+        - name: mwrmsync
+    - kind: Rule
+      match: "Host(`{{ current_site_item.ingress_host }}`) && PathPrefix(`/api`)"
+      services:
+        - name:  {{ current_site_item.name }}-api
+          port: {{ current_site_item.api_port }}
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: mwrmsync
+  namespace: default
+spec:
+  stripPrefix:
+    prefixes:
+      - /sync
