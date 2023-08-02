@@ -23,19 +23,4 @@
       provisioner: kubernetes.io/no-provisioner
       volumeBindingMode: WaitForFirstConsumer
 
-- name: Install traefik k8s IngressRoute CRD and RBAC
-  block:
-    - command:
-        cmd: "kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v2.10/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml"
-      register: kapply
-    - debug: var=kapply.cmd
-    - debug: var=kapply.stderr_lines
-    - debug: var=kapply.stdout_lines
-    - command:
-        cmd: "kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v2.10/docs/content/reference/dynamic-configuration/kubernetes-crd-rbac.yml"
-      register: kapply
-    - debug: var=kapply.cmd
-    - debug: var=kapply.stderr_lines
-    - debug: var=kapply.stdout_lines
-
 ###

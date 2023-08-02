@@ -15,35 +15,33 @@ spec:
     command: ["/bin/sh"]
     args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri-sfile.yaml --http --address :{{ current_site_item.api_sync_port }} --haslog"]
     ports:
-      - containerPort: {{ current_site_item.api_sync_port }}
-        name: {{ current_site_item.name }}-py
+    - containerPort: {{ current_site_item.api_sync_port }}
     volumeMounts:
-      - name: "{{ current_site_item.name }}-api-vol"
-        mountPath: /data
-      - name: "{{ current_site_item.name }}-api-vsf"
-        mountPath: /etc/cabri-sfile.yaml
+    - name: "{{ current_site_item.name }}-api-vol"
+      mountPath: /data
+    - name: "{{ current_site_item.name }}-api-vsf"
+      mountPath: /etc/cabri-sfile.yaml
   - name: {{ current_site_item.name }}-api
     image: "{{ combined_otvl.otvl_web_v4.docker_registry }}/{{ current_site_item.images.api }}:{{ current_site_item.tags.api }}"
     env:
-      - name: OTVL_WEB_CONFIG_PATH
-        value: "{{ current_site_item.api_conf }}"
+    - name: OTVL_WEB_CONFIG_PATH
+      value: "{{ current_site_item.api_conf }}"
     command: ["/bin/sh"]
     args: ["-c", "/entrypoint.sh /srv/pkg/otvl_web_server_venv/bin/python -m otvl_web.main"]
     ports:
-      - containerPort: {{ current_site_item.api_port }}
-        name: {{ current_site_item.name }}-pi
+    - containerPort: {{ current_site_item.api_port }}
     volumeMounts:
-        - name: "{{ current_site_item.name }}-api-vol"
-          mountPath: /data
+    - name: "{{ current_site_item.name }}-api-vol"
+      mountPath: /data
 
   volumes:
-    - name: "{{ current_site_item.name }}-api-vol"
-      persistentVolumeClaim:
-        claimName: "{{ current_site_item.name }}-api-pvc"
-    - name: "{{ current_site_item.name }}-api-vsf"
-      hostPath:
-        path: "/srv/data/pods-cf/cabri-sfile-api-{{ current_site_item.name }}.yaml"
-        type: File
+  - name: "{{ current_site_item.name }}-api-vol"
+    persistentVolumeClaim:
+      claimName: "{{ current_site_item.name }}-api-pvc"
+  - name: "{{ current_site_item.name }}-api-vsf"
+    hostPath:
+      path: "/srv/data/pods-cf/cabri-sfile-api-{{ current_site_item.name }}.yaml"
+      type: File
 
   restartPolicy: OnFailure
 
@@ -56,36 +54,9 @@ spec:
   selector:
     app.kubernetes.io/name: {{ current_site_item.name }}-lapi
   ports:
-    - name: {{ current_site_item.name }}-pysp
-      protocol: TCP
-      port: {{ current_site_item.api_sync_port }}
-      targetPort: {{ current_site_item.name }}-py
-    - name: {{ current_site_item.name }}-pisp
-      protocol: TCP
-      port: {{ current_site_item.api_port }}
-      targetPort: {{ current_site_item.name }}-pi
-
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: {{ current_site_item.name }}-api-sync
-spec:
-  rules:
-  - host: {{ current_site_item.ingress_host }}
-    http:
-      paths:
-      - path: /sync
-        pathType: Prefix
-        backend:
-          service:
-            name:  {{ current_site_item.name }}-api
-            port:
-              number: {{ current_site_item.api_sync_port }}
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name:  {{ current_site_item.name }}-api
-            port:
-              number: {{ current_site_item.api_port }}
+  - name: "sync-port"
+    port: {{ current_site_item.api_sync_port }}
+    protocol: TCP
+  - name: "api-port"
+    port: {{ current_site_item.api_port }}
+    protocol: TCP

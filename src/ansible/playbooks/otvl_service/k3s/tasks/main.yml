@@ -34,6 +34,12 @@
     src: registries.yaml
     dest: /etc/rancher/k3s/registries.yaml
 
+- name: Restart the k3s.service once registries.yaml delivered
+  systemd:
+    name: k3s.service
+    state: restarted
+  when: k3s_service_st.stat.isreg is not defined
+
 - name: Make k3s cluster config copy readable
   ansible.builtin.copy:
     src: /etc/rancher/k3s/k3s.yaml
