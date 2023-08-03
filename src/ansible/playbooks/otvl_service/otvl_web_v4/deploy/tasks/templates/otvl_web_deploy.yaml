@@ -49,6 +49,57 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
+  name: {{ current_site_item.name }}-app
+  labels:
+    app.kubernetes.io/name: {{ current_site_item.name }}-app
+spec:
+  securityContext:
+    runAsUser: {{ current_site_item.uid }}
+    runAsGroup: {{ current_site_item.uid }}
+    fsGroup: {{ current_site_item.fs_group }}
+  containers:
+    - name: sync
+      image: "{{ combined_otvl.otvl_web_v4.docker_registry }}/{{ combined_otvl.otvl_web_v4.cabri_sched_image }}"
+      command: ["/bin/sh"]
+      args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri-sfile.yaml --http --address :{{ current_site_item.app_sync_port }} --haslog"]
+      ports:
+        - containerPort: {{ current_site_item.app_sync_port }}
+      volumeMounts:
+        - name: "{{ current_site_item.name }}-app-vol"
+          mountPath: /data
+        - name: "{{ current_site_item.name }}-app-vsf"
+          mountPath: /etc/cabri-sfile.yaml
+    - name: app
+      image: "{{ combined_otvl.otvl_web_v4.docker_registry }}/{{ current_site_item.images.app }}:{{ current_site_item.tags.app }}"
+      env:
+        - name: OTVL_WEB_SERVER_NAME
+          value: "{{ current_site_item.ingress_host }}"
+        - name: OTVL_WEB_ENABLE_BOTS
+          value: "{{ (current_site_item.enable_bots|default(false)) | ternary('1', '', '') }}"
+
+      command: ["/bin/sh"]
+      args: ["-c", "/entrypoint.sh /shell/httpd-foreground.sh"]
+      ports:
+        - containerPort: {{ current_site_item.app_port }}
+      volumeMounts:
+        - name: "{{ current_site_item.name }}-app-vol"
+          mountPath: /data
+
+  volumes:
+    - name: "{{ current_site_item.name }}-app-vol"
+      persistentVolumeClaim:
+        claimName: "{{ current_site_item.name }}-app-pvc"
+    - name: "{{ current_site_item.name }}-app-vsf"
+      hostPath:
+        path: "/srv/data/pods-cf/cabri-sfile-app-{{ current_site_item.name }}.yaml"
+        type: File
+
+  restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
   name: {{ current_site_item.name }}-router
   labels:
     app.kubernetes.io/name: {{ current_site_item.name }}-router
