@@ -47,9 +47,38 @@ spec:
 
 ---
 apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ current_site_item.name }}-router
+  labels:
+    app.kubernetes.io/name: {{ current_site_item.name }}-router
+spec:
+  securityContext:
+    runAsUser: {{ current_site_item.uid }}
+    runAsGroup: {{ current_site_item.uid }}
+  containers:
+    - name: {{ current_site_item.name }}-router
+      image: "{{ combined_otvl.traefik.image }}"
+      command: ["/usr/local/bin/traefik"]
+      args: ["--configFile=/traefik/static_config.yml"]
+      ports:
+        - containerPort: {{ combined_otvl.otvl_web_v4.router_port }}
+      volumeMounts:
+        - name: "{{ current_site_item.name }}-router-vcf"
+          mountPath: /traefik
+  volumes:
+    - name: "{{ current_site_item.name }}-router-vcf"
+      hostPath:
+        path: "/srv/data/pods-cf/{{ current_site_item.name }}-traefik"
+        type: Directory
+
+  restartPolicy: OnFailure
+
+---
+apiVersion: v1
 kind: Service
 metadata:
-  name: {{ current_site_item.name }}-api
+  name: "{{ current_site_item.name }}-api"
 spec:
   selector:
     app.kubernetes.io/name: {{ current_site_item.name }}-lapi
@@ -60,3 +89,34 @@ spec:
   - name: "api-port"
     port: {{ current_site_item.api_port }}
     protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_site_item.name }}-router"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_site_item.name }}-router
+  ports:
+  - name: "router-port"
+    port: {{ combined_otvl.otvl_web_v4.router_port }}
+    protocol: TCP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ current_site_item.name }}-router"
+spec:
+  rules:
+    - host: "{{ current_site_item.ingress_host }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name:  "{{ current_site_item.name }}-router"
+                port:
+                  number: {{ combined_otvl.otvl_web_v4.router_port }}

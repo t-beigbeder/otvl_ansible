@@ -14,10 +14,34 @@
     group: root
     mode: 0700
 
-- name: Create configuration file for volume of the site {{ current_site_item.name }} Pod API
+- name: Create configuration file for cabri sync of the site {{ current_site_item.name }} Pod API
   template:
     src: "cabri-sfile-api.yaml"
     dest: "/srv/data/pods-cf/cabri-sfile-api-{{ current_site_item.name }}.yaml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create a directory for router of the site {{ current_site_item.name }} Pod API
+  file:
+    path: /srv/data/pods-cf/{{ current_site_item.name }}-traefik
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create static configuration file for router of the site {{ current_site_item.name }} Pod API
+  template:
+    src: "traefik_static_config.yml"
+    dest: "/srv/data/pods-cf/{{ current_site_item.name }}-traefik/static_config.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create dynamic configuration file for router of the site {{ current_site_item.name }} Pod API
+  template:
+    src: "traefik_dynamic_conf.yml"
+    dest: "/srv/data/pods-cf/{{ current_site_item.name }}-traefik/dynamic_conf.yml"
     owner: root
     group: root
     mode: 0644
