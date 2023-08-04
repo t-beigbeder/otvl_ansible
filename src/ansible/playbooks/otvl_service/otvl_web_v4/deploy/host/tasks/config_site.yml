@@ -30,7 +30,7 @@
     group: root
     mode: 0700
 
-- name: Create configuration file for cabri sync of the site {{ current_site_item.name }} Pod App
+- name: Create configuration file for cabri git-only sync of the site {{ current_site_item.name }} Pod App
   template:
     src: "cabri-sfile-git-app.yaml"
     dest: "/srv/data/pods-cf/cabri-sfile-app-{{ current_site_item.name }}.yaml"
@@ -38,6 +38,15 @@
     group: root
     mode: 0644
   when: current_site_item.git_assets
+
+- name: Create configuration file for cabri git+cabri sync of the site {{ current_site_item.name }} Pod App
+  template:
+    src: "cabri-sfile-gitcab-app.yaml"
+    dest: "/srv/data/pods-cf/cabri-sfile-app-{{ current_site_item.name }}.yaml"
+    owner: root
+    group: root
+    mode: 0644
+  when: not current_site_item.git_assets
 
 - name: Create configuration file for apache startup of the site {{ current_site_item.name }} Pod App
   template:

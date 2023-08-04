@@ -9,7 +9,7 @@ spec:
       enabled: true
     logs:
       general:
-        level: DEBUG
+        level: INFO
     ports:
       web:
         redirectTo: websecure
@@ -18,7 +18,6 @@ spec:
           certResolver: leresolver
     certResolvers:
       leresolver:
-        caServer: https://acme-staging-v02.api.letsencrypt.org/directory
         storage: /data/acme.json
         tlsChallenge: false
         httpChallenge:
