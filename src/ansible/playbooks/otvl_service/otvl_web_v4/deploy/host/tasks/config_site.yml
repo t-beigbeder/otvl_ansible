@@ -39,6 +39,14 @@
     mode: 0644
   when: current_site_item.git_assets
 
+- name: Create configuration file for apache startup of the site {{ current_site_item.name }} Pod App
+  template:
+    src: "apache-custo-init-app.sh"
+    dest: "/srv/data/pods-cf/apache-custo-init-app-{{ current_site_item.name }}.sh"
+    owner: root
+    group: root
+    mode: 0755
+
 - name: Create a directory for router of the site {{ current_site_item.name }} Pod API
   file:
     path: /srv/data/pods-cf/{{ current_site_item.name }}-traefik

@@ -55,6 +55,32 @@
           requests:
             storage: 768Mi
 
+- name: Create a storage PersistentVolume for the the site {{ current_site_item.name }} Pod App
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ current_site_item.name }}-app-pv"
+      spec:
+        capacity:
+          storage: 768Mi
+        accessModes:
+          - ReadWriteOnce
+        persistentVolumeReclaimPolicy: Retain
+        storageClassName: otvl-single-node-local-storage
+        local:
+          path: /srv/data/{{ current_site_item.name }}-app-pv
+        nodeAffinity:
+          required:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - "{{ combined_otvl.k3s.single_node_hostname }}"
+
 - name: Create a storage PersistentVolumeClaim for the the site {{ current_site_item.name }} Pod App
   kubernetes.core.k8s:
     namespace: "default"
@@ -92,3 +118,4 @@
     - debug: var=kapply.cmd
     - debug: var=kapply.stderr_lines
     - debug: var=kapply.stdout_lines
+  when: not (current_site_item.skip_kdeploy | default(false))

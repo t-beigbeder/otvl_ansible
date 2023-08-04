@@ -1,27 +1,27 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ current_site_item.name }}-papi
+  name: {{ current_site_item.name }}-api
   labels:
-    app.kubernetes.io/name: {{ current_site_item.name }}-lapi
+    app.kubernetes.io/name: {{ current_site_item.name }}-api
 spec:
   securityContext:
     runAsUser: {{ current_site_item.uid }}
     runAsGroup: {{ current_site_item.uid }}
     fsGroup: {{ current_site_item.fs_group }}
   containers:
-  - name: {{ current_site_item.name }}-apy
+  - name: sync
     image: "{{ combined_otvl.otvl_web_v4.docker_registry }}/{{ combined_otvl.otvl_web_v4.cabri_sched_image }}"
     command: ["/bin/sh"]
     args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri-sfile.yaml --http --address :{{ current_site_item.api_sync_port }} --haslog"]
     ports:
     - containerPort: {{ current_site_item.api_sync_port }}
     volumeMounts:
-    - name: "{{ current_site_item.name }}-api-vol"
+    - name: "api-vol"
       mountPath: /data
-    - name: "{{ current_site_item.name }}-api-vsf"
+    - name: "api-vsf"
       mountPath: /etc/cabri-sfile.yaml
-  - name: {{ current_site_item.name }}-api
+  - name: api
     image: "{{ combined_otvl.otvl_web_v4.docker_registry }}/{{ current_site_item.images.api }}:{{ current_site_item.tags.api }}"
     env:
     - name: OTVL_WEB_CONFIG_PATH
@@ -31,14 +31,14 @@ spec:
     ports:
     - containerPort: {{ current_site_item.api_port }}
     volumeMounts:
-    - name: "{{ current_site_item.name }}-api-vol"
+    - name: "api-vol"
       mountPath: /data
 
   volumes:
-  - name: "{{ current_site_item.name }}-api-vol"
+  - name: "api-vol"
     persistentVolumeClaim:
       claimName: "{{ current_site_item.name }}-api-pvc"
-  - name: "{{ current_site_item.name }}-api-vsf"
+  - name: "api-vsf"
     hostPath:
       path: "/srv/data/pods-cf/cabri-sfile-api-{{ current_site_item.name }}.yaml"
       type: File
@@ -65,12 +65,13 @@ spec:
       ports:
         - containerPort: {{ current_site_item.app_sync_port }}
       volumeMounts:
-        - name: "{{ current_site_item.name }}-app-vol"
+        - name: "app-vol"
           mountPath: /data
-        - name: "{{ current_site_item.name }}-app-vsf"
+        - name: "app-vsf"
           mountPath: /etc/cabri-sfile.yaml
     - name: app
       image: "{{ combined_otvl.otvl_web_v4.docker_registry }}/{{ current_site_item.images.app }}:{{ current_site_item.tags.app }}"
+      imagePullPolicy: Always
       env:
         - name: OTVL_WEB_SERVER_NAME
           value: "{{ current_site_item.ingress_host }}"
@@ -82,16 +83,23 @@ spec:
       ports:
         - containerPort: {{ current_site_item.app_port }}
       volumeMounts:
-        - name: "{{ current_site_item.name }}-app-vol"
-          mountPath: /data
+        - name: "app-vol"
+          mountPath: /assets
+          subPath: git/blog/data/assets
+        - name: "app-vca"
+          mountPath: /shell/custom_init.sh
 
   volumes:
-    - name: "{{ current_site_item.name }}-app-vol"
+    - name: "app-vol"
       persistentVolumeClaim:
         claimName: "{{ current_site_item.name }}-app-pvc"
-    - name: "{{ current_site_item.name }}-app-vsf"
+    - name: "app-vsf"
       hostPath:
         path: "/srv/data/pods-cf/cabri-sfile-app-{{ current_site_item.name }}.yaml"
+        type: File
+    - name: "app-vca"
+      hostPath:
+        path: "/srv/data/pods-cf/apache-custo-init-app-{{ current_site_item.name }}.sh"
         type: File
 
   restartPolicy: OnFailure
@@ -115,10 +123,10 @@ spec:
       ports:
         - containerPort: {{ combined_otvl.otvl_web_v4.router_port }}
       volumeMounts:
-        - name: "{{ current_site_item.name }}-router-vcf"
+        - name: "router-vcf"
           mountPath: /traefik
   volumes:
-    - name: "{{ current_site_item.name }}-router-vcf"
+    - name: "router-vcf"
       hostPath:
         path: "/srv/data/pods-cf/{{ current_site_item.name }}-traefik"
         type: Directory
@@ -132,7 +140,7 @@ metadata:
   name: "{{ current_site_item.name }}-api"
 spec:
   selector:
-    app.kubernetes.io/name: {{ current_site_item.name }}-lapi
+    app.kubernetes.io/name: {{ current_site_item.name }}-api
   ports:
   - name: "sync-port"
     port: {{ current_site_item.api_sync_port }}
@@ -140,6 +148,22 @@ spec:
   - name: "api-port"
     port: {{ current_site_item.api_port }}
     protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_site_item.name }}-app"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_site_item.name }}-app
+  ports:
+    - name: "sync-port"
+      port: {{ current_site_item.app_sync_port }}
+      protocol: TCP
+    - name: "app-port"
+      port: {{ current_site_item.app_port }}
+      protocol: TCP
 
 ---
 apiVersion: v1
