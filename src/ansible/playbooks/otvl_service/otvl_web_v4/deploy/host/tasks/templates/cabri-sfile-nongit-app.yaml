@@ -2,4 +2,4 @@ synchronize:
   period: 60
   actions:
     - type: cmd
-      cmdLine: cabri cli lsns --obsrg $OVHRG --obsep $OVHEP --obsct $OVHCT --obsak $OVHAK --obssk $OVHSK obs:/data/obs_otvl_sites@otvl_sites/assets/bga -rs
+      cmdLine: cabri cli sync obs:/home/sa/obs_otvl_sites@{{ current_site_item.obs_asset_ns }} fsy:/data/assets@ -rv --summary --noacl

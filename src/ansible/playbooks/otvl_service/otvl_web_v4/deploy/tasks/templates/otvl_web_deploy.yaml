@@ -97,7 +97,7 @@ spec:
       volumeMounts:
         - name: "app-vol"
           mountPath: /assets
-          subPath: assets
+          subPath: {{ current_site_item.assets_dir }}
         - name: "app-vca"
           mountPath: /shell/custom_init.sh
 
