@@ -2,6 +2,10 @@ synchronize:
   period: 60
   actions:
     - type: git
+      base:
+        verbose: true
+        dispOut: true
+        dispErr: true
       gitSpec:
         repoUrl: "{{ current_site_item.git.otvl_site.repo }}"
         branch: "{{ current_site_item.git.otvl_site.version }}"

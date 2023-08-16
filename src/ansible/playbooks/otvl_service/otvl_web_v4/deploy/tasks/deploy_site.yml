@@ -12,6 +12,17 @@
     dest: "/tmp/otvl_web_deploy.yaml"
   when: combined_otvl.debug
 
+- name: Create a StorageClass for the the site {{ current_site_item.name }} Pod API
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: "{{ current_site_item.name }}-api-sc"
+      provisioner: kubernetes.io/no-provisioner
+      volumeBindingMode: WaitForFirstConsumer
+
 - name: Create a storage PersistentVolume for the the site {{ current_site_item.name }} Pod API
   kubernetes.core.k8s:
     state: present
@@ -26,7 +37,7 @@
         accessModes:
           - ReadWriteOnce
         persistentVolumeReclaimPolicy: Retain
-        storageClassName: otvl-single-node-local-storage
+        storageClassName: "{{ current_site_item.name }}-api-sc"
         local:
           path: /srv/data/{{ current_site_item.name }}-api-pv
         nodeAffinity:
@@ -50,10 +61,21 @@
       spec:
         accessModes:
           - ReadWriteOnce
-        storageClassName: otvl-single-node-local-storage
+        storageClassName: "{{ current_site_item.name }}-api-sc"
         resources:
           requests:
             storage: 768Mi
+
+- name: Create a StorageClass for the the site {{ current_site_item.name }} Pod App
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: "{{ current_site_item.name }}-app-sc"
+      provisioner: kubernetes.io/no-provisioner
+      volumeBindingMode: WaitForFirstConsumer
 
 - name: Create a storage PersistentVolume for the the site {{ current_site_item.name }} Pod App
   kubernetes.core.k8s:
@@ -69,7 +91,7 @@
         accessModes:
           - ReadWriteOnce
         persistentVolumeReclaimPolicy: Retain
-        storageClassName: otvl-single-node-local-storage
+        storageClassName: "{{ current_site_item.name }}-app-sc"
         local:
           path: /srv/data/{{ current_site_item.name }}-app-pv
         nodeAffinity:
@@ -93,7 +115,7 @@
       spec:
         accessModes:
           - ReadWriteOnce
-        storageClassName: otvl-single-node-local-storage
+        storageClassName: "{{ current_site_item.name }}-app-sc"
         resources:
           requests:
             storage: 768Mi

@@ -8,5 +8,9 @@ if [ "$OTVL_WEB_CABRI_SYNC" ]; then
     echo "cabri cli dss unlock obs:/data/obs_otvl_sites"
     cabri cli dss unlock obs:$HOME/obs_otvl_sites
   fi
+  if [ ! -d /data/assets ] ; then
+    echo mkdir /data/assets
+    mkdir /data/assets
+  fi
 fi
 exec $*

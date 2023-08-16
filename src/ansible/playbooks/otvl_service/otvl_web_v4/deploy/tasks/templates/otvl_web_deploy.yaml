@@ -89,6 +89,8 @@ spec:
           value: "{{ current_site_item.ingress_host }}"
         - name: OTVL_WEB_ENABLE_BOTS
           value: "{{ (current_site_item.enable_bots|default(false)) | ternary('1', '', '') }}"
+        - name: OTVL_WEB_ASSETS_DIR
+          value: /data/{{ current_site_item.assets_dir }}
 
       command: ["/bin/sh"]
       args: ["-c", "/entrypoint.sh /shell/httpd-foreground.sh"]
@@ -96,8 +98,7 @@ spec:
         - containerPort: {{ current_site_item.app_port }}
       volumeMounts:
         - name: "app-vol"
-          mountPath: /assets
-          subPath: {{ current_site_item.assets_dir }}
+          mountPath: /data
         - name: "app-vca"
           mountPath: /shell/custom_init.sh
 
