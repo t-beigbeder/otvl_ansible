@@ -3,7 +3,7 @@ synchronize:
   actions:
     - type: cmd
       base:
-        verbose: true
-        dispOut: true
-        dispErr: true
+        verbose: false
+        dispOut: false
+        dispErr: false
       cmdLine: cabri cli sync obs:/home/sa/obs_otvl_sites@{{ current_site_item.obs_asset_ns }} fsy:/data/assets@ -rv --summary --noacl

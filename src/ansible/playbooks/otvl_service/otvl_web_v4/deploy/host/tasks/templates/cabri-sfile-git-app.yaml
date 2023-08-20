@@ -3,9 +3,9 @@ synchronize:
   actions:
     - type: git
       base:
-        verbose: true
-        dispOut: true
-        dispErr: true
+        verbose: false
+        dispOut: false
+        dispErr: false
       gitSpec:
         repoUrl: "{{ current_site_item.git.otvl_site.repo }}"
         branch: "{{ current_site_item.git.otvl_site.version }}"
