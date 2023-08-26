@@ -6,12 +6,14 @@ data:
   "custom-init.sh": |
     copt="--pfile /etc/cabri-pfile --cdir /data/cdir"
     ccmd="/usr/local/bin/cabri $copt"
-    mkdir -p /data/cdir && \
+    mkdir -p /data/cdir /data/backups/cdir && \
       $ccmd cli config --get
     urls=
     for dss in $* ; do
       urls="$urls `sh /etc/config/init-dss.sh $dss`"
     done
+    ts=`date +%Y%m%d-%H:%M:%S`
+    tar czf /data/backups/cdir/cdir.$ts.tgz data/cdir
     cmd="$ccmd webapi $urls --haslog"
     echo $cmd
     $cmd
@@ -19,7 +21,7 @@ data:
   "init-dss.sh": |
     dt=`echo $1 | cut -d':' -f1`
     dn=`echo $1 | cut -d':' -f2`
-    echo ${dt}+http://localhost:{{ current_webapi_item.webapi_port }}/data/dss/${dn}@${dn}
+    echo ${dt}+http://0.0.0.0:{{ current_webapi_item.webapi_port }}/data/dss/${dn}@${dn}
     copt="--pfile /etc/cabri-pfile --cdir /data/cdir"
     ccmd="/usr/local/bin/cabri $copt"
     OBS_ENV="--obsrg $OVHRG --obsep $OVHEP --obsct $dn --obsak $OVHAK --obssk $OVHSK"
@@ -28,7 +30,7 @@ data:
     ts=`date +%Y%m%d-%H:%M:%S`
     if [ ! -d /data/dss/$dn ] ; then
       mkdir -p /data/dss/$dn /data/backups/$dn
-      $ccmd cli dss make $dt:/data/dss/$dn
+      $ccmd cli dss make $OBS_ENV $dt:/data/dss/$dn
     else
       $ccmd cli dss unlock $dt:/data/dss/$dn && tar czf /data/backups/$dn/$dn.$ts.tgz data/dss/$dn
     fi
@@ -74,3 +76,34 @@ spec:
         name: "{{ current_webapi_item.name }}-webapi"
 
   restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_webapi_item.name }}-webapi"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_webapi_item.name }}-webapi
+  ports:
+    - name: "webapi-port"
+      port: {{ current_webapi_item.webapi_port }}
+      protocol: TCP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ current_webapi_item.name }}-webapi"
+spec:
+  rules:
+    - host: "{{ current_webapi_item.ingress_host }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name:  "{{ current_webapi_item.name }}-webapi"
+                port:
+                  number: {{ current_webapi_item.webapi_port }}
