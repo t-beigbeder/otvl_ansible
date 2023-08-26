@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ current_webapi_item.name }}-webapi
+data:
+  "custom-init.sh": |
+    copt="--pfile /etc/cabri-pfile --cdir /data/cdir"
+    ccmd="/usr/local/bin/cabri $copt"
+    mkdir -p /data/cdir && \
+      $ccmd cli config --get
+    urls=
+    for dss in $* ; do
+      urls="$urls `sh /etc/config/init-dss.sh $dss`"
+    done
+    cmd="$ccmd webapi $urls --haslog"
+    echo $cmd
+    $cmd
+    sleep 3600
+  "init-dss.sh": |
+    dt=`echo $1 | cut -d':' -f1`
+    dn=`echo $1 | cut -d':' -f2`
+    echo ${dt}+http://localhost:{{ current_webapi_item.webapi_port }}/data/dss/${dn}@${dn}
+    copt="--pfile /etc/cabri-pfile --cdir /data/cdir"
+    ccmd="/usr/local/bin/cabri $copt"
+    OBS_ENV="--obsrg $OVHRG --obsep $OVHEP --obsct $dn --obsak $OVHAK --obssk $OVHSK"
+    $ccmd cli check $OBS_ENV --s3cnx
+    if [ $? -ne 0 ] ; then echo >&2 "$OBS_ENV has connexion issues" ; fi
+    ts=`date +%Y%m%d-%H:%M:%S`
+    if [ ! -d /data/dss/$dn ] ; then
+      mkdir -p /data/dss/$dn /data/backups/$dn
+      $ccmd cli dss make $dt:/data/dss/$dn
+    else
+      $ccmd cli dss unlock $dt:/data/dss/$dn && tar czf /data/backups/$dn/$dn.$ts.tgz data/dss/$dn
+    fi
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ current_webapi_item.name }}-webapi
+  labels:
+    app.kubernetes.io/name: {{ current_webapi_item.name }}-webapi
+spec:
+  securityContext:
+    runAsUser: {{ current_webapi_item.uid }}
+    runAsGroup: {{ current_webapi_item.uid }}
+    fsGroup: {{ current_webapi_item.fs_group }}
+  containers:
+    - name: webapi
+      image: "{{ combined_otvl.otvl_web_v4.docker_registry }}/{{ combined_otvl.otvl_web_v4.cabri_webapi_image }}"
+      env:
+      - name: HOME
+        value: /home/sa
+{% for nkey, nvalue in current_webapi_item.ovh_config.items() %}
+      - name: {{ nkey }}
+        value: {{ nvalue }}
+{% endfor %}
+      command: ["/bin/sh"]
+      args: ["/etc/config/custom-init.sh", "{{ current_webapi_item.dsss | join(' ') }}"]
+      ports:
+        - containerPort: {{ current_webapi_item.webapi_port }}
+      volumeMounts:
+        - name: "webapi-vol"
+          mountPath: /data
+        - name: "config-vol"
+          mountPath: /etc/config
+
+  volumes:
+    - name: webapi-vol
+      persistentVolumeClaim:
+        claimName: "{{ current_webapi_item.name }}-webapi-pvc"
+    - name: config-vol
+      configMap:
+        name: "{{ current_webapi_item.name }}-webapi"
+
+  restartPolicy: OnFailure
