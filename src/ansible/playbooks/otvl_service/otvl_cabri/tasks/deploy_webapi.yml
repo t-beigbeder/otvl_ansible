@@ -1,0 +1,13 @@
+---
+# deploy_webapi tasks file for otvl_service/otvl_cabri
+
+- name: deploy_webapi display the webapi {{ current_webapi_item.name }} information
+  debug:
+    msg: "site webapi is {{ current_webapi_item }}"
+  when: combined_otvl.debug
+
+- name: test passing array
+  block:
+    - command: "echo begin {{ current_webapi_item.dsss | join(' ') }} end"
+      register: cecho
+    - debug: var=cecho.stdout_lines

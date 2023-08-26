@@ -46,6 +46,22 @@
     - debug: var=docker_login.stderr_lines
     - debug: var=docker_login.stdout_lines
 
+- name: Docker build cabri webapi image Dockerfile
+  block:
+    - command:
+        cmd: "docker build -t {{ combined_otvl.otvl_web_v4.cabri_webapi_image }} -t {{ combined_otvl.otvl_web_v4.docker_registry }}/{{ combined_otvl.otvl_web_v4.cabri_webapi_image }} -"
+        stdin: "{{ lookup('template', 'cabri_webapi_dockerfile') }}"
+      register: docker_build
+    - debug: var=docker_build.cmd
+    - debug: var=docker_build.stderr_lines
+    - debug: var=docker_build.stdout_lines
+    - command:
+        cmd: "docker image push {{ combined_otvl.otvl_web_v4.docker_registry }}/{{ combined_otvl.otvl_web_v4.cabri_webapi_image }}"
+      register: docker_push
+    - debug: var=docker_push.cmd
+    - debug: var=docker_push.stderr_lines
+    - debug: var=docker_push.stdout_lines
+
 - name: Docker build cabri schedule image dockerfile
   block:
     - command:
@@ -57,7 +73,6 @@
     - debug: var=docker_build.stdout_lines
     - command:
         cmd: "docker image push {{ combined_otvl.otvl_web_v4.docker_registry }}/{{ combined_otvl.otvl_web_v4.cabri_sched_image }}"
-        stdin: "{{ lookup('template', 'cabri_sched_dockerfile') }}"
       register: docker_push
     - debug: var=docker_push.cmd
     - debug: var=docker_push.stderr_lines
