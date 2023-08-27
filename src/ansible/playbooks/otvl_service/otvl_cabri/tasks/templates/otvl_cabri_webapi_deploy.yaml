@@ -106,8 +106,8 @@ data:
         "private-basic-auth":
           basicAuth:
             users:
-{% for nkey, nvalue in current_webapi_item.ingress_auth.items() %}
-              - "{{ nvalue }}"
+{% for auth_line in current_webapi_item.ingress_auth %}
+              - "{{ auth_line }}"
 {% endfor %}
       services:
         "webapi":
