@@ -79,6 +79,72 @@ spec:
 
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ current_webapi_item.name }}-warp
+data:
+  "static-config.yml": |
+    log:
+      level: INFO
+    providers:
+      file:
+        filename: /traefik/dynamic-conf.yml
+        watch: true
+    entryPoints:
+      web:
+        address: ':8080'
+  "dynamic-conf.yml": |
+    http:
+      routers:
+        to-private:
+          rule: "PathPrefix(`/`)"
+          priority: 1
+          middlewares:
+            - "private-basic-auth"
+          service: webapi    
+      middlewares:
+        "private-basic-auth":
+          basicAuth:
+            users:
+{% for nkey, nvalue in current_webapi_item.ingress_auth.items() %}
+              - "{{ nvalue }}"
+{% endfor %}
+      services:
+        "webapi":
+          loadBalancer:
+            servers:
+              - url: "http://{{ current_webapi_item.name }}-webapi:{{ current_webapi_item.webapi_port }}"
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ current_webapi_item.name }}-warp
+  labels:
+    app.kubernetes.io/name: {{ current_webapi_item.name }}-warp
+spec:
+  securityContext:
+    runAsUser: {{ current_webapi_item.uid }}
+    runAsGroup: {{ current_webapi_item.uid }}
+  containers:
+    - name: traefik
+      image: "{{ combined_otvl.traefik.image }}"
+      command: ["/usr/local/bin/traefik"]
+      args: ["--configFile=/traefik/static-config.yml"]
+      ports:
+        - containerPort: {{ combined_otvl.otvl_web_v4.router_port }}
+      volumeMounts:
+        - name: "config-vol"
+          mountPath: /traefik
+  volumes:
+    - name: config-vol
+      configMap:
+        name: "{{ current_webapi_item.name }}-warp"
+
+  restartPolicy: OnFailure
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: "{{ current_webapi_item.name }}-webapi"
@@ -91,10 +157,23 @@ spec:
       protocol: TCP
 
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_webapi_item.name }}-warp"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_webapi_item.name }}-warp
+  ports:
+      - name: "warp-port"
+        port: {{ combined_otvl.otvl_web_v4.router_port }}
+        protocol: TCP
+
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: "{{ current_webapi_item.name }}-webapi"
+  name: "{{ current_webapi_item.name }}-warp"
 spec:
   rules:
     - host: "{{ current_webapi_item.ingress_host }}"
@@ -104,6 +183,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name:  "{{ current_webapi_item.name }}-webapi"
+                name:  "{{ current_webapi_item.name }}-warp"
                 port:
-                  number: {{ current_webapi_item.webapi_port }}
+                  number: {{ combined_otvl.otvl_web_v4.router_port }}
