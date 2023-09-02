@@ -17,7 +17,7 @@
     group: root
     mode: 0755
 
-- name: Loop over sites for deploying pods
+- name: Loop over sites for setting local configuration files
   include_tasks: config_site.yml
   loop: "{{ combined_otvl.otvl_web_v4.site_items }}"
   loop_control:

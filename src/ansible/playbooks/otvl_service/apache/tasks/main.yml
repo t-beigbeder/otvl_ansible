@@ -1,11 +1,6 @@
 ---
 # main tasks file for otvl_service/apache
 
-- name: debug
-  debug:
-    var: combined_otvl
-  when: combined_otvl.debug
-
 - name: Install apache2
   command: "{{ combined_otvl.config_paths.sbin }}/otvl_apt_subs.sh apache2"
   args:

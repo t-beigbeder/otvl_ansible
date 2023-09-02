@@ -1,0 +1,19 @@
+---
+# main tasks file for otvl_service/otvl_cabri
+
+- name: Load default otvl (base) variables
+  include_vars:
+    dir: "{{ role_path }}/../../vars/defaults"
+
+- name: combine default with actual otvl config data (base)
+  set_fact:
+    combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+
+- name: Loop over webapi for deploying pods
+  include_tasks: deploy_webapi.yml
+  loop: "{{ combined_otvl.otvl_cabri.webapis }}"
+  loop_control:
+    loop_var: current_webapi_item
+  when: not (current_webapi_item.skip_deploy | default(false))
+
+###

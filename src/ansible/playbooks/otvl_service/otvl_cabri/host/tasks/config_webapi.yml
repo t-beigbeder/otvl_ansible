@@ -1,0 +1,15 @@
+---
+# config_webapi tasks file for otvl_service/otvl_cabri/host
+
+- name: config_webapi display the webapi {{ current_webapi_item.name }} information
+  debug:
+    msg: "site webapi is {{ current_webapi_item }}"
+  when: combined_otvl.debug
+
+- name: Create a directory for volume of the webapi {{ current_webapi_item.name }} Pod
+  file:
+    path: /srv/data/{{ current_webapi_item.name }}-webapi-pv
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
