@@ -1,0 +1,17 @@
+- hosts: "*"
+  gather_facts: False
+  tasks:
+  - name: Load default variables
+    include_vars:
+      dir: vars/defaults
+  tags: always
+
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/traefik
+  tags:
+    - traefik
+
+###
