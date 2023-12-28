@@ -83,6 +83,16 @@
     port_range_max: 443
     remote_ip_prefix: 0.0.0.0/0
 
+- name: Create a security group rule special HTTPS (10443) on {{ combined_infra.security_groups.ext_access }}
+  os_security_group_rule:
+    cloud: "{{ cloud_name }}"
+    security_group: "{{ combined_infra.security_groups.ext_access }}"
+    protocol: tcp
+    port_range_min: 10443
+    port_range_max: 10443
+    remote_ip_prefix: 0.0.0.0/0
+  when: combined_infra.security_groups.special_https
+
 - name: Create a security group rule egress v4 on {{ combined_infra.security_groups.ext_access }}
   os_security_group_rule:
     cloud: "{{ cloud_name }}"
