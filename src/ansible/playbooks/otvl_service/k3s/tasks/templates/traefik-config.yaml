@@ -12,7 +12,8 @@ spec:
         level: INFO
     ports:
       web:
-        redirectTo: websecure
+        redirectTo:
+          port: websecure
       websecure:
         tls:
           certResolver: leresolver

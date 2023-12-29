@@ -134,4 +134,31 @@
     owner: root
     group: root
     mode: 0644
+
+- name: Install fail2ban on bastion {{ server_infra.name }}
+  ansible.builtin.apt:
+    pkg:
+      - fail2ban
+      - python3-systemd
+    state: present
+    update_cache: yes
+    install_recommends: no
+  when: "'bastion_group' in server_infra.groups"
+
+- name: Configure fail2ban on bastion {{ server_infra.name }}
+  copy:
+    src: fail2ban/defaults-debian.conf
+    dest: /etc/fail2ban/jail.d/defaults-debian.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: "'bastion_group' in server_infra.groups"
+  register: flag_fail2ban_file
+
+- name: Restart the fail2ban.service once defaults-debian.conf delivered
+  systemd:
+    name: fail2ban.service
+    state: restarted
+  when: "'bastion_group' in server_infra.groups and flag_fail2ban_file.changed"
+
 ###

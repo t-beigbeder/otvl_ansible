@@ -51,7 +51,7 @@
   ansible.builtin.replace:
     path: "{{ combined_otvl.config_paths.data }}/otvl/k3s/k3s.yaml"
     regexp: "https://127.0.0.1:"
-    replace: "https://{{ combined_otvl.k3s.api_server }}-adm:"
+    replace: "https://{{ combined_otvl.k3s.api_server }}:"
 
 - name: Fetch k3s cluster config for access from localhost
   ansible.builtin.fetch:

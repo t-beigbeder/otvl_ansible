@@ -11,14 +11,14 @@ providers:
 
 entryPoints:
   web:
-    address: ":{{ combined_otvl.traefik.ctr.http_port | default('80') }}"
+    address: ":80"
     http:
       redirections:
         entryPoint:
           to: websecure
 
   websecure:
-    address: ":{{ combined_otvl.traefik.ctr.https_port | default('443') }}"
+    address: ":443"
     http:
       tls:
         certResolver: le-resolver

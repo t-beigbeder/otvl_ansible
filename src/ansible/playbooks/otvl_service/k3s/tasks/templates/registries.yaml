@@ -1,9 +1,9 @@
 mirrors:
-  "{{ combined_otvl.k3s.dkr }}":
+  "{{ combined_otvl.ctr.ingress_host }}":
     endpoint:
-      - "https://{{ combined_otvl.k3s.dkr }}"
+      - "https://{{ combined_otvl.ctr.ingress_host }}"
 configs:
-  "{{ combined_otvl.k3s.dkr }}":
+  "{{ combined_otvl.ctr.ingress_host }}":
     auth:
-      username: "{{ combined_otvl.otvl_web_v4.docker_login }}"
-      password: "{{ combined_otvl.otvl_web_v4.docker_password }}"
+      username: "{{ combined_otvl.ctr.login }}"
+      password: "{{ combined_otvl.ctr.password }}"

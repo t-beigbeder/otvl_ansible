@@ -7,7 +7,7 @@
 
 - name: Configure access to k3s api server
   ansible.builtin.copy:
-    src: "/home/{{ combined_otvl.config_vars.devops_user }}/.k3s/{{ combined_otvl.k3s.api_server }}/srv/data/otvl/k3s/k3s.yaml"
+    src: "/home/{{ combined_otvl.config_vars.devops_user }}/.k3s/{{ combined_otvl.k3s.api_server_ansible_host }}/srv/data/otvl/k3s/k3s.yaml"
     remote_src: true
     dest: "/home/{{ combined_otvl.config_vars.devops_user }}/.kube/config"
     mode: "0600"
