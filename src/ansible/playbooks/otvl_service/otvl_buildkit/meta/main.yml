@@ -1,0 +1,9 @@
+---
+# meta file for otvl_service/otvl_buildkit
+
+dependencies:
+  - role: otvl_service/base_service
+    tags:
+    - otvl_service_base
+
+###

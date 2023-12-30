@@ -46,4 +46,12 @@
   tags:
     - otvl_ctr
 
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_buildkit
+  tags:
+    - otvl_buildkit
+
 ###
