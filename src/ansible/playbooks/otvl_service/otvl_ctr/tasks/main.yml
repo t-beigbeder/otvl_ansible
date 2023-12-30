@@ -1,0 +1,88 @@
+---
+# main tasks file for otvl_service/otvl_ctr
+
+- name: Load default otvl (base) variables
+  include_vars:
+    dir: "{{ role_path }}/../../vars/defaults"
+
+- name: combine default with actual otvl config data (base)
+  set_fact:
+    combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+
+- name: Create a StorageClass for the ctr Pod
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: "ctr-sc"
+      provisioner: kubernetes.io/no-provisioner
+      volumeBindingMode: WaitForFirstConsumer
+
+- name: Create a storage PersistentVolume for the ctr Pod
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "ctr-pv"
+      spec:
+        capacity:
+          storage: 768Mi
+        accessModes:
+          - ReadWriteOnce
+        persistentVolumeReclaimPolicy: Retain
+        storageClassName: "ctr-sc"
+        local:
+          path: "{{ combined_otvl.config_paths.data }}/otvl_ctr/docker_registry"
+        nodeAffinity:
+          required:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - "{{ combined_otvl.k3s.single_node_hostname }}"
+
+- name: Create a storage PersistentVolumeClaim for the ctr Pod
+  kubernetes.core.k8s:
+    namespace: "default"
+    state: present
+    definition:
+      kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: "ctr-pvc"
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: "ctr-sc"
+        resources:
+          requests:
+            storage: 768Mi
+
+- name: Kubectl delete ctr pods deployment
+  block:
+    - command:
+        cmd: "kubectl delete --ignore-not-found=true -f -"
+        stdin: "{{ lookup('template', 'otvl_ctr_deploy.yaml') }}"
+      register: kdelete
+    - debug: var=kdelete.cmd
+    - debug: var=kdelete.stderr_lines
+    - debug: var=kdelete.stdout_lines
+  when: not (combined_otvl.ctr.skip_undeploy | default(false))
+
+- name: Kubectl apply site {{ current_site_item.name }} pods deployment
+  block:
+    - command:
+        cmd: "kubectl apply -f -"
+        stdin: "{{ lookup('template', 'otvl_ctr_deploy.yaml') }}"
+      register: kapply
+    - debug: var=kapply.cmd
+    - debug: var=kapply.stderr_lines
+    - debug: var=kapply.stdout_lines
+  when: not (combined_otvl.ctr.skip_deploy | default(false))
+
+###

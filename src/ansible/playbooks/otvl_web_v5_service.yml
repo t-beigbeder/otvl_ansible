@@ -28,6 +28,22 @@
   roles:
     - otvl_service/k3s/control/configure
   tags:
-    - otvl_v4_k3s
+    - otvl_v5_k3s
+
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_ctr/host
+  tags:
+    - otvl_ctr
+
+- hosts: localhost
+  gather_facts: False
+  become: no
+  roles:
+    - otvl_service/otvl_ctr
+  tags:
+    - otvl_ctr
 
 ###

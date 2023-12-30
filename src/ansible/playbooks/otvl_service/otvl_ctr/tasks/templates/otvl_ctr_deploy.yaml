@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ctr
+  labels:
+    app.kubernetes.io/name: ctr
+spec:
+  securityContext:
+    runAsUser: {{ combined_otvl.ctr.uid }}
+    runAsGroup: {{ combined_otvl.ctr.uid }}
+    fsGroup: {{ combined_otvl.ctr.fs_group }}
+  containers:
+    - name: ctr
+      image: registry:2
+      ports:
+        - containerPort: 5000
+      volumeMounts:
+        - name: "ctr-vol"
+          mountPath: /var/lib/registry
+        - name: "ctr-vcf"
+          mountPath: /etc/docker/registry/config.yml
+
+  volumes:
+    - name: "ctr-vol"
+      persistentVolumeClaim:
+        claimName: "ctr-pvc"
+    - name: "ctr-vcf"
+      hostPath:
+        path: "/srv/data/otvl_ctr/config.yml"
+        type: File
+
+  restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ctr-router
+  labels:
+    app.kubernetes.io/name: ctr-router
+spec:
+  securityContext:
+    runAsUser: {{ combined_otvl.ctr.uid }}
+    runAsGroup: {{ combined_otvl.ctr.uid }}
+  containers:
+    - name: ctr-router
+      image: "{{ combined_otvl.traefik.image }}"
+      command: ["/usr/local/bin/traefik"]
+      args: ["--configFile=/traefik/static_config.yml"]
+      ports:
+        - containerPort: 5000
+      volumeMounts:
+        - name: "router-vcf"
+          mountPath: /traefik
+  volumes:
+    - name: "router-vcf"
+      hostPath:
+        path: "/srv/data/pods-cf/ctr-traefik"
+        type: Directory
+
+  restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "ctr-reg"
+spec:
+  selector:
+    app.kubernetes.io/name: "ctr-reg"
+  ports:
+    - name: "reg-port"
+      port: 5000
+      protocol: TCP

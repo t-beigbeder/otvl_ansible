@@ -1,0 +1,20 @@
+http:
+  routers:
+    to-app:
+      rule: "PathPrefix(`/`)"
+      priority: 1
+      middlewares:
+        - basic-auth
+      service: reg
+
+  middlewares:
+    "basic-auth":
+      basicAuth:
+        users:
+          - "dkr:$apr1$KD8kDAOH$qUZdE/MoLCHe6WXMvHrX30"
+
+  services:
+    "reg":
+      loadBalancer:
+        servers:
+          - url: "http://ctr-reg:5000"
