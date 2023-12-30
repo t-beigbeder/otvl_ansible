@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: ctr
+  name: ctr-reg
   labels:
-    app.kubernetes.io/name: ctr
+    app.kubernetes.io/name: ctr-reg
 spec:
   securityContext:
     runAsUser: {{ combined_otvl.ctr.uid }}
     runAsGroup: {{ combined_otvl.ctr.uid }}
     fsGroup: {{ combined_otvl.ctr.fs_group }}
   containers:
-    - name: ctr
+    - name: ctr-reg
       image: registry:2
       ports:
         - containerPort: 5000
@@ -72,3 +72,34 @@ spec:
     - name: "reg-port"
       port: 5000
       protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "ctr-router"
+spec:
+  selector:
+    app.kubernetes.io/name: "ctr-router"
+  ports:
+    - name: "router-port"
+      port: 5000
+      protocol: TCP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "ctr-router"
+spec:
+  rules:
+    - host: "{{ combined_otvl.ctr.ingress_host }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name:  "ctr-router"
+                port:
+                  number: 5000
