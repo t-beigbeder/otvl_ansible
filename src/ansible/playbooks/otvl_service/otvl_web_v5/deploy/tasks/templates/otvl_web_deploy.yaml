@@ -1,0 +1,212 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ current_site_item.name }}-api
+  labels:
+    app.kubernetes.io/name: {{ current_site_item.name }}-api
+spec:
+  securityContext:
+    runAsUser: {{ current_site_item.uid }}
+    runAsGroup: {{ current_site_item.uid }}
+    fsGroup: {{ current_site_item.fs_group }}
+  containers:
+  - name: sync
+    image: "{{ combined_otvl.otvl_web_v5.cabri_sched_image }}"
+    command: ["/bin/sh"]
+    args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri-sfile.yaml --http --address :{{ current_site_item.api_sync_port }} --haslog"]
+    ports:
+    - containerPort: {{ current_site_item.api_sync_port }}
+    volumeMounts:
+    - name: "api-vol"
+      mountPath: /data
+    - name: "api-vsf"
+      mountPath: /etc/cabri-sfile.yaml
+  - name: api
+    image: "{{ current_site_item.images.api }}"
+    env:
+    - name: OTVL_WEB_CONFIG_PATH
+      value: "{{ current_site_item.api_conf }}"
+    command: ["/bin/sh"]
+    args: ["-c", "/entrypoint.sh /srv/pkg/otvl_web_server_venv/bin/python -m otvl_web.main"]
+    ports:
+    - containerPort: {{ current_site_item.api_port }}
+    volumeMounts:
+    - name: "api-vol"
+      mountPath: /data
+
+  volumes:
+  - name: "api-vol"
+    persistentVolumeClaim:
+      claimName: "{{ current_site_item.name }}-api-pvc"
+  - name: "api-vsf"
+    hostPath:
+      path: "/srv/data/pods-cf/cabri-sfile-api-{{ current_site_item.name }}.yaml"
+      type: File
+
+  restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ current_site_item.name }}-app
+  labels:
+    app.kubernetes.io/name: {{ current_site_item.name }}-app
+spec:
+  securityContext:
+    runAsUser: {{ current_site_item.uid }}
+    runAsGroup: {{ current_site_item.uid }}
+    fsGroup: {{ current_site_item.fs_group }}
+  containers:
+    - name: sync
+      image: "{{ combined_otvl.otvl_web_v5.cabri_sched_image }}"
+{% if current_site_item.env.sync.app is defined %}
+      env:
+        - name: OTVL_WEB_CABRI_SYNC
+          value: "1"
+{% for nkey, nvalue in current_site_item.env.sync.app.items() %}
+        - name: {{ nkey }}
+          value: {{ nvalue }}
+{% endfor %}
+{% endif %}
+      command: ["/bin/sh"]
+      args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri-sfile.yaml --http --address :{{ current_site_item.app_sync_port }} --haslog"]
+      ports:
+        - containerPort: {{ current_site_item.app_sync_port }}
+      volumeMounts:
+        - name: "app-vol"
+          mountPath: /data
+        - name: "app-vsf"
+          mountPath: /etc/cabri-sfile.yaml
+        - name: "app-vcs"
+          mountPath: /shell/custom_init.sh
+    - name: app
+      image: "{{ current_site_item.images.app }}"
+      env:
+        - name: OTVL_WEB_SERVER_NAME
+          value: "{{ current_site_item.ingress_host }}"
+        - name: OTVL_WEB_ENABLE_BOTS
+          value: "{{ (current_site_item.enable_bots|default(false)) | ternary('1', '', '') }}"
+        - name: OTVL_WEB_ASSETS_DIR
+          value: /data/{{ current_site_item.assets_dir }}
+
+      command: ["/bin/sh"]
+      args: ["-c", "/entrypoint.sh /shell/httpd-foreground.sh"]
+      ports:
+        - containerPort: {{ current_site_item.app_port }}
+      volumeMounts:
+        - name: "app-vol"
+          mountPath: /data
+        - name: "app-vca"
+          mountPath: /shell/custom_init.sh
+
+  volumes:
+    - name: "app-vol"
+      persistentVolumeClaim:
+        claimName: "{{ current_site_item.name }}-app-pvc"
+    - name: "app-vsf"
+      hostPath:
+        path: "/srv/data/pods-cf/cabri-sfile-app-{{ current_site_item.name }}.yaml"
+        type: File
+    - name: "app-vca"
+      hostPath:
+        path: "/srv/data/pods-cf/apache-custo-init-app-{{ current_site_item.name }}.sh"
+        type: File
+    - name: "app-vcs"
+      hostPath:
+        path: "/srv/data/pods-cf/apache-custo-init-sync-{{ current_site_item.name }}.sh"
+        type: File
+
+  restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ current_site_item.name }}-router
+  labels:
+    app.kubernetes.io/name: {{ current_site_item.name }}-router
+spec:
+  securityContext:
+    runAsUser: {{ current_site_item.uid }}
+    runAsGroup: {{ current_site_item.uid }}
+  containers:
+    - name: {{ current_site_item.name }}-router
+      image: "{{ combined_otvl.traefik.image }}"
+      command: ["/usr/local/bin/traefik"]
+      args: ["--configFile=/traefik/static_config.yml"]
+      ports:
+        - containerPort: {{ combined_otvl.otvl_web_v5.router_port }}
+      volumeMounts:
+        - name: "router-vcf"
+          mountPath: /traefik
+  volumes:
+    - name: "router-vcf"
+      hostPath:
+        path: "/srv/data/pods-cf/{{ current_site_item.name }}-traefik"
+        type: Directory
+
+  restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_site_item.name }}-api"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_site_item.name }}-api
+  ports:
+  - name: "sync-port"
+    port: {{ current_site_item.api_sync_port }}
+    protocol: TCP
+  - name: "api-port"
+    port: {{ current_site_item.api_port }}
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_site_item.name }}-app"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_site_item.name }}-app
+  ports:
+    - name: "sync-port"
+      port: {{ current_site_item.app_sync_port }}
+      protocol: TCP
+    - name: "app-port"
+      port: {{ current_site_item.app_port }}
+      protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_site_item.name }}-router"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_site_item.name }}-router
+  ports:
+  - name: "router-port"
+    port: {{ combined_otvl.otvl_web_v5.router_port }}
+    protocol: TCP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ current_site_item.name }}-router"
+spec:
+  rules:
+    - host: "{{ current_site_item.ingress_host }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name:  "{{ current_site_item.name }}-router"
+                port:
+                  number: {{ combined_otvl.otvl_web_v5.router_port }}

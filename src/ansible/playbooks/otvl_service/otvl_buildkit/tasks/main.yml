@@ -35,6 +35,18 @@
     dest: "/usr/local"
   when: buildkit_extract.changed
 
+- name: Create the buildkit configuration directory
+  file:
+    dest: "/etc/buildkit"
+    state: directory
+    mode: 0755
+
+- name: Create the buildkit configuration file
+  copy:
+    dest: "/etc/buildkit/buildkitd.toml"
+    src: "buildkitd.toml"
+    mode: 0644
+
 - name: "Create buildkit systemd service file"
   template:
     src: systemd/buildkit.service
