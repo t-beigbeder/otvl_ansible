@@ -51,7 +51,8 @@
   become: yes
   roles:
     - otvl_service/otvl_buildkit
+    - otvl_service/otvl_nerdctl
   tags:
-    - otvl_buildkit
+    - otvl_nerdctl
 
 ###

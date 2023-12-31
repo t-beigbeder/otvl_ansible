@@ -1,0 +1,51 @@
+---
+# main tasks file for otvl_service/otvl_nerdctl
+
+- name: Create the nerdctl installation directory
+  file:
+    dest: "{{ combined_otvl.config_paths.delivery }}/nerdctl"
+    state: directory
+    mode: 0755
+
+- name: Download nerdctl
+  ansible.builtin.get_url:
+    url: https://github.com/containerd/nerdctl/releases/download/v1.7.2/nerdctl-1.7.2-linux-amd64.tar.gz
+    dest: "{{ combined_otvl.config_paths.delivery }}/nerdctl-1.7.2-linux-amd64.tar.gz"
+    checksum: sha256:aed7d33d645bfb97c8df978d952a1e1f7e02b0b3ed2c0089ee4285af7f8f971b
+  register: nerdctl_download
+
+- name: Purge the nerdctl installation file
+  file:
+    dest: "{{ combined_otvl.config_paths.delivery }}/nerdctl/nerdctl"
+    state: absent
+  when: nerdctl_download.changed
+
+- name: Extract nerdctl
+  ansible.builtin.unarchive:
+    src: "{{ combined_otvl.config_paths.delivery }}/nerdctl-1.7.2-linux-amd64.tar.gz"
+    remote_src: yes
+    dest: "{{ combined_otvl.config_paths.delivery }}/nerdctl"
+  register: nerdctl_extract
+  when: nerdctl_download.changed
+
+- name: Install nerdctl
+  ansible.builtin.copy:
+    src: "{{ combined_otvl.config_paths.delivery }}/nerdctl/nerdctl"
+    remote_src: true
+    dest: "/usr/local/bin"
+    mode: 0755
+  when: nerdctl_extract.changed
+
+- name: Create the nerdctl configuration directory
+  file:
+    dest: "/etc/nerdctl"
+    state: directory
+    mode: 0755
+
+- name: Create the nerdctl configuration file
+  copy:
+    dest: "/etc/nerdctl/nerdctl.toml"
+    src: "nerdctl.toml"
+    mode: 0644
+
+###
