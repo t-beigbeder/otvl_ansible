@@ -1,0 +1,51 @@
+---
+# main tasks file for otvl_service/otvl_web_v5/build
+
+- name: Load default otvl (base) variables
+  include_vars:
+    dir: "{{ role_path }}/../../../vars/defaults"
+
+- name: combine default with actual otvl config data (base)
+  set_fact:
+    combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+
+- name: Install git for building
+  ansible.builtin.apt:
+    pkg:
+      - git
+    install_recommends: no
+
+- name: Create otvl_web_v5 delivery directory
+  file:
+    path: "{{ combined_otvl.config_paths.delivery }}/otvl_web_v5"
+    state: directory
+    mode: 0755
+
+- name: Nerdctl build cabri webapi image
+  block:
+    - command:
+        cmd: "nerdctl build -t {{ combined_otvl.otvl_web_v5.cabri_webapi_image }} -f - ."
+        stdin: "{{ lookup('template', 'cabri_webapi_dockerfile') }}"
+      register: docker_build
+    - debug: var=docker_build.cmd
+    - debug: var=docker_build.stderr_lines
+    - debug: var=docker_build.stdout_lines
+
+- name: Nerdctl build cabri schedule image
+  block:
+    - command:
+        cmd: "nerdctl build -t {{ combined_otvl.otvl_web_v5.cabri_sched_image }} -f - ."
+        stdin: "{{ lookup('template', 'cabri_sched_dockerfile') }}"
+      register: docker_build
+    - debug: var=docker_build.cmd
+    - debug: var=docker_build.stderr_lines
+    - debug: var=docker_build.stdout_lines
+
+- name: Loop over sites for building images
+  include_tasks: build_site.yml
+  loop: "{{ combined_otvl.otvl_web_v5.site_items }}"
+  loop_control:
+    loop_var: current_site_item
+  when: not (current_site_item.skip_build | default(false))
+
+###

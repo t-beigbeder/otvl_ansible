@@ -59,7 +59,7 @@
   gather_facts: False
   become: yes
   roles:
-    - otvl_service/otvl_web_v5/build
+    - otvl_service/otvl_web_v5/cbuild
   tags:
     - otvl_v5_build
 

@@ -1,0 +1,24 @@
+FROM alpine
+RUN apk fix && \
+    apk --no-cache --update add git
+RUN wget https://github.com/t-beigbeder/otvl_cabri/releases/download/{{ combined_otvl.otvl_web_v5.cabri_release }}/cabri-{{ combined_otvl.otvl_web_v5.cabri_release }}-linux-amd64.tar.gz
+RUN [ "`sha256sum < cabri-{{ combined_otvl.otvl_web_v5.cabri_release }}-linux-amd64.tar.gz`" = "{{ combined_otvl.otvl_web_v5.cabri_sha }}  -" ] && \
+    tar xf cabri-{{ combined_otvl.otvl_web_v5.cabri_release }}-linux-amd64.tar.gz && \
+    mv cabri/cabri /usr/local/bin && \
+    chown root:root /usr/local/bin/cabri && \
+    rm -r cabri-{{ combined_otvl.otvl_web_v5.cabri_release }}-linux-amd64.tar.gz cabri
+ENV SAUID 1001
+ENV PFILE /etc/cabri-pfile
+ENV SFILE /etc/cabri-sfile.yaml
+ARG VHOME=/home/sa
+RUN touch $PFILE && \
+    touch $SFILE && \
+    mkdir -p /home && \
+    chmod ugo+rwX /home && \
+    echo "mkdir -p $VHOME" > /entrypoint.sh && \
+    echo "export HOME=$VHOME" >> /entrypoint.sh && \
+    echo "if [ -f /shell/custom_init.sh ] ; then exec /shell/custom_init.sh \$*; fi" >> /entrypoint.sh && \
+    echo "exec \$*" >> /entrypoint.sh && \
+    chmod ugo+rx /entrypoint.sh
+USER $SAUID
+ENTRYPOINT /entrypoint.sh /usr/local/bin/cabri schedule --pfile $PFILE --sfile $SFILE $*
