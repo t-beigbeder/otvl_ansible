@@ -6,6 +6,10 @@
     msg: "site item is {{ current_site_item }}"
   when: combined_otvl.debug
 
+- name: set the site build dir
+  set_fact:
+    site_build_dir: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site{{ current_site_item.git.otvl_site.site_build_dir }}"
+
 - name: Checkout the git project containing otvl_web v4 for {{ current_site_item.name }}
   git:
     repo: "{{ current_site_item.git.otvl_web.repo }}"
