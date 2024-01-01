@@ -1,6 +1,12 @@
 ---
 # main tasks file for otvl_service/k3s
 
+- name: Install curl for k3s installation
+  ansible.builtin.apt:
+    pkg:
+      - curl
+    install_recommends: no
+
 - name: Create k3s configuration yaml directory
   file:
     path: "{{ combined_otvl.config_paths.data }}/otvl/k3s"
