@@ -25,14 +25,17 @@ data:
     copt="--pfile /etc/cabri-pfile --cdir /data/cdir"
     ccmd="/usr/local/bin/cabri $copt"
     OBS_ENV="--obsrg $OVHRG --obsep $OVHEP --obsct $dn --obsak $OVHAK --obssk $OVHSK"
-    $ccmd cli check $OBS_ENV --s3cnx
+    $ccmd cli s3tools $OBS_ENV --cnx
     if [ $? -ne 0 ] ; then echo >&2 "$OBS_ENV has connexion issues" ; fi
     ts=`date +%Y%m%d-%H:%M:%S`
     if [ ! -d /data/dss/$dn ] ; then
-      mkdir -p /data/dss/$dn /data/backups/$dn
-      $ccmd cli dss make $OBS_ENV $dt:/data/dss/$dn
+      mkdir -p /data/dss/$dn /data/backups/$dn && \
+      $ccmd cli dss make $OBS_ENV $dt:/data/dss/$dn && \
+      $ccmd cli dss reindex $dt:/data/dss/$dn && \
+      tar czf /data/backups/$dn/$dn.$ts.tgz data/dss/$dn
     else
-      $ccmd cli dss unlock $dt:/data/dss/$dn && tar czf /data/backups/$dn/$dn.$ts.tgz data/dss/$dn
+      $ccmd cli dss unlock $dt:/data/dss/$dn && \
+      tar czf /data/backups/$dn/$dn.$ts.tgz data/dss/$dn
     fi
 
 ---
@@ -49,7 +52,7 @@ spec:
     fsGroup: {{ current_webapi_item.fs_group }}
   containers:
     - name: webapi
-      image: "{{ combined_otvl.otvl_web_v4.docker_registry }}/{{ combined_otvl.otvl_web_v4.cabri_webapi_image }}"
+      image: "{{ combined_otvl.otvl_web_v5.cabri_webapi_image }}"
       env:
       - name: HOME
         value: /home/sa
@@ -132,7 +135,7 @@ spec:
       command: ["/usr/local/bin/traefik"]
       args: ["--configFile=/traefik/static-config.yml"]
       ports:
-        - containerPort: {{ combined_otvl.otvl_web_v4.router_port }}
+        - containerPort: {{ combined_otvl.otvl_web_v5.router_port }}
       volumeMounts:
         - name: "config-vol"
           mountPath: /traefik
@@ -166,7 +169,7 @@ spec:
     app.kubernetes.io/name: {{ current_webapi_item.name }}-warp
   ports:
       - name: "warp-port"
-        port: {{ combined_otvl.otvl_web_v4.router_port }}
+        port: {{ combined_otvl.otvl_web_v5.router_port }}
         protocol: TCP
 
 ---
@@ -185,4 +188,4 @@ spec:
               service:
                 name:  "{{ current_webapi_item.name }}-warp"
                 port:
-                  number: {{ combined_otvl.otvl_web_v4.router_port }}
+                  number: {{ combined_otvl.otvl_web_v5.router_port }}
