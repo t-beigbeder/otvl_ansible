@@ -6,9 +6,15 @@
     msg: "site item is {{ current_site_item }}"
   when: combined_otvl.debug
 
-- name: set the site build dir
+- name: set the site build dir when cloned from git
   set_fact:
     site_build_dir: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site{{ current_site_item.git.otvl_site.site_build_dir }}"
+  when: current_site_item.git is defined
+
+- name: set the site build dir when developing
+  set_fact:
+    site_build_dir: "{{ current_site_item.site_build_dir }}"
+  when: current_site_item.git is not defined
 
 - name: Checkout the git project containing otvl_web v4 for {{ current_site_item.name }}
   git:
@@ -19,6 +25,7 @@
     recursive: no
     force: yes
   register: otvl_web_git_checkout
+  when: current_site_item.git is defined
 
 - name: Checkout the git project containing the site for {{ current_site_item.name }}
   git:
@@ -29,12 +36,15 @@
     recursive: no
     force: yes
   register: otvl_site_git_checkout
+  when: current_site_item.git is defined
 
 - name: Purge the otvl_web dir for site {{ current_site_item.name }}
   file:
     path: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site{{ current_site_item.git.otvl_site.site_build_dir }}/otvl_web"
     state: absent
-  when: "otvl_site_git_checkout.changed or otvl_web_git_checkout.changed"
+  when:
+  - "otvl_site_git_checkout.changed or otvl_web_git_checkout.changed"
+  - current_site_item.git is defined
   register: otvl_site_git_checkout_purged
 
 - name: Copy the otvl_web dir to the site {{ current_site_item.name }}
@@ -43,12 +53,13 @@
     remote_src: yes
     dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site{{ current_site_item.git.otvl_site.site_build_dir }}"
   register: otvl_site_git_updated
+  when: current_site_item.git is defined
 
 - name: Trigger build execution if site {{ current_site_item.name }} updated
   include_tasks: "otvl_service/base_service/tasks/remove_install_status_file.yml"
   vars:
     isf_name: "{{ current_site_item.name }}_built"
-  when: otvl_site_git_updated.changed
+  when: otvl_site_git_updated.changed or current_site_item.git is not defined
 
 - name: "Set the {{ current_site_item.name }} to be built the first time"
   include_tasks: "otvl_service/base_service/tasks/set_install_status_file.yml"
@@ -61,14 +72,14 @@
   block:
     - command:
         cmd: "nerdctl build -t {{ current_site_item.images.app }} -f otvl-web-app/Dockerfile ."
-        chdir: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site{{ current_site_item.git.otvl_site.site_build_dir }}"
+        chdir: "{{ site_build_dir }}"
       register: nerdctl_build_app
     - debug: var=nerdctl_build_app.cmd
     - debug: var=nerdctl_build_app.stderr_lines
     - debug: var=nerdctl_build_app.stdout_lines
     - command:
         cmd: "nerdctl build -t {{ current_site_item.images.api }} ./otvl_web/server"
-        chdir: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_site{{ current_site_item.git.otvl_site.site_build_dir }}"
+        chdir: "{{ site_build_dir }}"
       register: nerdctl_build_api
     - debug: var=nerdctl_build_api.cmd
     - debug: var=nerdctl_build_api.stderr_lines
