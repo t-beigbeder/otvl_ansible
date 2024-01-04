@@ -17,8 +17,8 @@ http:
       headers:
         customRequestHeaders:
           X-Forwarded-Proto: "https"
-        customResponseHeaders:
-          Docker-Distribution-API-Version: “registry/2.0”
+#        customResponseHeaders:
+#          Docker-Distribution-API-Version: “registry/2.0”
 
   services:
     "reg":
