@@ -10,6 +10,20 @@ spec:
     logs:
       general:
         level: INFO
+      access:
+        enabled: true
+        fields:
+          headers:
+            defaultMode: keep
+            names:
+              User-Agent: drop
+              Authorization: drop
+              Content-Type: drop
+              X-Forwarded-Proto: keep
+              X-Forwarded-For: keep
+              Host: keep
+              Docker-Distribution-API-Version: keep
+    
     ports:
       web:
         redirectTo:
