@@ -5,7 +5,7 @@ http:
       priority: 1
       middlewares:
         - basic-auth
-        - rv2-header
+        - https-header
       service: reg
 
   middlewares:
@@ -13,12 +13,10 @@ http:
       basicAuth:
         users:
           - "dkr:$apr1$KD8kDAOH$qUZdE/MoLCHe6WXMvHrX30"
-    rv2-header:
+    https-header:
       headers:
         customRequestHeaders:
           X-Forwarded-Proto: "https"
-#        customResponseHeaders:
-#          Docker-Distribution-API-Version: “registry/2.0”
 
   services:
     "reg":

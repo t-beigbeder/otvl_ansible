@@ -5,18 +5,6 @@ accessLog:
   format: json
   fields:
     defaultMode: keep
-    names:
-      ClientUsername: drop
-    headers:
-      defaultMode: keep
-      names:
-        User-Agent: drop
-        Authorization: drop
-        Content-Type: drop
-        X-Forwarded-Proto: keep
-        X-Forwarded-For: keep
-        Host: keep
-        Docker-Distribution-API-Version: keep
 
 providers:
   file:
