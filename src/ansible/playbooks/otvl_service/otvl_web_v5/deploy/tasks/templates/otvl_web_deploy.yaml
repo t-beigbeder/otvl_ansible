@@ -1,4 +1,21 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ current_site_item.name }}-api-cmap
+data:
+  "cabri-sfile.yaml": |
+    synchronize:
+      period: 60
+      actions:
+        - type: cmd
+          base:
+            verbose: false
+            dispOut: false
+            dispErr: false
+          cmdLine: cabri cli sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/content@ -rv --summary --noacl
+
+---
+apiVersion: v1
 kind: Pod
 metadata:
   name: {{ current_site_item.name }}-api
@@ -13,7 +30,7 @@ spec:
   - name: sync
     image: "{{ combined_otvl.otvl_web_v5.cabri_sched_image }}"
     command: ["/bin/sh"]
-    args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri-sfile.yaml --http --address :{{ current_site_item.api_sync_port }} --haslog"]
+    args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri/cabri-sfile.yaml --http --address :{{ current_site_item.api_sync_port }} --haslog"]
     ports:
     - containerPort: {{ current_site_item.api_sync_port }}
     volumeMounts:
@@ -21,6 +38,8 @@ spec:
       mountPath: /data
     - name: "api-vsf"
       mountPath: /etc/cabri-sfile.yaml
+    - name: api-config-vol
+      mountPath: /etc/cabri
   - name: api
     image: "{{ current_site_item.images.api }}"
     env:
@@ -38,10 +57,9 @@ spec:
   - name: "api-vol"
     persistentVolumeClaim:
       claimName: "{{ current_site_item.name }}-api-pvc"
-  - name: "api-vsf"
-    hostPath:
-      path: "/srv/data/pods-cf/cabri-sfile-api-{{ current_site_item.name }}.yaml"
-      type: File
+  - name: api-config-vol
+    configMap:
+      name: {{ current_site_item.name }}-api-cmap
 
   restartPolicy: OnFailure
 

@@ -16,7 +16,7 @@
     site_build_dir: "{{ current_site_item.dev_build_dir }}"
   when: current_site_item.dev_build_dir is defined
 
-- name: Checkout the git project containing otvl_web v4 for {{ current_site_item.name }}
+- name: Checkout the git project containing otvl_web for {{ current_site_item.name }}
   git:
     repo: "{{ current_site_item.git.otvl_web.repo }}"
     dest: "{{ combined_otvl.config_paths.pkg }}/otvl_web/git/{{ current_site_item.name }}/otvl_web"
