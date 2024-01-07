@@ -62,7 +62,7 @@
       systemd:
         name: "buildkit"
         enabled: yes
-    - name: Restart {{ service_name }} systemd service
+    - name: Restart buildkit systemd service
       systemd:
         name: "buildkit"
         state: restarted
