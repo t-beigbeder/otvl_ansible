@@ -84,7 +84,7 @@ data:
         defaultMode: keep
     providers:
       file:
-        filename: /traefik/dynamic_conf.yml
+        filename: /traefik/dynamic-conf.yml
         watch: true
     entryPoints:
       web:
@@ -129,7 +129,7 @@ spec:
     - name: ctr-router
       image: "{{ combined_otvl.traefik.image }}"
       command: ["/usr/local/bin/traefik"]
-      args: ["--configFile=/traefik/static_config.yml"]
+      args: ["--configFile=/traefik/static-config.yml"]
       ports:
         - containerPort: 5000
       volumeMounts:
