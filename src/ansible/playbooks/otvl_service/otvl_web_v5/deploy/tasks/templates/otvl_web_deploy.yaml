@@ -28,7 +28,7 @@ spec:
     fsGroup: {{ current_site_item.fs_group }}
   containers:
   - name: sync
-    image: "{{ combined_otvl.otvl_web_v5.cabri_sched_image }}"
+    image: "{{ combined_otvl.cabri.sched_image }}"
     command: ["/bin/sh"]
     args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri/cabri-sfile.yaml --http --address :{{ current_site_item.api_sync_port }} --haslog"]
     ports:
@@ -77,7 +77,7 @@ spec:
     fsGroup: {{ current_site_item.fs_group }}
   containers:
     - name: sync
-      image: "{{ combined_otvl.otvl_web_v5.cabri_sched_image }}"
+      image: "{{ combined_otvl.cabri.sched_image }}"
 {% if current_site_item.env.sync.app is defined %}
       env:
         - name: OTVL_WEB_CABRI_SYNC

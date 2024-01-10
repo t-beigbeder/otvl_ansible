@@ -52,7 +52,7 @@ spec:
     fsGroup: {{ current_webapi_item.fs_group }}
   containers:
     - name: webapi
-      image: "{{ combined_otvl.otvl_web_v5.cabri_webapi_image }}"
+      image: "{{ combined_otvl.cabri.webapi_image }}"
       env:
       - name: HOME
         value: /home/sa

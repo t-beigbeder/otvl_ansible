@@ -24,7 +24,7 @@
 - name: Nerdctl build cabri webapi image
   block:
     - command:
-        cmd: "nerdctl build -t {{ combined_otvl.otvl_web_v5.cabri_webapi_image }} -f - ."
+        cmd: "nerdctl build -t {{ combined_otvl.cabri.webapi_image }} -f - ."
         stdin: "{{ lookup('template', 'cabri_webapi_dockerfile') }}"
       register: docker_build
     - debug: var=docker_build.cmd
@@ -34,7 +34,7 @@
 - name: Nerdctl build cabri schedule image
   block:
     - command:
-        cmd: "nerdctl build -t {{ combined_otvl.otvl_web_v5.cabri_sched_image }} -f - ."
+        cmd: "nerdctl build -t {{ combined_otvl.cabri.sched_image }} -f - ."
         stdin: "{{ lookup('template', 'cabri_sched_dockerfile') }}"
       register: docker_build
     - debug: var=docker_build.cmd
