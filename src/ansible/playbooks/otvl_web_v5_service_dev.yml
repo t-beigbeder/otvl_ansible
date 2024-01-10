@@ -79,4 +79,20 @@
   tags:
     - otvl_v5_deploy
 
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_service/otvl_cabri/host
+  tags:
+    - otvl_cabri
+
+- hosts: localhost
+  gather_facts: False
+  become: no
+  roles:
+    - otvl_service/otvl_cabri
+  tags:
+    - otvl_cabri
+
 ###

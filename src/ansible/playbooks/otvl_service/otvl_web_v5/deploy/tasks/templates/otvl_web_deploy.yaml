@@ -12,7 +12,18 @@ data:
             verbose: false
             dispOut: false
             dispErr: false
-          cmdLine: cabri cli sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/content@ -rv --summary --noacl
+          cmdLine: cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CT} fsy:/data/content@ -rv --summary --noacl
+  "run-cabri-scheduler.sh": |
+    echo /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER '<hidden>'
+    /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER $OTVL_WEB_CABRI_SYNC_WEB_PASSWORD
+    if [ $? -ne 0 ] ; then exit 1 ; fi
+    mkdir -p /data/config /data/content
+    echo /usr/local/bin/cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CF} fsy:/data/config@ -rv --summary --noacl
+    /usr/local/bin/cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CF} fsy:/data/config@ -rv --summary --noacl
+    if [ $? -ne 0 ] ; then exit 1 ; fi
+    ln -s /data/content /data/config/content
+    echo /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/api-cmap/cabri-sfile.yaml
+    /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/api-cmap/cabri-sfile.yaml
 
 ---
 apiVersion: v1
@@ -29,22 +40,27 @@ spec:
   containers:
   - name: sync
     image: "{{ combined_otvl.cabri.sched_image }}"
+    env:
+      - name: OTVL_WEB_CABRI_SYNC_WEB_USER
+        value: "{{ combined_otvl.cabri.webapi_user }}"
+      - name: OTVL_WEB_CABRI_SYNC_WEB_PASSWORD
+        value: "{{ combined_otvl.cabri.webapi_password }}"
+      - name: OTVL_WEB_CABRI_SYNC_REMOTE_CF
+        value: "{{ current_site_item.rca.dss }}@{{ current_site_item.rca.config }}"
+      - name: OTVL_WEB_CABRI_SYNC_REMOTE_CT
+        value: "{{ current_site_item.rca.dss }}@{{ current_site_item.rca.content }}"
     command: ["/bin/sh"]
-    args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri/cabri-sfile.yaml --http --address :{{ current_site_item.api_sync_port }} --haslog"]
-    ports:
-    - containerPort: {{ current_site_item.api_sync_port }}
+    args: ["-c", "/entrypoint.sh /bin/sh /etc/api-cmap/run-cabri-scheduler.sh"]
     volumeMounts:
     - name: "api-vol"
       mountPath: /data
-    - name: "api-vsf"
-      mountPath: /etc/cabri-sfile.yaml
-    - name: api-config-vol
-      mountPath: /etc/cabri
+    - name: api-cmap
+      mountPath: /etc/api-cmap
   - name: api
     image: "{{ current_site_item.images.api }}"
     env:
     - name: OTVL_WEB_CONFIG_PATH
-      value: "{{ current_site_item.api_conf }}"
+      value: /data/config/config.yml
     command: ["/bin/sh"]
     args: ["-c", "/entrypoint.sh /srv/pkg/otvl_web_server_venv/bin/python -m otvl_web.main"]
     ports:
@@ -57,11 +73,48 @@ spec:
   - name: "api-vol"
     persistentVolumeClaim:
       claimName: "{{ current_site_item.name }}-api-pvc"
-  - name: api-config-vol
+  - name: "api-cmap"
     configMap:
-      name: {{ current_site_item.name }}-api-cmap
+      name: "{{ current_site_item.name }}-api-cmap"
 
   restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_site_item.name }}-api"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_site_item.name }}-api
+  ports:
+    - name: "api-port"
+      port: {{ current_site_item.api_port }}
+      protocol: TCP
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ current_site_item.name }}-app-cmap
+data:
+  "cabri-sfile.yaml": |
+    synchronize:
+      period: 60
+      actions:
+        - type: cmd
+          base:
+            verbose: false
+            dispOut: false
+            dispErr: false
+          cmdLine: cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/assets@ -rv --summary --noacl
+  "run-cabri-scheduler.sh": |
+    echo /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER '<hidden>'
+    /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER $OTVL_WEB_CABRI_SYNC_WEB_PASSWORD
+    if [ $? -ne 0 ] ; then exit 1 ; fi
+    mkdir -p /data/assets
+    echo /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/app-cmap/cabri-sfile.yaml
+    /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/app-cmap/cabri-sfile.yaml
 
 ---
 apiVersion: v1
@@ -78,26 +131,20 @@ spec:
   containers:
     - name: sync
       image: "{{ combined_otvl.cabri.sched_image }}"
-{% if current_site_item.env.sync.app is defined %}
       env:
-        - name: OTVL_WEB_CABRI_SYNC
-          value: "1"
-{% for nkey, nvalue in current_site_item.env.sync.app.items() %}
-        - name: {{ nkey }}
-          value: {{ nvalue }}
-{% endfor %}
-{% endif %}
+        - name: OTVL_WEB_CABRI_SYNC_WEB_USER
+          value: "{{ combined_otvl.cabri.webapi_user }}"
+        - name: OTVL_WEB_CABRI_SYNC_WEB_PASSWORD
+          value: "{{ combined_otvl.cabri.webapi_password }}"
+        - name: OTVL_WEB_CABRI_SYNC_REMOTE
+          value: "{{ current_site_item.rca.dss }}@{{ current_site_item.rca.assets }}"
       command: ["/bin/sh"]
-      args: ["-c", "/entrypoint.sh /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/cabri-sfile.yaml --http --address :{{ current_site_item.app_sync_port }} --haslog"]
-      ports:
-        - containerPort: {{ current_site_item.app_sync_port }}
+      args: ["-c", "/entrypoint.sh /bin/sh /etc/app-cmap/run-cabri-scheduler.sh"]
       volumeMounts:
         - name: "app-vol"
           mountPath: /data
-        - name: "app-vsf"
-          mountPath: /etc/cabri-sfile.yaml
-        - name: "app-vcs"
-          mountPath: /shell/custom_init.sh
+        - name: app-cmap
+          mountPath: /etc/app-cmap
     - name: app
       image: "{{ current_site_item.images.app }}"
       env:
@@ -106,8 +153,7 @@ spec:
         - name: OTVL_WEB_ENABLE_BOTS
           value: "{{ (current_site_item.enable_bots|default(false)) | ternary('1', '', '') }}"
         - name: OTVL_WEB_ASSETS_DIR
-          value: /data/{{ current_site_item.assets_dir }}
-
+          value: /data/assets
       command: ["/bin/sh"]
       args: ["-c", "/entrypoint.sh /shell/httpd-foreground.sh"]
       ports:
@@ -115,27 +161,122 @@ spec:
       volumeMounts:
         - name: "app-vol"
           mountPath: /data
-        - name: "app-vca"
-          mountPath: /shell/custom_init.sh
 
   volumes:
     - name: "app-vol"
       persistentVolumeClaim:
         claimName: "{{ current_site_item.name }}-app-pvc"
-    - name: "app-vsf"
-      hostPath:
-        path: "/srv/data/pods-cf/cabri-sfile-app-{{ current_site_item.name }}.yaml"
-        type: File
-    - name: "app-vca"
-      hostPath:
-        path: "/srv/data/pods-cf/apache-custo-init-app-{{ current_site_item.name }}.sh"
-        type: File
-    - name: "app-vcs"
-      hostPath:
-        path: "/srv/data/pods-cf/apache-custo-init-sync-{{ current_site_item.name }}.sh"
-        type: File
+    - name: "app-cmap"
+      configMap:
+        name: "{{ current_site_item.name }}-app-cmap"
 
   restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ current_site_item.name }}-app"
+spec:
+  selector:
+    app.kubernetes.io/name: {{ current_site_item.name }}-app
+  ports:
+      - name: "app-port"
+        port: {{ current_site_item.app_port }}
+        protocol: TCP
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ current_site_item.name }}-router
+data:
+  "static-config.yml": |
+    log:
+      level: INFO
+    providers:
+      file:
+        filename: /traefik/dynamic-conf.yml
+        watch: true
+    entryPoints:
+      web:
+        address: ':8080'
+  "dynamic-conf.yml": |
+    http:
+      routers:
+    
+        to-api-private:
+          rule: "Path(`/api/v2/content/private{n:.*}`,`/api/v2/content/prive{n:.*}`,`/api/v2/html/private{n:.*}`,`/api/v2/html/prive{n:.*}`)"
+          middlewares:
+            - private-basic-auth
+          service: api
+    
+        to-api-sitemap:
+          rule: "Path(`/sitemap.xml`)"
+          middlewares:
+            - add-api
+          service: api
+    
+        to-api:
+          rule: "PathPrefix(`/api/`)"
+          service: api
+    
+        to-nobot:
+          rule: "(PathPrefix(`/assets/`) || Path(`/favicon.ico`,`/robots.txt`))"
+          priority: 5
+          service: app
+    
+        to-api-html-private:
+          rule: "Path(`/private{n:.*}`,`/prive{n:.*}`) && HeadersRegexp(`User-Agent`, `(otvl_begin|Googlebot|Bingbot|bingbot|BingPreview|YandexWebmaster|YandexBot|LinkedInBot|PocketParser|Slurp|Baiduspider|Sogou|Exabot|facebot|facebookexternalhit|ia_archiver|DuckDuckBot|WhatsApp|Twitterbot|Applebot|AhrefsBot|PaperLiBot|otvl_end)`)"
+          priority: 4
+          middlewares:
+            - "private-basic-auth"
+            - "add-api-html"
+          service: api
+    
+        to-api-html:
+          rule: "HeadersRegexp(`User-Agent`, `(otvl_begin|Googlebot|Bingbot|bingbot|BingPreview|YandexWebmaster|YandexBot|LinkedInBot|PocketParser|Slurp|Baiduspider|Sogou|Exabot|facebot|facebookexternalhit|ia_archiver|DuckDuckBot|WhatsApp|Twitterbot|Applebot|AhrefsBot|PaperLiBot|otvl_end)`)"
+          priority: 3
+          middlewares:
+            - "add-api-html"
+          service: api
+    
+        to-private:
+          rule: "Path(`/private{n:.*}`,`/prive{n:.*}`)"
+          priority: 2
+          middlewares:
+            - "private-basic-auth"
+          service: app
+    
+        to-app:
+          rule: "PathPrefix(`/`)"
+          priority: 1
+          service: app
+    
+      middlewares:
+        "add-api":
+          addPrefix:
+            prefix: "/api/v2"
+    
+        "add-api-html":
+          addPrefix:
+            prefix: "/api/v2/html"
+    
+        "private-basic-auth":
+          basicAuth:
+            users:
+              - "qigonggo:$apr1$BZ3stzt5$FlYaD1Nt37KqjddDbpNaQ."
+    
+      services:
+        "app":
+          loadBalancer:
+            servers:
+              - url: "http://{{ current_site_item.name }}-app:{{ current_site_item.app_port }}"
+    
+        "api":
+          loadBalancer:
+            servers:
+              - url: "http://{{ current_site_item.name }}-api:{{ current_site_item.api_port }}"
 
 ---
 apiVersion: v1
@@ -152,51 +293,18 @@ spec:
     - name: {{ current_site_item.name }}-router
       image: "{{ combined_otvl.traefik.image }}"
       command: ["/usr/local/bin/traefik"]
-      args: ["--configFile=/traefik/static_config.yml"]
+      args: ["--configFile=/traefik/static-config.yml"]
       ports:
         - containerPort: {{ combined_otvl.otvl_web_v5.router_port }}
       volumeMounts:
-        - name: "router-vcf"
+        - name: "config-vol"
           mountPath: /traefik
   volumes:
-    - name: "router-vcf"
-      hostPath:
-        path: "/srv/data/pods-cf/{{ current_site_item.name }}-traefik"
-        type: Directory
+    - name: config-vol
+      configMap:
+        name: "{{ current_site_item.name }}-router"
 
   restartPolicy: OnFailure
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: "{{ current_site_item.name }}-api"
-spec:
-  selector:
-    app.kubernetes.io/name: {{ current_site_item.name }}-api
-  ports:
-  - name: "sync-port"
-    port: {{ current_site_item.api_sync_port }}
-    protocol: TCP
-  - name: "api-port"
-    port: {{ current_site_item.api_port }}
-    protocol: TCP
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: "{{ current_site_item.name }}-app"
-spec:
-  selector:
-    app.kubernetes.io/name: {{ current_site_item.name }}-app
-  ports:
-    - name: "sync-port"
-      port: {{ current_site_item.app_sync_port }}
-      protocol: TCP
-    - name: "app-port"
-      port: {{ current_site_item.app_port }}
-      protocol: TCP
 
 ---
 apiVersion: v1

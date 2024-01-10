@@ -21,16 +21,6 @@
     state: directory
     mode: 0755
 
-- name: Nerdctl build cabri webapi image
-  block:
-    - command:
-        cmd: "nerdctl build -t {{ combined_otvl.cabri.webapi_image }} -f - ."
-        stdin: "{{ lookup('template', 'cabri_webapi_dockerfile') }}"
-      register: docker_build
-    - debug: var=docker_build.cmd
-    - debug: var=docker_build.stderr_lines
-    - debug: var=docker_build.stdout_lines
-
 - name: Nerdctl build cabri schedule image
   block:
     - command:

@@ -9,6 +9,16 @@
   set_fact:
     combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
 
+- name: Nerdctl build cabri webapi image
+  block:
+    - command:
+        cmd: "nerdctl build -t {{ combined_otvl.cabri.webapi_image }} -f - ."
+        stdin: "{{ lookup('template', 'cabri_webapi_dockerfile') }}"
+      register: docker_build
+    - debug: var=docker_build.cmd
+    - debug: var=docker_build.stderr_lines
+    - debug: var=docker_build.stdout_lines
+
 - name: Loop over webapi for setting local configuration files
   include_tasks: config_webapi.yml
   loop: "{{ combined_otvl.otvl_cabri.webapis }}"

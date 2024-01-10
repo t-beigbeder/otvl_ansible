@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: {{ current_webapi_item.name }}-webapi
 data:
-  "custom-init.sh": |
+  "run-cabri-webapi.sh": |
     copt="--pfile /etc/cabri-pfile --cdir /data/cdir"
     ccmd="/usr/local/bin/cabri $copt"
     mkdir -p /data/cdir /data/backups/cdir && \
@@ -17,7 +17,6 @@ data:
     cmd="$ccmd webapi $urls --haslog"
     echo $cmd
     $cmd
-    sleep 3600
   "init-dss.sh": |
     dt=`echo $1 | cut -d':' -f1`
     dn=`echo $1 | cut -d':' -f2`
@@ -61,7 +60,7 @@ spec:
         value: {{ nvalue }}
 {% endfor %}
       command: ["/bin/sh"]
-      args: ["/etc/config/custom-init.sh", "{{ current_webapi_item.dsss | join(' ') }}"]
+      args: ["/etc/config/run-cabri-webapi.sh", "{{ current_webapi_item.dsss | join(' ') }}"]
       ports:
         - containerPort: {{ current_webapi_item.webapi_port }}
       volumeMounts:
