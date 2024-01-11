@@ -88,6 +88,7 @@ data:
   "static-config.yml": |
     log:
       level: INFO
+    accessLog: {}
     providers:
       file:
         filename: /traefik/dynamic-conf.yml
