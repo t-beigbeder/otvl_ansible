@@ -40,4 +40,20 @@
     mode: 0755
   when: cabri_extract.changed
 
+- name: Create the cabri configuration directory
+  file:
+    dest: /home/{{ combined_otvl.config_vars.devops_user }}/.cabri
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+    state: directory
+    mode: 0750
+
+- name: Copy cabri clientConfig on the bastion
+  copy:
+    src: override/bastion/cabri/clientConfig
+    dest: /home/{{ combined_otvl.config_vars.devops_user }}/.cabri/clientConfig
+    owner: "{{ combined_otvl.config_vars.devops_user }}"
+    group: "{{ combined_otvl.config_vars.devops_user }}"
+    mode: 0640
+
 ###
