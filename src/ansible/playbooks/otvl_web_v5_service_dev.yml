@@ -6,6 +6,14 @@
       dir: vars/defaults
   tags: always
 
+- hosts: bastion_controlled_group
+  gather_facts: False
+  become: yes
+  roles:
+    - otvl_bastion/bastion/cabri
+  tags:
+    - otvl_bastion
+
 - hosts: localhost
   gather_facts: False
   become: yes
@@ -50,6 +58,22 @@
   gather_facts: False
   become: yes
   roles:
+    - otvl_service/otvl_cabri/host
+  tags:
+    - otvl_cabri
+
+- hosts: localhost
+  gather_facts: False
+  become: no
+  roles:
+    - otvl_service/otvl_cabri
+  tags:
+    - otvl_cabri
+
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
     - otvl_service/otvl_buildkit
     - otvl_service/otvl_nerdctl
   tags:
@@ -78,21 +102,5 @@
     - otvl_service/otvl_web_v5/deploy
   tags:
     - otvl_v5_deploy
-
-- hosts: otvl_v5_k3s
-  gather_facts: False
-  become: yes
-  roles:
-    - otvl_service/otvl_cabri/host
-  tags:
-    - otvl_cabri
-
-- hosts: localhost
-  gather_facts: False
-  become: no
-  roles:
-    - otvl_service/otvl_cabri
-  tags:
-    - otvl_cabri
 
 ###

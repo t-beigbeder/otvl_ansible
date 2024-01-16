@@ -11,6 +11,7 @@
   become: yes
   roles:
     - otvl_bastion/bastion
+    - otvl_bastion/bastion/cabri
   tags:
     - otvl_bastion
 
@@ -75,6 +76,22 @@
   gather_facts: False
   become: yes
   roles:
+    - otvl_service/otvl_cabri/host
+  tags:
+    - otvl_cabri
+
+- hosts: localhost
+  gather_facts: False
+  become: no
+  roles:
+    - otvl_service/otvl_cabri
+  tags:
+    - otvl_cabri
+
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
     - otvl_service/otvl_web_v5/cbuild
   tags:
     - otvl_v5_build
@@ -94,21 +111,5 @@
     - otvl_service/otvl_web_v5/deploy
   tags:
     - otvl_v5_deploy
-
-- hosts: otvl_v5_k3s
-  gather_facts: False
-  become: yes
-  roles:
-    - otvl_service/otvl_cabri/host
-  tags:
-    - otvl_cabri
-
-- hosts: localhost
-  gather_facts: False
-  become: no
-  roles:
-    - otvl_service/otvl_cabri
-  tags:
-    - otvl_cabri
 
 ###

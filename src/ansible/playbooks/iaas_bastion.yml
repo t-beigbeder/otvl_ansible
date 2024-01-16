@@ -49,5 +49,6 @@
   become: yes
   roles:
   - otvl_bastion/bastion
+  - otvl_bastion/bastion/cabri
   tags:
   - otvl_bastion

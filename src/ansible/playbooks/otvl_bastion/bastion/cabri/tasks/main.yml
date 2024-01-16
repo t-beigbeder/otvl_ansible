@@ -1,0 +1,43 @@
+---
+# main tasks file for otvl_bastion/bastion/cabri
+
+- name: combine default with actual otvl config data
+  set_fact:
+    combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+
+- name: Create the cabri installation directory
+  file:
+    dest: "{{ combined_otvl.config_paths.delivery }}/cabri"
+    state: directory
+    mode: 0755
+
+- name: Download cabri
+  ansible.builtin.get_url:
+    url: https://github.com/t-beigbeder/otvl_cabri/releases/download/{{ combined_otvl.cabri.release }}/cabri-{{ combined_otvl.cabri.release }}-linux-amd64.tar.gz
+    dest: "{{ combined_otvl.config_paths.delivery }}/cabri-{{ combined_otvl.cabri.release }}-linux-amd64.tar.gz"
+    checksum: "sha256:{{ combined_otvl.cabri.sha }}"
+  register: cabri_download
+
+- name: Purge the cabri installation directory
+  file:
+    dest: "{{ combined_otvl.config_paths.delivery }}/cabri/bin"
+    state: absent
+  when: cabri_download.changed
+
+- name: Extract cabri
+  ansible.builtin.unarchive:
+    src: "{{ combined_otvl.config_paths.delivery }}/cabri-{{ combined_otvl.cabri.release }}-linux-amd64.tar.gz"
+    remote_src: yes
+    dest: "{{ combined_otvl.config_paths.delivery }}/cabri"
+  register: cabri_extract
+  when: cabri_download.changed
+
+- name: Install cabri
+  ansible.builtin.copy:
+    src: "{{ combined_otvl.config_paths.delivery }}/cabri/cabri/cabri"
+    remote_src: true
+    dest: "/usr/local/bin"
+    mode: 0755
+  when: cabri_extract.changed
+
+###
