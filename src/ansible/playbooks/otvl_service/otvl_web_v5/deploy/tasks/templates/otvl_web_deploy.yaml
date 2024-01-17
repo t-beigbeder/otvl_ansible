@@ -5,14 +5,14 @@ metadata:
 data:
   "cabri-sfile.yaml": |
     synchronize:
-      period: 60
+      period: {{ current_site_item.sync_periods.api | default(3600) }}
       actions:
         - type: cmd
           base:
             verbose: false
             dispOut: false
             dispErr: false
-          cmdLine: cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CT} fsy:/data/content@ -rv --summary --noacl
+          cmdLine: cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CT} fsy:/data/content@ -rvn --summary --noacl
   "run-cabri-scheduler.sh": |
     echo /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER '<hidden>'
     /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER $OTVL_WEB_CABRI_SYNC_WEB_PASSWORD
@@ -22,6 +22,8 @@ data:
     /usr/local/bin/cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CF} fsy:/data/config@ -rv --summary --noacl
     if [ $? -ne 0 ] ; then exit 1 ; fi
     ln -s /data/content /data/config/content
+    echo cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CT} fsy:/data/content@ -rv --summary --noacl
+    cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CT} fsy:/data/content@ -rv --summary --noacl
     echo /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/api-cmap/cabri-sfile.yaml
     /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/api-cmap/cabri-sfile.yaml
 
@@ -100,19 +102,21 @@ metadata:
 data:
   "cabri-sfile.yaml": |
     synchronize:
-      period: 60
+      period: {{ current_site_item.sync_periods.app | default(3600) }}
       actions:
         - type: cmd
           base:
             verbose: false
             dispOut: false
             dispErr: false
-          cmdLine: cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/assets@ -rv --summary --noacl
+          cmdLine: cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/assets@ -rvn --summary --noacl
   "run-cabri-scheduler.sh": |
     echo /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER '<hidden>'
     /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER $OTVL_WEB_CABRI_SYNC_WEB_PASSWORD
     if [ $? -ne 0 ] ; then exit 1 ; fi
     mkdir -p /data/assets
+    echo cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/assets@ -rv --summary --noacl
+    cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/assets@ -rv --summary --noacl
     echo /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/app-cmap/cabri-sfile.yaml
     /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/app-cmap/cabri-sfile.yaml
 
@@ -228,7 +232,7 @@ data:
           service: app
     
         to-api-html-private:
-          rule: "Path(`/private{n:.*}`,`/prive{n:.*}`) && HeadersRegexp(`User-Agent`, `(otvl_begin|Googlebot|Bingbot|bingbot|BingPreview|YandexWebmaster|YandexBot|LinkedInBot|PocketParser|Slurp|Baiduspider|Sogou|Exabot|facebot|facebookexternalhit|ia_archiver|DuckDuckBot|WhatsApp|Twitterbot|Applebot|AhrefsBot|PaperLiBot|otvl_end)`)"
+          rule: "Path(`/private{n:.*}`,`/prive{n:.*}`) && HeadersRegexp(`User-Agent`, `(otvl_begin|nomoreGooglebot|Bingbot|bingbot|BingPreview|YandexWebmaster|YandexBot|LinkedInBot|PocketParser|Slurp|Baiduspider|Sogou|Exabot|facebot|facebookexternalhit|ia_archiver|DuckDuckBot|WhatsApp|Twitterbot|Applebot|AhrefsBot|PaperLiBot|otvl_end)`)"
           priority: 4
           middlewares:
             - "private-basic-auth"
@@ -236,7 +240,7 @@ data:
           service: api
     
         to-api-html:
-          rule: "HeadersRegexp(`User-Agent`, `(otvl_begin|Googlebot|Bingbot|bingbot|BingPreview|YandexWebmaster|YandexBot|LinkedInBot|PocketParser|Slurp|Baiduspider|Sogou|Exabot|facebot|facebookexternalhit|ia_archiver|DuckDuckBot|WhatsApp|Twitterbot|Applebot|AhrefsBot|PaperLiBot|otvl_end)`)"
+          rule: "HeadersRegexp(`User-Agent`, `(otvl_begin|nomoreGooglebot|Bingbot|bingbot|BingPreview|YandexWebmaster|YandexBot|LinkedInBot|PocketParser|Slurp|Baiduspider|Sogou|Exabot|facebot|facebookexternalhit|ia_archiver|DuckDuckBot|WhatsApp|Twitterbot|Applebot|AhrefsBot|PaperLiBot|otvl_end)`)"
           priority: 3
           middlewares:
             - "add-api-html"
@@ -325,7 +329,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: "{{ current_site_item.name }}-router"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
 spec:
+  tls:
+    - hosts:
+        - "{{ current_site_item.ingress_host }}"
+      secretName: "{{ current_site_item.name }}-router"
   rules:
     - host: "{{ current_site_item.ingress_host }}"
       http:

@@ -17,12 +17,5 @@ spec:
       web:
         redirectTo:
           port: websecure
-      websecure:
-        tls:
-          certResolver: leresolver
-    certResolvers:
-      leresolver:
-        storage: /data/acme.json
-        tlsChallenge: false
-        httpChallenge:
-          entryPoint: web
+          # enable cert-manager to bypass redirection during http challenge
+          priority: 1000
