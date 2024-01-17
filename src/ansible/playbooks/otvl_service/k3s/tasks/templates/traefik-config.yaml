@@ -11,18 +11,9 @@ spec:
       general:
         level: INFO
       access:
-        enabled: false
+        enabled: true
     
     ports:
       web:
         redirectTo:
           port: websecure
-      websecure:
-        tls:
-          certResolver: leresolver
-    certResolvers:
-      leresolver:
-        storage: /data/acme.json
-        tlsChallenge: false
-        httpChallenge:
-          entryPoint: web
