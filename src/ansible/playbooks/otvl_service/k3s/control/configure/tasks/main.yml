@@ -22,4 +22,14 @@
     - debug: var=kapply.stdout_lines
   when: true
 
+- name: Install a ClusterIssuer for lets encrypt
+  block:
+    - command:
+        cmd: "kubectl apply -f -"
+        stdin: "{{ lookup('template', 'cm_cluster_issuer.yaml') }}"
+      register: kapply
+    - debug: var=kapply.cmd
+    - debug: var=kapply.stderr_lines
+    - debug: var=kapply.stdout_lines
+
 ###

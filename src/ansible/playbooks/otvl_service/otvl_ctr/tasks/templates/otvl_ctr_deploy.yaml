@@ -160,6 +160,10 @@ kind: Ingress
 metadata:
   name: ctr-router
 spec:
+  tls:
+    - hosts:
+        - "{{ combined_otvl.ctr.ingress_host }}"
+      secretName: ctr-router
   rules:
     - host: "{{ combined_otvl.ctr.ingress_host }}"
       http:

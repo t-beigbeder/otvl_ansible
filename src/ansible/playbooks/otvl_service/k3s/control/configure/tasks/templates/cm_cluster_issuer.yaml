@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    email: "{{ combined_otvl.cert_manager.le_email }}"
+    server: "{{ combined_otvl.cert_manager.le_url }}"
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: letsencrypt-issuer-account-key
+    solvers:
+      - http01:
+          ingress:
+            class: traefik
