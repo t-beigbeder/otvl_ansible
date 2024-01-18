@@ -22,6 +22,8 @@
     - debug: var=kapply.stdout_lines
   when: true
 
+- name: Wait for the cert-manager installation to complete
+  
 - name: Install a ClusterIssuer for lets encrypt
   block:
     - command:

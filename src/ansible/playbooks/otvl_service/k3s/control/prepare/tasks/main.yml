@@ -39,4 +39,13 @@
     mode: "0755"
   when: kctl_dl.changed
 
+- name: Install cmctl on the bastion host
+  include_tasks: "{{ role_path }}/../../../base_service/tasks/install_from_ghr.yml"
+  vars:
+    url: "{{ combined_otvl.cmctl.release_url }}"
+    tgz_name: "cmctl.3.tgz"
+    sha: "{{ combined_otvl.cmctl.sha }}"
+    binary_name: "cmctl"
+    binary_path: "."
+
 ###
