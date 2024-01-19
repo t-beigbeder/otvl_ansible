@@ -23,7 +23,9 @@
   when: true
 
 - name: Wait for the cert-manager installation to complete
-  
+  command:
+    cmd: "cmctl check api --wait 20s"
+
 - name: Install a ClusterIssuer for lets encrypt
   block:
     - command:
