@@ -177,7 +177,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: "{{ current_webapi_item.name }}-warp"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
 spec:
+  tls:
+    - hosts:
+        - "{{ current_webapi_item.ingress_host }}"
+      secretName: "{{ current_webapi_item.name }}-warp"
   rules:
     - host: "{{ current_webapi_item.ingress_host }}"
       http:
