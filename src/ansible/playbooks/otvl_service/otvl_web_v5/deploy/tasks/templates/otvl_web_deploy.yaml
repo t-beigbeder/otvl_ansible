@@ -5,7 +5,7 @@ metadata:
 data:
   "cabri-sfile.yaml": |
     synchronize:
-      period: 60
+      period: {{ current_site_item.sync_periods.api | default(3600) }}
       actions:
         - type: cmd
           base:
@@ -100,7 +100,7 @@ metadata:
 data:
   "cabri-sfile.yaml": |
     synchronize:
-      period: 60
+      period: {{ current_site_item.sync_periods.app | default(3600) }}
       actions:
         - type: cmd
           base:
