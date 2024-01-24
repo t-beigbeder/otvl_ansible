@@ -22,6 +22,8 @@ data:
     /usr/local/bin/cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CF} fsy:/data/config@ -rv --summary --noacl
     if [ $? -ne 0 ] ; then exit 1 ; fi
     ln -s /data/content /data/config/content
+    echo cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CT} fsy:/data/content@ -rv --summary --noacl
+    cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CT} fsy:/data/content@ -rv --summary --noacl
     echo /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/api-cmap/cabri-sfile.yaml
     /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/api-cmap/cabri-sfile.yaml
 
@@ -113,6 +115,8 @@ data:
     /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER $OTVL_WEB_CABRI_SYNC_WEB_PASSWORD
     if [ $? -ne 0 ] ; then exit 1 ; fi
     mkdir -p /data/assets
+    echo cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/assets@ -rv --summary --noacl
+    cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/assets@ -rv --summary --noacl
     echo /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/app-cmap/cabri-sfile.yaml
     /usr/local/bin/cabri schedule --pfile /etc/cabri-pfile --sfile /etc/app-cmap/cabri-sfile.yaml
 
