@@ -12,7 +12,7 @@ data:
             verbose: false
             dispOut: false
             dispErr: false
-          cmdLine: cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CT} fsy:/data/content@ -rv --summary --noacl
+          cmdLine: cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE_CT} fsy:/data/content@ -rvn --summary --noacl
   "run-cabri-scheduler.sh": |
     echo /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER '<hidden>'
     /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER $OTVL_WEB_CABRI_SYNC_WEB_PASSWORD
@@ -109,7 +109,7 @@ data:
             verbose: false
             dispOut: false
             dispErr: false
-          cmdLine: cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/assets@ -rv --summary --noacl
+          cmdLine: cabri cli --pfile /etc/cabri-pfile sync ${OTVL_WEB_CABRI_SYNC_REMOTE} fsy:/data/assets@ -rvn --summary --noacl
   "run-cabri-scheduler.sh": |
     echo /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER '<hidden>'
     /usr/local/bin/cabri cli --pfile /etc/cabri-pfile config --put WebBasicAuth $OTVL_WEB_CABRI_SYNC_WEB_USER $OTVL_WEB_CABRI_SYNC_WEB_PASSWORD
