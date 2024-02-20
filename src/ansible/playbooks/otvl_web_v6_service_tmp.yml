@@ -1,0 +1,27 @@
+- hosts: "*"
+  gather_facts: False
+  tasks:
+    - name: Load default variables
+      include_vars:
+        dir: vars/defaults
+    - name: Combine default with actual otvl config data
+      set_fact:
+        combined_otvl: "{{ default_otvl | combine(otvl, recursive=True) }}"
+  tags: always
+
+- hosts: "*"
+  gather_facts: False
+  roles:
+    - role: otvl_service/otvl_web_v6/tvars
+      vars:
+        otvl:
+          key: value
+          cb: "{{ combined_otvl }}"
+  tags: never
+
+- hosts: localhost
+  gather_facts: False
+  roles:
+    - role: tvars
+      vars:
+        otvl: "{{ combined_otvl }}"

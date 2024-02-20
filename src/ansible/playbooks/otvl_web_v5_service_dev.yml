@@ -58,6 +58,15 @@
   gather_facts: False
   become: yes
   roles:
+    - otvl_service/otvl_buildkit
+    - otvl_service/otvl_nerdctl
+  tags:
+    - otvl_nerdctl
+
+- hosts: otvl_v5_k3s
+  gather_facts: False
+  become: yes
+  roles:
     - otvl_service/otvl_cabri/host
   tags:
     - otvl_cabri
@@ -69,15 +78,6 @@
     - otvl_service/otvl_cabri
   tags:
     - otvl_cabri
-
-- hosts: otvl_v5_k3s
-  gather_facts: False
-  become: yes
-  roles:
-    - otvl_service/otvl_buildkit
-    - otvl_service/otvl_nerdctl
-  tags:
-    - otvl_nerdctl
 
 - hosts: otvl_v5_k3s
   gather_facts: False
